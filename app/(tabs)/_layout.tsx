@@ -1,10 +1,13 @@
 import { Tabs } from 'expo-router';
+import type { ColorValue } from 'react-native';
 import { CalendarDays, Disc3, House, Leaf, type LucideIcon } from 'lucide-react-native';
-import colours from '../../src/themes/colours';
+import colours from '../../src/theme/colours';
 
-const icon = (Icon: LucideIcon) => ({ colour }: { colour: string }) => (
-  <Icon color={colour} size={24} strokeWidth={1.5} />
-);
+const icon =
+  (Icon: LucideIcon) =>
+  ({ color: colour }: { color: ColorValue }) => (
+    <Icon color={colour as string} size={24} strokeWidth={1.5} />
+  );
 
 export default function TabLayout() {
   return (
