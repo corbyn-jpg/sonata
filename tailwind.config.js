@@ -1,25 +1,21 @@
+const c = require('./src/themes/colours');
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ['./App.tsx', './app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
+  content: ['./app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
-      backgroundColor: {
-        canvas: '#08050d',
-        surface: '#110521',
-        'surface-raised': '#291F35',
-      },
-      textColor: {
-        primary: '#f3ebfa',
-        secondary: '#c2bfd6',
-        muted: '#9f9ead',
-      },
-      borderColor: {
-        DEFAULT: '#493461',
-      },
-      colors: {
-        violet: { 200: '#C9BFFB', 500: '#8B5CF6', 700: '#5B34B8' },
-        teal: { 300: '#7EE4CE', 700: '#0B7A6E' },
+      backgroundColor: { canvas: c.canvas, surface: c.surface, 'surface-raised': c.surfaceRaised },
+      textColor: { primary: c.textPrimary, secondary: c.textSecondary, muted: c.textMuted },
+      borderColor: { DEFAULT: c.border },
+      colors: { violet: c.violet, teal: c.teal },
+      fontFamily: {
+        mono: ['DMMono_400Regular'],
+        'mono-medium': ['DMMono_500Medium'],
+        sans: ['Roboto_400Regular'],
+        'sans-medium': ['Roboto_500Medium'],
+        'sans-bold': ['Roboto_700Bold'],
       },
       fontSize: {
         caption: ['13px', '21px'],
@@ -29,10 +25,7 @@ module.exports = {
         h2: ['31px', '40px'],
         h1: ['39px', '51px'],
       },
-      borderRadius: {
-        card: '16px',
-        pill: '28px',
-      },
+      borderRadius: { card: '16px', pill: '28px' },
     },
   },
   plugins: [],
