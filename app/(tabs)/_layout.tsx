@@ -1,7 +1,7 @@
 import { Tabs } from 'expo-router';
 import type { ColorValue } from 'react-native';
 import { CalendarDays, Disc3, House, Leaf, type LucideIcon } from 'lucide-react-native';
-import colours from '../../src/theme/colours';
+import colours from '@/theme/colours';
 
 const icon =
   (Icon: LucideIcon) =>

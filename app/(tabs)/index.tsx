@@ -1,8 +1,8 @@
 import { Link } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
 import { Music, Settings } from 'lucide-react-native';
-import { Screen } from '../../src/components/Screen';
-import colours from '../../src/theme/colours';
+import { Screen } from '@/components/Screen';
+import colours from '@/theme/colours';
 
 function greeting() {
   const h = new Date().getHours();
