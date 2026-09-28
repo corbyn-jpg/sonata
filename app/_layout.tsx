@@ -6,6 +6,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { useFonts, DMMono_400Regular, DMMono_500Medium } from '@expo-google-fonts/dm-mono';
 import { Roboto_400Regular, Roboto_500Medium, Roboto_700Bold } from '@expo-google-fonts/roboto';
 import colours from '@/theme/colours';
+import { getUserId } from '@/lib/session';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -21,6 +22,11 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded || error) SplashScreen.hideAsync();
   }, [loaded, error]);
+
+  // Sign in early so the first check-in doesn't wait on it. Failures retry on save.
+  useEffect(() => {
+    getUserId().catch(() => {});
+  }, []);
 
   if (!loaded && !error) return null;
 
