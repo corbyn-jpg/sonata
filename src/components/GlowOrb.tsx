@@ -1,4 +1,4 @@
-import { useEffect, useId } from 'react';
+import { memo, useEffect, useId } from 'react';
 import { View } from 'react-native';
 import Animated, {
   cancelAnimation,
@@ -30,7 +30,7 @@ type Props = {
 
 const CANVAS_SCALE = 4; // big enough that the aura fades out before the edge
 
-export function GlowOrb({ core, edge, size, softness = 0.01, aura = false, shimmer = true }: Props) {
+export const GlowOrb = memo(function GlowOrb({ core, edge, size, softness = 0.01, aura = false, shimmer = true }: Props) {
   const id = useId().replace(/[^a-zA-Z0-9]/g, ''); // gradient ids must be unique per orb
   
   const reduceMotion = useReducedMotion();
@@ -111,4 +111,4 @@ export function GlowOrb({ core, edge, size, softness = 0.01, aura = false, shimm
       </Svg>
     </View>
   );
-}
+});

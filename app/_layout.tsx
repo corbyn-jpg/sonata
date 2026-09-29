@@ -7,6 +7,7 @@ import { useFonts, DMMono_400Regular, DMMono_500Medium } from '@expo-google-font
 import { Roboto_400Regular, Roboto_500Medium, Roboto_700Bold } from '@expo-google-fonts/roboto';
 import colours from '@/theme/colours';
 import { getUserId } from '@/lib/session';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,13 +32,13 @@ export default function RootLayout() {
   if (!loaded && !error) return null;
 
   return (
-    <>
+      <GestureHandlerRootView style={{ flex: 1, backgroundColor: colours.canvas }}>
       <StatusBar style="light" />
       <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colours.canvas } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="settings" />
         <Stack.Screen name="composer" />
       </Stack>
-    </>
+    </GestureHandlerRootView>
   );
 }
