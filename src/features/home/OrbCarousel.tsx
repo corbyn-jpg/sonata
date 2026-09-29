@@ -1,7 +1,9 @@
-import { memo, useEffect, useMemo, useRef } from 'react';
-import { Text, View, useWindowDimensions, type AccessibilityActionEvent } from 'react-native';
+import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { StyleSheet, Text, View, useWindowDimensions, type AccessibilityActionEvent } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { Canvas, Group, Oval, vec } from '@shopify/react-native-skia';
 import Animated, {
+  cancelAnimation,
   clamp,
   Easing,
   Extrapolation,
@@ -9,14 +11,15 @@ import Animated, {
   runOnJS,
   useAnimatedStyle,
   useDerivedValue,
+  useReducedMotion,
   useSharedValue,
+  withRepeat,
   withSequence,
   withSpring,
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Ellipse } from 'react-native-svg';
-import { GlowOrb } from '@/components/GlowOrb';
+import { Orb } from '@/components/GlowOrb';
 import { LETTERS, displayName, spokenName, type Letter, type Mode } from '@/data/notes';
 import colours from '@/theme/colours';
 
@@ -36,10 +39,13 @@ type Props = {
   onFocusChange: (index: number) => void;
   selected: Letter | null;
   onSelect: (letter: Letter) => void;
+  /** Set false to pause the shimmer, e.g. while the screen isn't focused. */
+  animated?: boolean;
 };
 
-export function OrbCarousel({ mode, position, focused, onFocusChange, selected, onSelect }: Props) {
+export function OrbCarousel({ mode, position, focused, onFocusChange, selected, onSelect, animated = true }: Props) {
   const { width } = useWindowDimensions();
+  const [height, setHeight] = useState(0);
   const step = width * 0.45; // puts the neighbours' centres near the screen edges
   const start = useSharedValue(0);
 
@@ -89,7 +95,8 @@ export function OrbCarousel({ mode, position, focused, onFocusChange, selected, 
     });
 
     return Gesture.Race(pan, tap);
-    // settle/onTap read focusedRef, so the gesture only needs rebuilding when the layout changes eslint-disable-next-line react-hooks/exhaustive-deps
+    // settle/onTap read focusedRef, so the gesture only needs rebuilding when the layout changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [width, step]);
 
   const onAccessibilityAction = (e: AccessibilityActionEvent) => {
@@ -100,11 +107,20 @@ export function OrbCarousel({ mode, position, focused, onFocusChange, selected, 
   };
 
   const letter = LETTERS[focused];
+  const cx = width / 2;
+  const cy = height / 2;
+
+  // Only the focused orb and two either side can be on screen. Draw the farthest first,
+  // so the focused orb sits on top of its neighbours' halos.
+  const visible = LETTERS.map((l, index) => ({ letter: l, index }))
+    .filter(({ index }) => Math.abs(index - focused) <= 2)
+    .sort((a, b) => Math.abs(b.index - focused) - Math.abs(a.index - focused));
 
   return (
     <GestureDetector gesture={gesture}>
       <View
         className="flex-1"
+        onLayout={(e) => setHeight(e.nativeEvent.layout.height)}
         accessible
         accessibilityRole="adjustable"
         accessibilityLabel="Today's note"
@@ -113,69 +129,81 @@ export function OrbCarousel({ mode, position, focused, onFocusChange, selected, 
         accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }, { name: 'activate' }]}
         onAccessibilityAction={onAccessibilityAction}
       >
-        <Orbits width={width} />
-        {/* Only mount orbs that can be on screen */}
-        {LETTERS.map((l, index) =>
-          Math.abs(index - focused) > 2 ? null : (
-            <CarouselOrb
-              key={l}
-              letter={l}
-              mode={mode}
-              index={index}
-              step={step}
-              width={width}
-              position={position}
-              isFocused={index === focused}
-              isSelected={selected === l}
-            />
-          ),
+        {height > 0 && (
+          <>
+            {/* Every orb and orbit path in one GPU canvas */}
+            <Canvas style={StyleSheet.absoluteFill}>
+              <Orbits cx={cx} cy={cy} width={width} />
+              {visible.map(({ letter: l, index }) => (
+                <CarouselOrb
+                  key={l}
+                  letter={l}
+                  mode={mode}
+                  index={index}
+                  step={step}
+                  cx={cx}
+                  cy={cy}
+                  position={position}
+                  isFocused={index === focused}
+                  isSelected={selected === l}
+                  animated={animated}
+                />
+              ))}
+            </Canvas>
+            {visible.map(({ letter: l, index }) => (
+              <OrbLabel key={l} letter={l} mode={mode} index={index} step={step} cy={cy} position={position} />
+            ))}
+          </>
         )}
       </View>
     </GestureDetector>
   );
 }
 
-/** Faint orbit paths behind the orbs */
-function Orbits({ width }: { width: number }) {
-  const cx = width / 2;
-  const cy = ORB_SIZE;
+/** Faint orbit paths behind the orbs (spec: 5–10% opacity). */
+function Orbits({ cx, cy, width }: { cx: number; cy: number; width: number }) {
+  const origin = vec(cx, cy);
   return (
-    <Svg width={width} height={ORB_SIZE * 2} style={{ position: 'absolute', top: '50%', marginTop: -ORB_SIZE }}>
-      <Ellipse
-        cx={cx}
-        cy={cy}
-        rx={width * 0.46}
-        ry={ORB_SIZE * 0.36}
-        rotation={-8}
-        origin={[cx, cy]}
-        fill="none"
-        stroke={colours.violet[200]}
-        strokeOpacity={0.1}
-      />
-      <Ellipse
-        cx={cx}
-        cy={cy}
-        rx={width * 0.6}
-        ry={ORB_SIZE * 0.6}
-        rotation={6}
-        origin={[cx, cy]}
-        fill="none"
-        stroke={colours.violet[200]}
-        strokeOpacity={0.05}
-      />
-    </Svg>
+    <>
+      <Group transform={[{ rotate: (-8 * Math.PI) / 180 }]} origin={origin}>
+        <Oval
+          x={cx - width * 0.46}
+          y={cy - ORB_SIZE * 0.36}
+          width={width * 0.92}
+          height={ORB_SIZE * 0.72}
+          style="stroke"
+          strokeWidth={1}
+          color={colours.violet[200]}
+          opacity={0.1}
+        />
+      </Group>
+      <Group transform={[{ rotate: (6 * Math.PI) / 180 }]} origin={origin}>
+        <Oval
+          x={cx - width * 0.6}
+          y={cy - ORB_SIZE * 0.6}
+          width={width * 1.2}
+          height={ORB_SIZE * 1.2}
+          style="stroke"
+          strokeWidth={1}
+          color={colours.violet[200]}
+          opacity={0.05}
+        />
+      </Group>
+    </>
   );
 }
 
-type ItemProps = {
+type OrbItemProps = {
   letter: Letter;
   mode: Mode;
   index: number;
   step: number;
-  width: number;
+  cx: number;
+  cy: number;
   position: SharedValue<number>;
   isFocused: boolean;
   isSelected: boolean;
+  animated: boolean;
 };
 
 const CarouselOrb = memo(function CarouselOrb({
@@ -183,27 +211,38 @@ const CarouselOrb = memo(function CarouselOrb({
   mode,
   index,
   step,
-  width,
+  cx,
+  cy,
   position,
   isFocused,
   isSelected,
-}: ItemProps) {
+  animated,
+}: OrbItemProps) {
+  const reduceMotion = useReducedMotion();
   const pulse = useSharedValue(1);
-  const offset = useDerivedValue(() => index - position.value); 
+  const glow = useSharedValue(1);
+  const offset = useDerivedValue(() => index - position.value); // -1 = left neighbour, +1 = right
   const distance = useDerivedValue(() => Math.abs(offset.value));
 
-  const slotStyle = useAnimatedStyle(() => ({ transform: [{ translateX: offset.value * step }] }));
-  const orbStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(distance.value, [0, 1, 2], [1, NEIGHBOUR_OPACITY, 0], Extrapolation.CLAMP),
-    transform: [
-      { scale: interpolate(distance.value, [0, 1], [1, NEIGHBOUR_SCALE], Extrapolation.CLAMP) * pulse.value },
-    ],
-  }));
+  const transform = useDerivedValue(() => [
+    { translateX: offset.value * step },
+    { scale: interpolate(distance.value, [0, 1], [1, NEIGHBOUR_SCALE], Extrapolation.CLAMP) * pulse.value },
+  ]);
+  const opacity = useDerivedValue(() =>
+    interpolate(distance.value, [0, 1, 2], [1, NEIGHBOUR_OPACITY, 0], Extrapolation.CLAMP),
+  );
+  // Real blur: neighbours soften continuously as they move away from the centre
+  const softness = useDerivedValue(() => clamp(distance.value, 0, 1));
 
-  // crossfade a crisp orb and a blurred one instead of animating it
-  const crispStyle = useAnimatedStyle(() => ({ opacity: clamp(1 - distance.value, 0, 1) }));
-  const blurredStyle = useAnimatedStyle(() => ({ opacity: clamp(distance.value, 0, 1) }));
-  const labelStyle = useAnimatedStyle(() => ({ opacity: clamp(1 - distance.value * 2, 0, 1) }));
+  // Only the centred orb shimmers
+  useEffect(() => {
+    if (!isFocused || !animated || reduceMotion) return;
+    glow.value = withRepeat(withTiming(0.7, { duration: 4000, easing: Easing.inOut(Easing.sin) }), -1, true);
+    return () => {
+      cancelAnimation(glow);
+      glow.value = 1;
+    };
+  }, [isFocused, animated, reduceMotion, glow]);
 
   useEffect(() => {
     if (!isSelected) return;
@@ -216,20 +255,34 @@ const CarouselOrb = memo(function CarouselOrb({
   const { core, edge } = colours.orb[letter][mode];
 
   return (
-    <Animated.View
-      style={[{ position: 'absolute', top: '50%', left: (width - ORB_SIZE) / 2, marginTop: -ORB_SIZE / 2 }, slotStyle]}
-    >
-      <Animated.View style={orbStyle}>
-        <Animated.View style={crispStyle}>
-          <GlowOrb core={core} edge={edge} size={ORB_SIZE} shimmer={isFocused} />
-        </Animated.View>
-        <Animated.View style={[{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }, blurredStyle]}>
-          <GlowOrb core={core} edge={edge} size={ORB_SIZE} softness={1} shimmer={false} />
-        </Animated.View>
-      </Animated.View>
-      <Animated.View style={[{ position: 'absolute', top: ORB_SIZE + 28, left: 0, right: 0 }, labelStyle]}>
-        <Text className="text-center font-mono-medium text-h4 text-secondary">{displayName(letter, mode)}</Text>
-      </Animated.View>
+    <Group transform={transform} origin={vec(cx, cy)} opacity={opacity}>
+      <Orb cx={cx} cy={cy} size={ORB_SIZE} core={core} edge={edge} softness={softness} glow={glow} />
+    </Group>
+  );
+});
+
+type LabelProps = {
+  letter: Letter;
+  mode: Mode;
+  index: number;
+  step: number;
+  cy: number;
+  position: SharedValue<number>;
+};
+
+/** The note under the centred orb. Plain text views, so they stay crisp and cheap. */
+const OrbLabel = memo(function OrbLabel({ letter, mode, index, step, cy, position }: LabelProps) {
+  const style = useAnimatedStyle(() => {
+    const offset = index - position.value;
+    return {
+      opacity: clamp(1 - Math.abs(offset) * 2, 0, 1),
+      transform: [{ translateX: offset * step }],
+    };
+  });
+
+  return (
+    <Animated.View style={[{ position: 'absolute', left: 0, right: 0, top: cy + ORB_SIZE / 2 + 28 }, style]}>
+      <Text className="text-center font-mono-medium text-h4 text-secondary">{displayName(letter, mode)}</Text>
     </Animated.View>
   );
 });

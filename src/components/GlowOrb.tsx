@@ -1,38 +1,76 @@
-import { memo, useEffect, useId } from 'react';
+import { memo, useEffect } from 'react';
 import { View } from 'react-native';
-import Animated, {
+import { BlurMask, Canvas, Circle, Group, RadialGradient, vec } from '@shopify/react-native-skia';
+import {
   cancelAnimation,
   Easing,
-  useAnimatedStyle,
+  useDerivedValue,
   useReducedMotion,
   useSharedValue,
   withRepeat,
   withTiming,
+  type SharedValue,
 } from 'react-native-reanimated';
-import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 
-type Props = {
+type Animatable = number | SharedValue<number>;
+
+const read = (value: Animatable) => {
+  'worklet';
+  return typeof value === 'number' ? value : value.value;
+};
+
+type OrbProps = {
+  cx: number;
+  cy: number;
+  /** Diameter of the orb body. */
+  size: number;
   core: string;
   edge: string;
-
-  /** Diameter of the orb body. The glow spreads past this without taking up layout space. */
-  size: number;
-
-  /** 0 = crisp rim, 1 = heavily blurred */
-  softness?: number;
-
-  /** Faint outer aura */
+  /** 0 = crisp rim, 1 = heavily blurred (carousel neighbours). */
+  softness?: Animatable;
+  /** Halo brightness, 0–1. Animate it for the shimmer. */
+  glow?: Animatable;
+  /** Faint outer aura — hero orbs only. */
   aura?: boolean;
+};
 
+/**
+ * A glow orb drawn with Skia. Use inside a <Canvas>, so several orbs can share one GPU surface.
+ * Halo: the orb at 2× with a real blur at 40% (spec). Body: two-colour radial gradient.
+ */
+export function Orb({ cx, cy, size, core, edge, softness = 0, glow = 1, aura = false }: OrbProps) {
+  const r = size / 2;
+  const haloOpacity = useDerivedValue(() => 0.4 * read(glow));
+  // Skia skips a zero blur, so keep a sub-pixel minimum
+  const bodyBlur = useDerivedValue(() => Math.max(0.5, read(softness) * size * 0.15));
+
+  return (
+    <Group>
+      {aura && (
+        <Circle cx={cx} cy={cy} r={size * 1.5} color={core} opacity={0.15}>
+          <BlurMask blur={size * 0.5} style="normal" />
+        </Circle>
+      )}
+      <Circle cx={cx} cy={cy} r={size} color={core} opacity={haloOpacity}>
+        <BlurMask blur={size * 0.2} style="normal" />
+      </Circle>
+      <Circle cx={cx} cy={cy} r={r}>
+        {/* Centre nudged up-left so the orb reads as a lit sphere, not a flat disc */}
+        <RadialGradient c={vec(cx - r * 0.16, cy - r * 0.24)} r={r * 1.2} colors={[core, edge]} />
+        <BlurMask blur={bodyBlur} style="normal" />
+      </Circle>
+    </Group>
+  );
+}
+
+type GlowOrbProps = Omit<OrbProps, 'cx' | 'cy' | 'glow' | 'softness'> & {
+  softness?: number;
   /** Slow halo shimmer. Skipped when the OS asks for reduced motion. */
   shimmer?: boolean;
 };
 
-const CANVAS_SCALE = 4; // big enough that the aura fades out before the edge
-
-export const GlowOrb = memo(function GlowOrb({ core, edge, size, softness = 0.01, aura = false, shimmer = true }: Props) {
-  const id = useId().replace(/[^a-zA-Z0-9]/g, ''); // gradient ids must be unique per orb
-  
+/** A standalone orb with its own canvas. Takes up `size × size`; the glow spills past it. */
+export const GlowOrb = memo(function GlowOrb({ size, shimmer = true, aura = false, ...orb }: GlowOrbProps) {
   const reduceMotion = useReducedMotion();
   const glow = useSharedValue(1);
 
@@ -45,70 +83,16 @@ export const GlowOrb = memo(function GlowOrb({ core, edge, size, softness = 0.01
     };
   }, [shimmer, reduceMotion, glow]);
 
-  const haloStyle = useAnimatedStyle(() => ({ opacity: glow.value }));
-
-  const canvas = size * CANVAS_SCALE;
+  const canvas = size * (aura ? 5 : 3); // room for the blur to fade out
   const c = canvas / 2;
-  const coreR = (size / 2) * (1 + softness * 0.5); // blurred orbs spread wider
-  const layer = {
-    position: 'absolute',
-    left: (size - canvas) / 2,
-    top: (size - canvas) / 2,
-    width: canvas,
-    height: canvas,
-  } as const;
 
   return (
     <View style={{ width: size, height: size, pointerEvents: 'none' }}>
-      {aura && (
-        <Svg width={canvas} height={canvas} style={layer}>
-          <Defs>
-            <RadialGradient id={`${id}aura`} gradientUnits="userSpaceOnUse" cx={c} cy={c} r={c}>
-              <Stop offset={0} stopColor={core} stopOpacity={0.15} />
-              <Stop offset={0.4} stopColor={core} stopOpacity={0.12} />
-              <Stop offset={0.7} stopColor={core} stopOpacity={0.05} />
-              <Stop offset={1} stopColor={core} stopOpacity={0} />
-            </RadialGradient>
-          </Defs>
-          <Circle cx={c} cy={c} r={c} fill={`url(#${id}aura)`} />
-        </Svg>
-      )}
-
-      <Animated.View style={[layer, haloStyle]}>
-        <Svg width={canvas} height={canvas}>
-          <Defs>
-            <RadialGradient id={`${id}halo`} gradientUnits="userSpaceOnUse" cx={c} cy={c} r={c}>
-              <Stop offset={0} stopColor={core} stopOpacity={0.4} />
-              <Stop offset={0.25} stopColor={core} stopOpacity={0.4} />
-              <Stop offset={0.45} stopColor={core} stopOpacity={0.2} />
-              <Stop offset={0.65} stopColor={core} stopOpacity={0.06} />
-              <Stop offset={0.85} stopColor={core} stopOpacity={0} />
-            </RadialGradient>
-          </Defs>
-          <Circle cx={c} cy={c} r={c} fill={`url(#${id}halo)`} />
-        </Svg>
-      </Animated.View>
-
-      <Svg width={canvas} height={canvas} style={layer}>
-        <Defs>
-            
-          {/* Focal point nudged up-left so the orb reads as a lit sphere, not a flat disc */}
-          <RadialGradient
-            id={`${id}core`}
-            gradientUnits="userSpaceOnUse"
-            cx={c}
-            cy={c}
-            r={coreR}
-            fx={c - coreR * 0.16}
-            fy={c - coreR * 0.24}
-          >
-            <Stop offset={0} stopColor={core} stopOpacity={1} />
-            <Stop offset={1 - softness * 0.75} stopColor={edge} stopOpacity={1 - softness * 0.4} />
-            <Stop offset={1} stopColor={edge} stopOpacity={1 - softness} />
-          </RadialGradient>
-        </Defs>
-        <Circle cx={c} cy={c} r={coreR} fill={`url(#${id}core)`} />
-      </Svg>
+      <Canvas
+        style={{ position: 'absolute', left: (size - canvas) / 2, top: (size - canvas) / 2, width: canvas, height: canvas }}
+      >
+        <Orb cx={c} cy={c} size={size} glow={glow} aura={aura} {...orb} />
+      </Canvas>
     </View>
   );
 });
