@@ -4,11 +4,25 @@ import { Music, Settings } from 'lucide-react-native';
 import { Screen } from '@/components/Screen';
 import colours from '@/theme/colours';
 import { GlowOrb } from '@/components/GlowOrb';
-import { LETTERS } from '@/data/notes';
+import { LETTERS, displayName, spokenName, type Mode } from '@/data/notes';
 
 function greeting() {
   const h = new Date().getHours();
   return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+}
+
+// TEMP: Stage 3 orb preview row
+function PreviewRow({ mode }: { mode: Mode }) {
+  return (
+    <View className="flex-row justify-between">
+      {LETTERS.map((l) => (
+        <View key={l} accessible accessibilityLabel={spokenName(l, mode)} className="items-center">
+          <GlowOrb {...colours.orb[l][mode]} size={36} />
+          <Text className="mt-3 font-mono text-caption text-secondary">{displayName(l, mode)}</Text>
+        </View>
+      ))}
+    </View>
+  );
 }
 
 export default function Home() {
@@ -31,6 +45,7 @@ export default function Home() {
           </View>
         </View>
       }>
+
     </Screen>
   );
 }

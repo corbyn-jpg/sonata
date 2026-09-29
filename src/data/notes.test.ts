@@ -1,4 +1,5 @@
-import { LETTERS, emotionOf, pitchOf, spokenName, valenceOf } from './notes';
+import { LETTERS, displayName, emotionOf, pitchOf, spokenName, valenceOf } from './notes';
+
 
 describe('pitchOf', () => {
   it('keeps C major pitches on the Bright page', () => {
@@ -35,4 +36,11 @@ describe('valenceOf', () => {
 it('gives all 14 states a distinct emotion', () => {
   const all = LETTERS.flatMap((l) => [emotionOf(l, 'major'), emotionOf(l, 'minor')]);
   expect(new Set(all).size).toBe(14);
+});
+
+describe('displayName', () => {
+  it('uses flat symbols for the Dark page', () => {
+    expect(LETTERS.map((l) => displayName(l, 'minor'))).toEqual(['C', 'D', 'E♭', 'F', 'G', 'A♭', 'B♭']);
+    expect(LETTERS.map((l) => displayName(l, 'major'))).toEqual(['C', 'D', 'E', 'F', 'G', 'A', 'B']);
+  });
 });

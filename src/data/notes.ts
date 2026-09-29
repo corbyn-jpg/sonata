@@ -35,3 +35,6 @@ export const spokenName = (letter: Letter, mode: Mode) => {
   const pitch = pitchOf(letter, mode);
   return pitch.endsWith('b') ? `${pitch[0]} flat` : pitch;
 };
+
+/** Visible label for the grid view: "E♭". Never an emotion word. */
+export const displayName = (letter: Letter, mode: Mode) => pitchOf(letter, mode).replace('b', '♭');
