@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'expo-router';
 import { Pressable, Text, View } from 'react-native';
+import { useSharedValue } from 'react-native-reanimated';
 import { Music, Settings } from 'lucide-react-native';
 import { Screen } from '@/components/Screen';
 import type { Letter } from '@/data/notes';
 import { OrbCarousel } from '@/features/home/OrbCarousel';
 import colours from '@/theme/colours';
+
+const START_INDEX = 3; // F — middle of the scale, so there's a neighbour on each side
 
 function greeting() {
   const h = new Date().getHours();
@@ -13,12 +16,19 @@ function greeting() {
 }
 
 export default function Home() {
+  const position = useSharedValue(START_INDEX);
+  const [focused, setFocused] = useState(START_INDEX);
   const [selected, setSelected] = useState<Letter | null>(null);
+
+  const onFocusChange = (index: number) => {
+    setFocused(index);
+    setSelected(null); // the selected orb is always the centred one
+  };
 
   return (
     <Screen
       header={
-        <View className="mb-8 flex-row items-center justify-between">
+        <View className="flex-row items-center justify-between">
           <Text className="font-mono-medium text-h3 text-primary">{greeting()}</Text>
           <View className="flex-row">
             <Link href="/composer" asChild>
@@ -35,14 +45,15 @@ export default function Home() {
         </View>
       }
     >
-      
-      {/* Full-bleed: neighbours sit at the screen edges, past Screen's 24px margins */}
-      <View className="-mx-6">
+      {/* Full-bleed and flex-1: the orb sits centred in the space, and you can swipe anywhere in it */}
+      <View className="-mx-6 flex-1">
         <OrbCarousel
           mode="major"
+          position={position}
+          focused={focused}
+          onFocusChange={onFocusChange}
           selected={selected}
           onSelect={setSelected}
-          onFocusChange={() => setSelected(null)}
         />
       </View>
     </Screen>
