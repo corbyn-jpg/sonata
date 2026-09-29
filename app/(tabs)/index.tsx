@@ -3,6 +3,8 @@ import { Pressable, Text, View } from 'react-native';
 import { Music, Settings } from 'lucide-react-native';
 import { Screen } from '@/components/Screen';
 import colours from '@/theme/colours';
+import { GlowOrb } from '@/components/GlowOrb';
+import { LETTERS } from '@/data/notes';
 
 function greeting() {
   const h = new Date().getHours();
@@ -13,7 +15,7 @@ export default function Home() {
   return (
     <Screen
       header={
-        <View className="mb-8 flex-row items-center justify-between">
+        <View className="mb-8 flex-row items-center justify-between bg-canvas ">
           <Text className="font-mono-medium text-h3 text-primary">{greeting()}</Text>
           <View className="flex-row">
             <Link href="/composer" asChild>
@@ -28,8 +30,7 @@ export default function Home() {
             </Link>
           </View>
         </View>
-      }
-    >
+      }>
     </Screen>
   );
 }
