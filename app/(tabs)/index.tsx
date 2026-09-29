@@ -4,7 +4,9 @@ import { Pressable, Text, View } from 'react-native';
 import { useSharedValue } from 'react-native-reanimated';
 import { Music, Settings } from 'lucide-react-native';
 import { Screen } from '@/components/Screen';
+import { Starfield } from '@/components/Starfield';
 import type { Letter } from '@/data/notes';
+import { Atmosphere } from '@/features/home/Atmosphere';
 import { OrbCarousel } from '@/features/home/OrbCarousel';
 import colours from '@/theme/colours';
 
@@ -26,7 +28,13 @@ export default function Home() {
   };
 
   return (
-    <Screen
+        <Screen
+      background={
+        <>
+          <Atmosphere position={position} focused={focused} mode="major" />
+          <Starfield />
+        </>
+      }
       header={
         <View className="flex-row items-center justify-between">
           <Text className="font-mono-medium text-h3 text-primary">{greeting()}</Text>
