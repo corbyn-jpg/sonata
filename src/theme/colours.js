@@ -9,7 +9,7 @@ module.exports = {
   violet: { 200: '#C9BFFB', 500: '#8B5CF6', 700: '#5B34B8' },
   teal: { 300: '#7EE4CE', 700: '#0B7A6E' },
 
-  // Orb gradients, core → edge (CLAUDE.md §4). Two colours only — three goes muddy.
+  // Orb gradients, core to edge
   orb: {
     C: { major: { core: '#A3FBC3', edge: '#60A5FA' }, minor: { core: '#013E88', edge: '#04C349' } },
     D: { major: { core: '#A7F3D0', edge: '#FDE047' }, minor: { core: '#BEA51C', edge: '#01894A' } },

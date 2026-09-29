@@ -1,4 +1,4 @@
-/** Internal only — nothing in this file is ever rendered except `spokenName` and letters. */
+/** Internal only */
 
 export const LETTERS = ['C', 'D', 'E', 'F', 'G', 'A', 'B'] as const; // scale order
 export type Letter = (typeof LETTERS)[number];
@@ -30,11 +30,11 @@ export const pitchOf = (letter: Letter, mode: Mode): Pitch =>
 export const emotionOf = (letter: Letter, mode: Mode) => NOTES[letter][mode].emotion;
 export const valenceOf = (letter: Letter, mode: Mode) => NOTES[letter][mode].valence;
 
-/** Screen-reader name: "E flat", never "E♭" or an emotion word. */
+/** Screen-reader name*/
 export const spokenName = (letter: Letter, mode: Mode) => {
   const pitch = pitchOf(letter, mode);
   return pitch.endsWith('b') ? `${pitch[0]} flat` : pitch;
 };
 
-/** Visible label for the grid view: "E♭". Never an emotion word. */
+/** Visible label for the grid view*/
 export const displayName = (letter: Letter, mode: Mode) => pitchOf(letter, mode).replace('b', '♭');

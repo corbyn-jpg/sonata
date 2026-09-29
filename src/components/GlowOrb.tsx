@@ -14,12 +14,16 @@ import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 type Props = {
   core: string;
   edge: string;
+
   /** Diameter of the orb body. The glow spreads past this without taking up layout space. */
   size: number;
-  /** 0 = crisp rim, 1 = heavily blurred (carousel neighbours). */
+
+  /** 0 = crisp rim, 1 = heavily blurred */
   softness?: number;
-  /** Faint outer aura at ~3× — hero orbs only. */
+
+  /** Faint outer aura */
   aura?: boolean;
+
   /** Slow halo shimmer. Skipped when the OS asks for reduced motion. */
   shimmer?: boolean;
 };
@@ -28,6 +32,7 @@ const CANVAS_SCALE = 4; // big enough that the aura fades out before the edge
 
 export function GlowOrb({ core, edge, size, softness = 0.01, aura = false, shimmer = true }: Props) {
   const id = useId().replace(/[^a-zA-Z0-9]/g, ''); // gradient ids must be unique per orb
+  
   const reduceMotion = useReducedMotion();
   const glow = useSharedValue(1);
 
@@ -86,6 +91,7 @@ export function GlowOrb({ core, edge, size, softness = 0.01, aura = false, shimm
 
       <Svg width={canvas} height={canvas} style={layer}>
         <Defs>
+            
           {/* Focal point nudged up-left so the orb reads as a lit sphere, not a flat disc */}
           <RadialGradient
             id={`${id}core`}
