@@ -18,6 +18,8 @@ import { useWeek } from "@/features/home/useWeek";
 import { WeekStrip } from "@/features/home/WeekStrip";
 import { saveCheckin } from "@/lib/checkins";
 import colours from "@/theme/colours";
+import * as Haptics from "expo-haptics";
+import { chooseNote, previewNote } from "@/audio";
 
 const START_INDEX = 3; // F — middle of the scale, so there's a neighbour on each side
 const INDICES = LETTERS.map((_, i) => i);
@@ -48,19 +50,24 @@ export default function Home() {
 
   const canSave = loaded && !todayLogged && selected !== null;
 
-  const onFocusChange = (index: number) => {
+    const onFocusChange = (index: number) => {
     setFocused(index);
     setSelected(null); // the selected orb is always the centred one
+    previewNote(LETTERS[index], mode);
+    Haptics.selectionAsync();
   };
 
   const onSelect = (letter: Letter) => {
     setSelected(letter);
     setStatus("idle");
+    chooseNote(letter, mode);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
   const onSave = () => {
     if (!canSave || !selected) return;
     logToday({ note: selected, mode }); // show the dot now
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setStatus("saved");
     setSelected(null);
     setReflection("");
@@ -83,7 +90,7 @@ export default function Home() {
             {greeting()}
           </Text>
           <View className="flex-row items-center">
-            {/* No pill at 0: a missed day shouldn't feel like a penalty */}
+            {/* No pill at 0*/}
             {streak > 0 && (
               <View
                 accessible

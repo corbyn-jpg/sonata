@@ -23,11 +23,19 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": [
+        "plugins": [
       "expo-router",
       "expo-splash-screen",
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "react-native-audio-api",
+        {
+          "iosBackgroundMode": false,
+          "androidForegroundService": false,
+          "androidPermissions": []
+        }
+      ]
     ],
     "extra": {
       "router": {},

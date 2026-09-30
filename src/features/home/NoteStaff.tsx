@@ -5,6 +5,7 @@ import {
   interpolateColors,
   Line,
   mixColors,
+  Morphology,
   Oval,
   Path,
   Skia,
@@ -125,6 +126,7 @@ export function NoteStaff({ cx, top, mode, position }: Props) {
       ))}
       <Group transform={clef} opacity={0.75}>
         <Path path={CLEF} color={colours.textSecondary} />
+        <Morphology operator="erode" radius={0.35} />
       </Group>
 
       <Line
