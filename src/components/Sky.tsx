@@ -58,8 +58,8 @@ export const Sky = memo(function Sky({ glow, animated = true, seed = 7 }: Props)
   useEffect(() => {
     if (!moving) return;
     const ease = Easing.inOut(Easing.sin);
-    drift.value = withRepeat(withTiming(1, { duration: 75000, easing: ease }), -1, true);
-    twinkle.value = withRepeat(withTiming(0.4, { duration: 4000, easing: ease }), -1, true);
+    drift.value = withRepeat(withTiming(1, { duration: 7500, easing: ease }), -1, true);
+    twinkle.value = withRepeat(withTiming(0.4, { duration: 1000, easing: ease }), -1, true);
     return () => {
       cancelAnimation(drift);
       cancelAnimation(twinkle);
