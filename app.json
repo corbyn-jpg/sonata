@@ -23,17 +23,17 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-        "plugins": [
+    "plugins": [
       "expo-router",
       "expo-splash-screen",
       "expo-font",
       "expo-secure-store",
       [
-        "react-native-audio-api",
+        "expo-audio",
         {
-          "iosBackgroundMode": false,
-          "androidForegroundService": false,
-          "androidPermissions": []
+          "microphonePermission": false,
+          "recordAudioAndroid": false,
+          "enableBackgroundPlayback": false
         }
       ]
     ],

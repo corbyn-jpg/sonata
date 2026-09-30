@@ -9,6 +9,7 @@
     "@react-native-async-storage/async-storage": "2.2.0",
     "@shopify/react-native-skia": "2.6.2",
     "expo": "~57.0.26",
+    "expo-audio": "~57.0.5",
     "expo-constants": "~57.0.19",
     "expo-crypto": "~57.0.3",
     "expo-dev-client": "~57.0.19",
@@ -25,7 +26,6 @@
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "react-native": "0.86.3",
-    "react-native-audio-api": "^0.13.6",
     "react-native-gesture-handler": "~2.32.0",
     "react-native-reanimated": "4.5.1",
     "react-native-safe-area-context": "~5.7.0",
@@ -48,7 +48,8 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "test": "jest"
+    "test": "jest",
+    "render:chords": "node scripts/render-chords.mjs"
   },
   "jest": {
     "preset": "jest-expo",

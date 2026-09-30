@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useIsFocused } from "expo-router";
 import {
   KeyboardAvoidingView,
@@ -25,7 +25,7 @@ import { WeekStrip } from "@/features/home/WeekStrip";
 import { saveCheckin } from "@/lib/checkins";
 import colours from "@/theme/colours";
 import * as Haptics from "expo-haptics";
-import { chooseNote, previewNote } from "@/audio";
+import { chooseNote, preloadChords, previewNote } from "@/audio";
 
 const START_INDEX = 3; // F — middle of the scale, so there's a neighbour on each side
 const INDICES = LETTERS.map((_, i) => i);
@@ -47,6 +47,9 @@ export default function Home() {
   const [reflection, setReflection] = useState("");
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
   const { days, todayIndex, todayLogged, streak, loaded, logToday } = useWeek();
+
+  // Load the chord sounds now, so the first swipe plays without a delay
+  useEffect(preloadChords, []);
 
   // Wash colour follows the carousel, and crossfades to the Dark palette (and dims) with the toggle
   const glow = useDerivedValue(() => {
