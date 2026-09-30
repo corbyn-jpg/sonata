@@ -9,7 +9,7 @@ module.exports = {
       backgroundColor: { canvas: c.canvas, surface: c.surface, 'surface-raised': c.surfaceRaised },
       textColor: { primary: c.textPrimary, secondary: c.textSecondary, muted: c.textMuted },
       borderColor: { DEFAULT: c.border },
-      colors: { violet: c.violet, teal: c.teal },
+      colors: { violet: c.violet, teal: c.teal, border: c.border },
       fontFamily: {
         mono: ['DMMono_400Regular'],
         'mono-medium': ['DMMono_500Medium'],

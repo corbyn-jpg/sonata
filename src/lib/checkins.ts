@@ -49,3 +49,17 @@ export async function getCheckins(from: Date, to: Date): Promise<Checkin[]> {
     }),
   );
 }
+
+/** When each check-in since `from` happened, oldest first. Timestamps only */
+export async function getCheckinDates(from: Date): Promise<Date[]> {
+  const user_id = await getUserId();
+  const snapshot = await getDocs(
+    query(
+      checkins,
+      where('user_id', '==', user_id),
+      where('timestamp', '>=', Timestamp.fromDate(from)),
+      orderBy('timestamp'), // ascending uses the index you already have
+    ),
+  );
+  return snapshot.docs.map((doc) => doc.data().timestamp.toDate());
+}
