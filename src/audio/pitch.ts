@@ -18,7 +18,11 @@ export function midiOf(pitch: Pitch, octave = 4): number {
   return 12 * (octave + 1) + SEMITONES_FROM_C[pitch];
 }
 
-/** Equal temperament, tuned to A4 = 440 Hz. */
+/** Equal temperament, tuned to A4 = 440 Hz (MIDI 69). */
+export function frequencyOfMidi(midi: number): number {
+  return 440 * 2 ** ((midi - 69) / 12);
+}
+
 export function frequencyOf(pitch: Pitch, octave = 4): number {
-  return 440 * 2 ** ((midiOf(pitch, octave) - 69) / 12);
+  return frequencyOfMidi(midiOf(pitch, octave));
 }

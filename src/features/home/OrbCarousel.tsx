@@ -7,7 +7,7 @@ import {
   type AccessibilityActionEvent,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { Canvas, Group, Oval, vec } from "@shopify/react-native-skia";
+import { Canvas, Group, mixColors, Oval, vec } from "@shopify/react-native-skia";
 import Animated, {
   cancelAnimation,
   clamp,
@@ -50,6 +50,8 @@ type Props = {
   mode: Mode;
   /** Fractional index of the centred orb. Shared with the atmosphere. */
   position: SharedValue<number>;
+  /** 0 = Bright, 1 = Dark — animated, so the orbs crossfade between palettes */
+  page: SharedValue<number>;
   focused: number;
   onFocusChange: (index: number) => void;
   selected: Letter | null;
@@ -61,6 +63,7 @@ type Props = {
 export function OrbCarousel({
   mode,
   position,
+  page,
   focused,
   onFocusChange,
   selected,
@@ -72,13 +75,17 @@ export function OrbCarousel({
   const step = width * 0.45; // puts the neighbours' centres near the screen edges
   const start = useSharedValue(0);
 
-  // Gesture callbacks run on the UI thread and can't see fresh React state
+    // The gesture is built once, so it must read the latest state and callbacks through refs — otherwise it keeps calling the first render's versions (e.g. with the old Bright/Dark mode)
   const focusedRef = useRef(focused);
   focusedRef.current = focused;
+  const onFocusChangeRef = useRef(onFocusChange);
+  onFocusChangeRef.current = onFocusChange;
+  const onSelectRef = useRef(onSelect);
+  onSelectRef.current = onSelect;
 
   const settle = (index: number) => {
     if (index === focusedRef.current) return;
-    focusedRef.current = index;
+        onFocusChangeRef.current(index);
     onFocusChange(index);
   };
 
@@ -89,8 +96,7 @@ export function OrbCarousel({
 
   const onTap = (offset: number) => {
     const current = focusedRef.current;
-    if (offset === 0) return onSelect(LETTERS[current]);
-    goTo(clamp(current + Math.sign(offset), 0, LAST)); // tapping an edge orb brings it to the centre
+        if (offset === 0) return onSelectRef.current(LETTERS[current]);
   };
 
   const gesture = useMemo(() => {
@@ -179,7 +185,7 @@ export function OrbCarousel({
                 <CarouselOrb
                   key={l}
                   letter={l}
-                  mode={mode}
+                  page={page}
                   index={index}
                   step={step}
                   cx={cx}
@@ -193,7 +199,7 @@ export function OrbCarousel({
               <NoteStaff
                 cx={cx}
                 top={cy + ORB_SIZE / 2 + STAFF_GAP}
-                mode={mode}
+                page={page}
                 position={position}
               />
             </Canvas>
@@ -250,12 +256,12 @@ function Orbits({ cx, cy, width }: { cx: number; cy: number; width: number }) {
 
 type OrbItemProps = {
   letter: Letter;
-  mode: Mode;
   index: number;
   step: number;
   cx: number;
   cy: number;
   position: SharedValue<number>;
+  page: SharedValue<number>;
   isFocused: boolean;
   isSelected: boolean;
   animated: boolean;
@@ -263,12 +269,12 @@ type OrbItemProps = {
 
 const CarouselOrb = memo(function CarouselOrb({
   letter,
-  mode,
   index,
   step,
   cx,
   cy,
   position,
+  page,
   isFocused,
   isSelected,
   animated,
@@ -324,7 +330,14 @@ const CarouselOrb = memo(function CarouselOrb({
     );
   }, [isSelected, pulse]);
 
-  const { core, edge } = colours.orb[letter][mode];
+  // Blend between the Bright and Dark palettes as the page toggles
+  const { major, minor } = colours.orb[letter];
+  const core = useDerivedValue(() =>
+    mixColors(page.value, major.core, minor.core),
+  );
+  const edge = useDerivedValue(() =>
+    mixColors(page.value, major.edge, minor.edge),
+  );
 
   return (
     <Group transform={transform} origin={vec(cx, cy)} opacity={opacity}>

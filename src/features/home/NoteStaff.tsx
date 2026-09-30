@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import {
   BlurMask,
   Group,
@@ -17,7 +16,7 @@ import {
   useDerivedValue,
   type SharedValue,
 } from "react-native-reanimated";
-import { LETTERS, pitchOf, type Mode } from "@/data/notes";
+import { LETTERS, pitchOf } from "@/data/notes";
 import colours from "@/theme/colours";
 
 // Clef and flat shapes from Material Design Icons (Apache 2.0), drawn in a 24×24 box
@@ -36,40 +35,41 @@ const STEM = GAP * 3.5;
 const INDICES = LETTERS.map((_, i) => i);
 // Staff steps above the bottom line (E4): C4 sits on a ledger line below, B4 on the middle line
 const STEPS = [-2, -1, 0, 1, 2, 3, 4];
+const MAJOR_CORES = LETTERS.map((l) => colours.orb[l].major.core);
+const MINOR_CORES = LETTERS.map((l) => colours.orb[l].minor.core);
+// 1 where the Dark page lowers the note (E♭, A♭, B♭)
+const MINOR_FLATS = LETTERS.map((l) => (pitchOf(l, "minor").endsWith("b") ? 1 : 0));
 
 type Props = {
   cx: number;
   /** y of the top staff line */
   top: number;
-  mode: Mode;
+  /** 0 = Bright, 1 = Dark — animated, so colours and flats crossfade */
+  page: SharedValue<number>;
   /** Carousel position, so the note glides between pitches as you swipe */
   position: SharedValue<number>;
 };
 
 /** A treble staff showing the centred orb's note. Draw inside a Skia <Canvas>. */
-export function NoteStaff({ cx, top, mode, position }: Props) {
+export function NoteStaff({ cx, top, page, position }: Props) {
   const left = cx - WIDTH / 2;
   const bottom = top + GAP * 4;
   const noteX = left + WIDTH * 0.62;
-
-  const cores = useMemo(
-    () => LETTERS.map((l) => colours.orb[l][mode].core),
-    [mode],
-  );
-  const flats = useMemo(
-    () => LETTERS.map((l) => (pitchOf(l, mode).endsWith("b") ? 1 : 0)),
-    [mode],
-  );
 
   const step = useDerivedValue(() =>
     interpolate(position.value, INDICES, STEPS, Extrapolation.CLAMP),
   );
   const noteY = useDerivedValue(() => bottom - (step.value * GAP) / 2);
   // Lifted towards off-white so the darker Dark-page colours stay readable on the night sky
+    // Lifted towards off-white so the darker Dark-page colours stay readable on the night sky
   const colour = useDerivedValue(() =>
     mixColors(
       0.3,
-      interpolateColors(position.value, INDICES, cores),
+      mixColors(
+        page.value,
+        interpolateColors(position.value, INDICES, MAJOR_CORES),
+        interpolateColors(position.value, INDICES, MINOR_CORES),
+      ),
       colours.textPrimary,
     ),
   );
@@ -91,8 +91,10 @@ export function NoteStaff({ cx, top, mode, position }: Props) {
       : vec(noteX - HEAD_RX + 0.8, noteY.value + STEM),
   );
 
-  const flatOpacity = useDerivedValue(() =>
-    interpolate(position.value, INDICES, flats, Extrapolation.CLAMP),
+    const flatOpacity = useDerivedValue(
+    () =>
+      interpolate(position.value, INDICES, MINOR_FLATS, Extrapolation.CLAMP) *
+      page.value,
   );
   const flatScale = (GAP * 2.5) / 14; // the flat is 14 units tall in its box
   const flat = useDerivedValue(() => [

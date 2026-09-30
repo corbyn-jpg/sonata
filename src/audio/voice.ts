@@ -16,6 +16,8 @@ type NoteOptions = {
   volume?: number;
   /** Seconds until the note has fully faded. */
   length?: number;
+  /** Seconds to wait before starting, e.g. to roll the notes of a chord. */
+  delay?: number;
 };
 
 /**
@@ -24,10 +26,10 @@ type NoteOptions = {
  */
 export function playNote(
   frequency: number,
-  { volume = 0.15, length = 1.8 }: NoteOptions = {},
+  { volume = 0.15, length = 1.8, delay = 0 }: NoteOptions = {},
 ): () => void {
   const { context, output } = getAudio();
-  const start = context.currentTime + LOOKAHEAD;
+  const start = context.currentTime + LOOKAHEAD + delay;
   const end = start + length;
 
   // Envelope: soft 40 ms attack (no click), settle, then a long fade like a struck bell

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Link, useIsFocused } from "expo-router";
 import {
   KeyboardAvoidingView,
@@ -7,12 +7,18 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useDerivedValue, useSharedValue } from "react-native-reanimated";
+import {
+  Easing,
+  useDerivedValue,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { interpolateColors } from "@shopify/react-native-skia";
 import { Music2, Piano, Settings } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
 import { Sky } from "@/components/Sky";
 import { LETTERS, type Letter, type Mode } from "@/data/notes";
+import { ModeToggle } from "@/features/home/ModeToggle";
 import { OrbCarousel } from "@/features/home/OrbCarousel";
 import { useWeek } from "@/features/home/useWeek";
 import { WeekStrip } from "@/features/home/WeekStrip";
@@ -23,6 +29,8 @@ import { chooseNote, previewNote } from "@/audio";
 
 const START_INDEX = 3; // F — middle of the scale, so there's a neighbour on each side
 const INDICES = LETTERS.map((_, i) => i);
+const MAJOR_CORES = LETTERS.map((l) => colours.orb[l].major.core);
+const MINOR_CORES = LETTERS.map((l) => colours.orb[l].minor.core);
 
 function greeting() {
   const h = new Date().getHours();
@@ -30,7 +38,8 @@ function greeting() {
 }
 
 export default function Home() {
-  const mode: Mode = "major"; // Bright/Dark pages come later
+  const [mode, setMode] = useState<Mode>("major");
+  const page = useSharedValue(0); // 0 = Bright, 1 = Dark
   const isFocused = useIsFocused(); // pause the sky while another tab is showing
   const position = useSharedValue(START_INDEX);
   const [focused, setFocused] = useState(START_INDEX);
@@ -39,18 +48,22 @@ export default function Home() {
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
   const { days, todayIndex, todayLogged, streak, loaded, logToday } = useWeek();
 
-  // The wash blends between orb colours as the carousel moves, on the UI thread
-  const cores = useMemo(
-    () => LETTERS.map((l) => colours.orb[l][mode].core),
-    [mode],
-  );
-  const glow = useDerivedValue(() =>
-    interpolateColors(position.value, INDICES, cores),
-  );
+  // Wash colour follows the carousel, and crossfades to the Dark palette (and dims) with the toggle
+  const glow = useDerivedValue(() => {
+    const bright = interpolateColors(position.value, INDICES, MAJOR_CORES);
+    const dark = interpolateColors(position.value, INDICES, MINOR_CORES);
+    const t = page.value;
+    return [
+      bright[0] + (dark[0] - bright[0]) * t,
+      bright[1] + (dark[1] - bright[1]) * t,
+      bright[2] + (dark[2] - bright[2]) * t,
+      1 - 0.35 * t, // dimmer wash on the Dark page
+    ];
+  });
 
   const canSave = loaded && !todayLogged && selected !== null;
 
-    const onFocusChange = (index: number) => {
+  const onFocusChange = (index: number) => {
     setFocused(index);
     setSelected(null); // the selected orb is always the centred one
     previewNote(LETTERS[index], mode);
@@ -62,6 +75,19 @@ export default function Home() {
     setStatus("idle");
     chooseNote(letter, mode);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  };
+
+  const onModeChange = (next: Mode) => {
+    if (next === mode) return;
+    setMode(next);
+    setSelected(null);
+    setStatus("idle");
+    page.value = withTiming(next === "minor" ? 1 : 0, {
+      duration: 600,
+      easing: Easing.inOut(Easing.quad),
+    });
+    previewNote(LETTERS[focused], next); // hear the same note in the new mode, e.g. E → E♭
+    Haptics.selectionAsync();
   };
 
   const onSave = () => {
@@ -80,8 +106,15 @@ export default function Home() {
 
   return (
     <Screen
-      background={<Sky glow={glow} animated={isFocused} />}
+      background={
+        <Sky
+          glow={glow}
+          animated={isFocused}
+          pace={mode === "minor" ? 1.6 : 1} // calmer stars on the Dark page
+        />
+      }
       header={
+        <View className="gap-4">
         <View className="flex-row items-center justify-between">
           <Text
             numberOfLines={1}
@@ -133,6 +166,8 @@ export default function Home() {
             </Link>
           </View>
         </View>
+        <ModeToggle mode={mode} onChange={onModeChange} />
+        </View>
       }
     >
       {/* Keeps the reflection input above the keyboard */}
@@ -142,6 +177,7 @@ export default function Home() {
           <OrbCarousel
             mode={mode}
             position={position}
+            page={page}
             focused={focused}
             onFocusChange={onFocusChange}
             selected={selected}

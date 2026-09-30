@@ -1,6 +1,13 @@
-import { memo, useEffect, useMemo } from 'react';
-import { StyleSheet, useWindowDimensions } from 'react-native';
-import { Canvas, Circle, Group, RadialGradient, Rect, vec } from '@shopify/react-native-skia';
+import { memo, useEffect, useMemo } from "react";
+import { StyleSheet, useWindowDimensions } from "react-native";
+import {
+  Canvas,
+  Circle,
+  Group,
+  RadialGradient,
+  Rect,
+  vec,
+} from "@shopify/react-native-skia";
 import {
   cancelAnimation,
   Easing,
@@ -10,8 +17,8 @@ import {
   withRepeat,
   withTiming,
   type SharedValue,
-} from 'react-native-reanimated';
-import colours from '@/theme/colours';
+} from "react-native-reanimated";
+import colours from "@/theme/colours";
 
 const STARS_PER_LAYER = 24;
 const LAYERS = 3;
@@ -25,6 +32,8 @@ type Props = {
   /** Set false to pause the ambient motion, e.g. while the screen isn't focused. */
   animated?: boolean;
   seed?: number;
+  /** Multiplies the drift and twinkle durations: above 1 is slower and calmer. */
+  pace?: number;
 };
 
 // Seeded so the sky doesn't reshuffle on every reload
@@ -36,7 +45,12 @@ function seededRandom(seed: number) {
 }
 
 /** Colour wash + drifting starfield, drawn in a single Skia canvas. */
-export const Sky = memo(function Sky({ glow, animated = true, seed = 7 }: Props) {
+export const Sky = memo(function Sky({
+  glow,
+  animated = true,
+  pace = 1,
+  seed = 7,
+}: Props) {
   const { width, height } = useWindowDimensions();
   const reduceMotion = useReducedMotion();
   const drift = useSharedValue(0);
@@ -58,20 +72,28 @@ export const Sky = memo(function Sky({ glow, animated = true, seed = 7 }: Props)
   useEffect(() => {
     if (!moving) return;
     const ease = Easing.inOut(Easing.sin);
-    drift.value = withRepeat(withTiming(1, { duration: 7500, easing: ease }), -1, true);
-    twinkle.value = withRepeat(withTiming(0.4, { duration: 1000, easing: ease }), -1, true);
+    drift.value = withRepeat(
+      withTiming(1, { duration: 7500 * pace, easing: ease }),
+      -1,
+      true,
+    );
+    twinkle.value = withRepeat(
+      withTiming(0.4, { duration: 1000 * pace, easing: ease }),
+      -1,
+      true,
+    );
     return () => {
       cancelAnimation(drift);
       cancelAnimation(twinkle);
     };
-  }, [moving, drift, twinkle]);
+  }, [moving, pace, drift, twinkle]);
 
-  // Same colour at 30% → 10% → 0% alpha
+  // Same colour at 30% → 10% → 0%, scaled by the glow's own alpha (a dimmer wash on the Dark page)
   const glowColours = useDerivedValue(() => {
-    const [r, g, b] = glow?.value ?? NO_GLOW;
+    const [r, g, b, a = 1] = glow?.value ?? NO_GLOW;
     return [
-      [r, g, b, 0.3],
-      [r, g, b, 0.1],
+      [r, g, b, 0.3 * a],
+      [r, g, b, 0.1 * a],
       [r, g, b, 0],
     ];
   });
@@ -89,13 +111,24 @@ export const Sky = memo(function Sky({ glow, animated = true, seed = 7 }: Props)
         </Rect>
       )}
       {layers.map((stars, index) => (
-        <StarLayer key={index} index={index} stars={stars} drift={drift} twinkle={twinkle} />
+        <StarLayer
+          key={index}
+          index={index}
+          stars={stars}
+          drift={drift}
+          twinkle={twinkle}
+        />
       ))}
     </Canvas>
   );
 });
 
-type LayerProps = { index: number; stars: Star[]; drift: SharedValue<number>; twinkle: SharedValue<number> };
+type LayerProps = {
+  index: number;
+  stars: Star[];
+  drift: SharedValue<number>;
+  twinkle: SharedValue<number>;
+};
 
 function StarLayer({ index, stars, drift, twinkle }: LayerProps) {
   // Nearer layers drift further (parallax); only the first layer twinkles
@@ -108,7 +141,14 @@ function StarLayer({ index, stars, drift, twinkle }: LayerProps) {
   return (
     <Group transform={transform} opacity={opacity}>
       {stars.map((star, i) => (
-        <Circle key={i} cx={star.x} cy={star.y} r={star.r} color={colours.textPrimary} opacity={star.opacity} />
+        <Circle
+          key={i}
+          cx={star.x}
+          cy={star.y}
+          r={star.r}
+          color={colours.textPrimary}
+          opacity={star.opacity}
+        />
       ))}
     </Group>
   );
