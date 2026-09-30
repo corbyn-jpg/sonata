@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "sonata",
+    "name": "Sonata",
     "slug": "sonata",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -11,6 +11,7 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.chloe.sonata",
       "adaptiveIcon": {
         "backgroundColor": "#08050d",
         "foregroundImage": "./assets/android-icon-foreground.png",
@@ -27,6 +28,12 @@
       "expo-splash-screen",
       "expo-font",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "60b2c30a-979e-462d-842e-7f01fb336553"
+      }
+    }
   }
 }
