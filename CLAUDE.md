@@ -332,13 +332,15 @@ Work in this sequence — each stage produces something runnable.
    wrapper. **Build and unit-test this before any real data flows through the app.**
 3. **Glow orb component** — the reusable two-tone orb (core + halo + aura). Everything visual
    depends on this. Get it right before building screens around it.
-4. **Home screen** — carousel, grid view, Bright/Dark pages, responsive atmosphere, save flow
-5. **Audio engine** — react-native-audio-api soundfont setup, note preview on selection, haptics
+4. **Home screen** — carousel, grid view, Bright/Dark toggle, responsive atmosphere, save flow
+5. **Audio engine** — pre-rendered chords played with `expo-audio`, preview on selection,
+   **instrument picker on Home**, **per-note vibration patterns** (§11)
 6. **Harmony engine** — the symbolic AI. Pure functions, heavily unit-tested, no UI
    dependencies. Should be testable in isolation with a fixture of 7 notes.
-7. **Weekly screen** — spinning disc, wavy transport, generated artwork, composing state
-8. **Monthly screen** — calendar, bento analytics, weeks shelf
-9. **Grounding Oasis** — bento grid + 4 sub-screens
+7. **Weekly screen** — spinning disc, wavy transport, generated artwork, composing state,
+   **share / download**, **save to playlist** (§11)
+8. **Monthly screen** — calendar, bento analytics, weeks shelf, **monthly song** (§11)
+9. **Grounding Oasis** — bento grid + 4 sub-screens, **sheet music from your songs** (§11)
 10. **Composer, Settings, onboarding**
 11. **Audit** — network proxy check for zero unencrypted egress, Jest coverage, a11y pass
 
@@ -370,10 +372,10 @@ Work in this sequence — each stage produces something runnable.
 
 ## 10. Things that are easy to get wrong
 
-- **Don't put labels on the carousel orbs.** Grid view only.
+- **Never show emotion words** anywhere in the UI (§12). Orbs are identified by note only.
 - **Don't blend 3+ colours in an orb.** Two maximum, or it goes muddy.
-- **Don't make Bright/Dark a toggle switch.** They're two pages swiped vertically, with
-  distinct atmospheres.
+- **Bright/Dark is a toggle** (§12), but switching must still crossfade the palette and
+  atmosphere — never snap.
 - **Don't skip the atmosphere crossfade.** Without it the app is just a dark theme.
 - **Don't use standard three-button transport controls.** The wavy capsule is the detail that
   makes the player feel custom.
@@ -381,3 +383,63 @@ Work in this sequence — each stage produces something runnable.
   It's meaningful, not wallpaper.
 - **DM Mono has no Bold.** Medium is the heaviest weight available.
 - **Never write unencrypted user content to Firestore**, including during debugging.
+
+---
+
+## 11. Added scope (October 2026)
+
+Features added after the original brief. Each is slotted into the build order in §8.
+
+1. **Instrument picker on Home** (Stage 5) — a button on Home lets the user choose what their
+   daily check-in sounds like: Piano / Strings / Ambient (the same three as the Weekly
+   soundfont pills). The chosen instrument is stored **inside the encrypted check-in payload**,
+   so each day keeps its sound and the weekly melody can use it; the picker remembers the last
+   choice. Each instrument is a set of 14 pre-rendered chord files (see §12, audio); recorded,
+   properly licensed samples (e.g. Salamander Grand Piano, CC-BY) are preferred for realism.
+2. **Per-note vibration for deaf / hard-of-hearing users** (Stage 5) — every note has its own
+   recognisable vibration: **pulse count = scale degree** (C = 1 … B = 7, grouped so they're
+   countable), **Bright = light, quick pulses; Dark = heavier, slower pulses**. Melody playback
+   pulses in rhythm. Controlled by a **"Feel notes"** setting. Android plays exact patterns;
+   iOS approximates with its preset impacts.
+3. **Monthly song** (Stage 8) — at month end the month's weekly melodies are combined into one
+   piece: **every week that starts in that month** (so 4 or 5), joined with short linking
+   passages so it plays as one song.
+4. **Share / download songs** (Stage 7) — through the **OS share sheet** (WhatsApp, Instagram,
+   email, "Save to Files"): an audio file, optionally a short video with the disc artwork.
+   **No in-app user-to-user sharing** — it would need visible accounts, which conflicts with the
+   anonymous, zero-tracker design. Shared files contain music and dates only, never emotion
+   words or reflections.
+5. **Save to playlist** (Stage 7) — in-app playlists of the user's own weekly songs, monthly
+   songs and Composer pieces. Playlist names are user content, so they're **encrypted** like
+   every other payload (new collection `PLAYLISTS`). External services (Spotify, Apple Music)
+   don't allow third-party audio, so they're out of scope.
+6. **Sheet music in the Oasis** (Stage 9) — users turn any of their songs into sheet music: a
+   scrolling treble-staff view in the Home staff's style, exportable as **PDF** (MusicXML
+   optional, for MuseScore / Sibelius).
+
+---
+
+## 12. Decisions since the original spec
+
+These override earlier sections. Don't "fix" them back.
+
+- **No emotion words in the UI, anywhere** — not on grid orbs, not on Weekly chips. Emotions
+  exist only in the encrypted database, derived from note + mode. Orbs are named by note:
+  visible letters under the carousel and grid orbs (`displayName`, "E♭"), screen readers get
+  `spokenName` ("E flat"). The centred orb also shows its note on a small **treble staff**.
+- **Bright/Dark is a toggle** (a Bright | Dark pill under the Home header), not two vertically
+  swiped pages. Switching crossfades orbs, wash, staff and flats over ~600 ms; the Dark page
+  has a dimmer wash and slower stars.
+- **Every orb plays a chord**, not a single note: a major triad on Bright, a minor triad on
+  Dark, so all seven Dark orbs sound minor (C, D, F, G included).
+- **Graphics: `@shopify/react-native-skia`** for every glow, orb, wash and starfield — one shared
+  canvas per area. Stacked `react-native-svg` layers lagged badly on a Galaxy A55.
+  `react-native-svg` remains only for Lucide icons.
+- **Audio: pre-rendered WAVs played with `expo-audio`** — not `react-native-audio-api`, whose
+  real-time synthesis crackled on device. `scripts/render-chords.mjs` renders the chords
+  (`npm run render:chords`); the Weekly melody and monthly song will be rendered to files in
+  JS the same way. The `expo-audio` plugin is configured with **no microphone permission and
+  no background playback** — the app must never request the microphone.
+- **Carousel gestures** use `react-native-gesture-handler` 2.32 (SDK 57 pin) on the UI thread,
+  not ScrollView snapping.
+- **Git: commit straight to `main`** (solo project) — no Git Flow branches.

@@ -37,8 +37,8 @@ import { NoteStaff } from "./NoteStaff";
 import colours from "@/theme/colours";
 
 const ORB_SIZE = 150;
-const STAFF_GAP = 40; // orb edge to top staff line
-const LABEL_GAP = STAFF_GAP + 32 + 28; // below the staff, clear of ledger lines and stems
+const STAFF_GAP = 35; // orb edge to top staff line
+const LABEL_GAP = STAFF_GAP + 32 + 10; // below the staff, clear of ledger lines and stems
 const NEIGHBOUR_SCALE = 0.6;
 const NEIGHBOUR_OPACITY = 0.35;
 const LAST = LETTERS.length - 1;
@@ -75,7 +75,7 @@ export function OrbCarousel({
   const step = width * 0.45; // puts the neighbours' centres near the screen edges
   const start = useSharedValue(0);
 
-    // The gesture is built once, so it must read the latest state and callbacks through refs — otherwise it keeps calling the first render's versions (e.g. with the old Bright/Dark mode)
+    // The gesture is built once, so it must read the latest state and callbacks through refs otherwise it keeps calling the first render's versions 
   const focusedRef = useRef(focused);
   focusedRef.current = focused;
   const onFocusChangeRef = useRef(onFocusChange);
@@ -149,8 +149,7 @@ export function OrbCarousel({
   const cx = width / 2;
   const cy = height / 2;
 
-  // Only the focused orb and two either side can be on screen. Draw the farthest first,
-  // so the focused orb sits on top of its neighbours' halos.
+  // Only the focused orb and two either side can be on screen. Draw the farthest first, so the focused orb sits on top of its neighbours' halos.
   const visible = LETTERS.map((l, index) => ({ letter: l, index }))
     .filter(({ index }) => Math.abs(index - focused) <= 2)
     .sort((a, b) => Math.abs(b.index - focused) - Math.abs(a.index - focused));

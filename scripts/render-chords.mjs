@@ -1,9 +1,8 @@
-// Renders the 14 orb chords (7 Bright, 7 Dark) to WAV files in assets/sounds.
-// Run with `npm run render:chords` after changing the voice below, then commit the files.
-//
-// This is plain maths — sums of sine waves — so the files come out perfectly clean.
-// The phone only plays them back, so there's no real-time synthesis to crackle.
-import { mkdirSync, writeFileSync } from "node:fs";
+/* Renders the 14 orb chords (7 Bright, 7 Dark) to WAV files in assets/sounds.
+Run with `npm run render:chords` after changing the voice below, then commit the files.
+This is plain maths so the files come out perfectly clean.
+The phone only plays them back, so there's no real-time synthesis to crackle.
+import { mkdirSync, writeFileSync } from "node:fs";*/
 
 const SAMPLE_RATE = 48000; // Android's native rate, so nothing gets resampled on the phone
 const LENGTH = 2.4; // seconds until each note is silent

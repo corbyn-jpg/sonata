@@ -25,6 +25,8 @@ import { WeekStrip } from "@/features/home/WeekStrip";
 import { saveCheckin } from "@/lib/checkins";
 import colours from "@/theme/colours";
 import * as Haptics from "expo-haptics";
+import { feelNote } from "@/haptics";
+import { usePreference } from "@/lib/preferences";
 import { chooseNote, preloadChords, previewNote } from "@/audio";
 
 const START_INDEX = 3; // F — middle of the scale, so there's a neighbour on each side
@@ -47,6 +49,7 @@ export default function Home() {
   const [reflection, setReflection] = useState("");
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
   const { days, todayIndex, todayLogged, streak, loaded, logToday } = useWeek();
+  const feelNotes = usePreference("feelNotes");
 
   // Load the chord sounds now, so the first swipe plays without a delay
   useEffect(preloadChords, []);
@@ -70,14 +73,16 @@ export default function Home() {
     setFocused(index);
     setSelected(null); // the selected orb is always the centred one
     previewNote(LETTERS[index], mode);
-    Haptics.selectionAsync();
+    if (feelNotes) feelNote(LETTERS[index], mode);
+    else Haptics.selectionAsync();
   };
 
   const onSelect = (letter: Letter) => {
     setSelected(letter);
     setStatus("idle");
     chooseNote(letter, mode);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    if (feelNotes) feelNote(letter, mode);
+    else Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
 
   const onModeChange = (next: Mode) => {
@@ -90,7 +95,8 @@ export default function Home() {
       easing: Easing.inOut(Easing.quad),
     });
     previewNote(LETTERS[focused], next); // hear the same note in the new mode, e.g. E → E♭
-    Haptics.selectionAsync();
+    if (feelNotes) feelNote(LETTERS[focused], next);
+    else Haptics.selectionAsync();
   };
 
   const onSave = () => {
@@ -118,58 +124,58 @@ export default function Home() {
       }
       header={
         <View className="gap-4">
-        <View className="flex-row items-center justify-between">
-          <Text
-            numberOfLines={1}
-            className="shrink font-mono-medium text-h3 text-primary"
-          >
-            {greeting()}
-          </Text>
-          <View className="flex-row items-center">
-            {/* No pill at 0*/}
-            {streak > 0 && (
-              <View
-                accessible
-                accessibilityLabel={`${streak}-day streak`}
-                className="mr-1 h-8 flex-row items-center gap-1 rounded-pill border border-border px-3"
-              >
-                <Music2
-                  color={colours.textSecondary}
-                  size={14}
-                  strokeWidth={1.5}
-                />
-                <Text className="font-sans-medium text-caption text-secondary">
-                  {streak}
-                </Text>
-              </View>
-            )}
-            <Link href="/composer" asChild>
-              <Pressable
-                accessibilityLabel="Open composer"
-                className="h-11 w-11 items-center justify-center"
-              >
-                <Piano
-                  color={colours.textSecondary}
-                  size={24}
-                  strokeWidth={1.5}
-                />
-              </Pressable>
-            </Link>
-            <Link href="/settings" asChild>
-              <Pressable
-                accessibilityLabel="Settings"
-                className="h-11 w-11 items-center justify-center"
-              >
-                <Settings
-                  color={colours.textSecondary}
-                  size={24}
-                  strokeWidth={1.5}
-                />
-              </Pressable>
-            </Link>
+          <View className="flex-row items-center justify-between">
+            <Text
+              numberOfLines={1}
+              className="shrink font-mono-medium text-h3 text-primary"
+            >
+              {greeting()}
+            </Text>
+            <View className="flex-row items-center">
+              {/* No pill at 0*/}
+              {streak > 0 && (
+                <View
+                  accessible
+                  accessibilityLabel={`${streak}-day streak`}
+                  className="mr-1 h-8 flex-row items-center gap-1 rounded-pill border border-border px-3"
+                >
+                  <Music2
+                    color={colours.textSecondary}
+                    size={14}
+                    strokeWidth={1.5}
+                  />
+                  <Text className="font-sans-medium text-caption text-secondary">
+                    {streak}
+                  </Text>
+                </View>
+              )}
+              <Link href="/composer" asChild>
+                <Pressable
+                  accessibilityLabel="Open composer"
+                  className="h-11 w-11 items-center justify-center"
+                >
+                  <Piano
+                    color={colours.textSecondary}
+                    size={24}
+                    strokeWidth={1.5}
+                  />
+                </Pressable>
+              </Link>
+              <Link href="/settings" asChild>
+                <Pressable
+                  accessibilityLabel="Settings"
+                  className="h-11 w-11 items-center justify-center"
+                >
+                  <Settings
+                    color={colours.textSecondary}
+                    size={24}
+                    strokeWidth={1.5}
+                  />
+                </Pressable>
+              </Link>
+            </View>
           </View>
-        </View>
-        <ModeToggle mode={mode} onChange={onModeChange} />
+          <ModeToggle mode={mode} onChange={onModeChange} />
         </View>
       }
     >
