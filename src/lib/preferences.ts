@@ -1,13 +1,16 @@
 import { useSyncExternalStore } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { isInstrument, type Instrument } from "@/audio/instruments";
 
 // Device-only settings
 type Preferences = {
   /** Play each note's vibration pattern (for deaf and hard-of-hearing users).*/
   feelNotes: boolean;
+    /** What check-ins sound like. The last choice is remembered. */
+  instrument: Instrument;
 };
 
-const DEFAULTS: Preferences = { feelNotes: false };
+const DEFAULTS: Preferences = { feelNotes: false, instrument: "piano" };
 const STORAGE_KEY = "sonata.preferences";
 
 let current = DEFAULTS;
@@ -19,6 +22,8 @@ AsyncStorage.getItem(STORAGE_KEY)
   .then((saved) => {
     if (!saved) return;
     current = { ...DEFAULTS, ...JSON.parse(saved) };
+    // An instrument that's since been removed (e.g. "ambient") falls back to the default
+    if (!isInstrument(current.instrument)) current.instrument = DEFAULTS.instrument;
     notify();
   })
   .catch(() => {});

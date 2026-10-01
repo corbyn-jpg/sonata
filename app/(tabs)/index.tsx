@@ -14,7 +14,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { interpolateColors } from "@shopify/react-native-skia";
-import { Music2, Piano, Settings } from "lucide-react-native";
+import { FileMusic, Music2, Settings } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
 import { Sky } from "@/components/Sky";
 import { LETTERS, type Letter, type Mode } from "@/data/notes";
@@ -26,8 +26,15 @@ import { saveCheckin } from "@/lib/checkins";
 import colours from "@/theme/colours";
 import * as Haptics from "expo-haptics";
 import { feelNote } from "@/haptics";
-import { usePreference } from "@/lib/preferences";
-import { chooseNote, preloadChords, previewNote } from "@/audio";
+import { setPreference, usePreference } from "@/lib/preferences";
+import {
+  chooseNote,
+  playChime,
+  preloadChords,
+  previewNote,
+  type Instrument,
+} from "@/audio";
+import { InstrumentPicker } from "@/features/home/InstrumentPicker";
 
 const START_INDEX = 3; // F — middle of the scale, so there's a neighbour on each side
 const INDICES = LETTERS.map((_, i) => i);
@@ -50,9 +57,10 @@ export default function Home() {
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
   const { days, todayIndex, todayLogged, streak, loaded, logToday } = useWeek();
   const feelNotes = usePreference("feelNotes");
+  const instrument = usePreference("instrument");
 
-  // Load the chord sounds now, so the first swipe plays without a delay
-  useEffect(preloadChords, []);
+  // Load the chosen instrument's sounds now, so the first swipe plays without a delay
+  useEffect(() => preloadChords(instrument), [instrument]);
 
   // Wash colour follows the carousel, and crossfades to the Dark palette (and dims) with the toggle
   const glow = useDerivedValue(() => {
@@ -72,7 +80,7 @@ export default function Home() {
   const onFocusChange = (index: number) => {
     setFocused(index);
     setSelected(null); // the selected orb is always the centred one
-    previewNote(LETTERS[index], mode);
+    previewNote(LETTERS[index], mode, instrument);
     if (feelNotes) feelNote(LETTERS[index], mode);
     else Haptics.selectionAsync();
   };
@@ -80,7 +88,7 @@ export default function Home() {
   const onSelect = (letter: Letter) => {
     setSelected(letter);
     setStatus("idle");
-    chooseNote(letter, mode);
+    chooseNote(letter, mode, instrument);
     if (feelNotes) feelNote(letter, mode);
     else Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
   };
@@ -94,20 +102,27 @@ export default function Home() {
       duration: 600,
       easing: Easing.inOut(Easing.quad),
     });
-    previewNote(LETTERS[focused], next); // hear the same note in the new mode, e.g. E → E♭
+    previewNote(LETTERS[focused], next, instrument);
     if (feelNotes) feelNote(LETTERS[focused], next);
     else Haptics.selectionAsync();
+  };
+
+  const onInstrumentChange = (next: Instrument) => {
+    setPreference("instrument", next);
+    previewNote(LETTERS[focused], mode, next); // hear the new instrument straight away
+    Haptics.selectionAsync();
   };
 
   const onSave = () => {
     if (!canSave || !selected) return;
     logToday({ note: selected, mode }); // show the dot now
+    playChime("save");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     setStatus("saved");
     setSelected(null);
     setReflection("");
     // addDoc only resolves once the server confirms, so don't wait on it (offline writes are queued)
-    saveCheckin(selected, mode, reflection).catch(() => {
+    saveCheckin(selected, mode, instrument, reflection).catch(() => {
       logToday(null);
       setStatus("error");
     });
@@ -154,7 +169,7 @@ export default function Home() {
                   accessibilityLabel="Open composer"
                   className="h-11 w-11 items-center justify-center"
                 >
-                  <Piano
+                  <FileMusic
                     color={colours.textSecondary}
                     size={24}
                     strokeWidth={1.5}
@@ -175,7 +190,13 @@ export default function Home() {
               </Link>
             </View>
           </View>
-          <ModeToggle mode={mode} onChange={onModeChange} />
+          <View className="flex-row items-center justify-center gap-3">
+            <ModeToggle mode={mode} onChange={onModeChange} />
+            <InstrumentPicker
+              instrument={instrument}
+              onChange={onInstrumentChange}
+            />
+          </View>
         </View>
       }
     >

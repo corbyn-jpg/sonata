@@ -86,7 +86,6 @@ export function OrbCarousel({
   const settle = (index: number) => {
     if (index === focusedRef.current) return;
         onFocusChangeRef.current(index);
-    onFocusChange(index);
   };
 
   const goTo = (index: number) => {

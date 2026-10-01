@@ -234,7 +234,7 @@ silhouette inside the bloom. CTA "Get started". Background atmosphere crossfades
 - Circular progress ring traces the disc edge; drag anywhere on it to seek.
 - **Wavy transport capsule** — one continuous undulating shape housing skip/play/skip, play
   bulging largest at centre. Not three separate buttons.
-- Soundfont pills: Piano / Strings / Ambient synth
+- Instrument pills: the Home picker's list (§11.1)
 - Row of 7 day chips in emotion colours — these *do* carry emotion words (review context, not
   picking context). Tap to seek to that bar.
 - **"Composing your week" transitional state:** full-screen orb with colours visibly swirling,
@@ -269,7 +269,8 @@ Sub-screens:
 
 ### 7. Settings & Data Privacy  (reached from gear icon, NOT the tab bar)
 Flat, no washes. Trust banner (lock icon, teal, one line on on-device encryption). Grouped
-rows: Notifications (daily reminder, time) · Sound (default soundfont, preview volume) ·
+rows: Notifications (daily reminder, time) · Sound (default instrument, preview volume, sample
+credits — §12) ·
 Data (export PDF, backup encryption key) · Danger zone ("Delete all data" in muted red text
 with outline trash icon — never a solid red button).
 
@@ -391,11 +392,11 @@ Work in this sequence — each stage produces something runnable.
 Features added after the original brief. Each is slotted into the build order in §8.
 
 1. **Instrument picker on Home** (Stage 5) — a button on Home lets the user choose what their
-   daily check-in sounds like: Piano / Strings / Ambient (the same three as the Weekly
-   soundfont pills). The chosen instrument is stored **inside the encrypted check-in payload**,
-   so each day keeps its sound and the weekly melody can use it; the picker remembers the last
-   choice. Each instrument is a set of 14 pre-rendered chord files (see §12, audio); recorded,
-   properly licensed samples (e.g. Salamander Grand Piano, CC-BY) are preferred for realism.
+   daily check-in sounds like: **Piano / Strings / Harp**, plus **Marimba / Flute** on trial
+   (kept only if they sound good). The same list is used for the Weekly instrument pills. The
+   chosen instrument is stored **inside the encrypted check-in payload**, so each day keeps its
+   sound and the weekly melody can use it; the picker remembers the last choice. Each
+   instrument is a set of 14 chord files pre-rendered from recorded samples (see §12, audio).
 2. **Per-note vibration for deaf / hard-of-hearing users** (Stage 5) — every note has its own
    recognisable vibration: **pulse count = scale degree** (C = 1 … B = 7, grouped so they're
    countable), **Bright = light, quick pulses; Dark = heavier, slower pulses**. Melody playback
@@ -416,6 +417,10 @@ Features added after the original brief. Each is slotted into the build order in
 6. **Sheet music in the Oasis** (Stage 9) — users turn any of their songs into sheet music: a
    scrolling treble-staff view in the Home staff's style, exportable as **PDF** (MusicXML
    optional, for MuseScore / Sibelius).
+7. **Glockenspiel chimes** — short glockenspiel cues, never an instrument choice: a soft chime
+   on **Save check-in** (Stage 5), a cue when **"Composing your week"** finishes (Stage 7), and
+   the **phase changes in Breathing space** (Stage 9), so users can breathe with their eyes
+   closed. Chimes are rendered with the chords and stay quiet under the main sounds.
 
 ---
 
@@ -436,10 +441,19 @@ These override earlier sections. Don't "fix" them back.
   canvas per area. Stacked `react-native-svg` layers lagged badly on a Galaxy A55.
   `react-native-svg` remains only for Lucide icons.
 - **Audio: pre-rendered WAVs played with `expo-audio`** — not `react-native-audio-api`, whose
-  real-time synthesis crackled on device. `scripts/render-chords.mjs` renders the chords
-  (`npm run render:chords`); the Weekly melody and monthly song will be rendered to files in
-  JS the same way. The `expo-audio` plugin is configured with **no microphone permission and
-  no background playback** — the app must never request the microphone.
+  real-time synthesis crackled on device. `scripts/render-chords.mjs` renders the chords and
+  chimes (`npm run render:chords`); the Weekly melody and monthly song will be rendered to
+  files in JS the same way. The `expo-audio` plugin is configured with **no microphone
+  permission and no background playback** — the app must never request the microphone.
+- **Sounds come from recorded samples, not synthesis** (the synthesised voices sounded poor):
+  - Piano: **Salamander Grand Piano V3** (44.1 kHz 16-bit), **CC-BY 3.0**, so Settings must
+    credit "Salamander Grand Piano by Alexander Holm (CC-BY 3.0)".
+  - Strings, Harp, Marimba, Flute and Glockenspiel: **VSCO 2 Community Edition** (CC0, no
+    credit needed; credited anyway as good practice).
+  - The raw libraries (gigabytes) live **outside the project and outside Google Drive**
+    (`C:\sonata-samples\`). Only the rendered WAVs are committed.
+  - **Ambient is dropped; Harp replaces it.** VSCO file names don't always use scientific
+    octave numbers, so sample pitch is checked before trusting a file name.
 - **Carousel gestures** use `react-native-gesture-handler` 2.32 (SDK 57 pin) on the UI thread,
   not ScrollView snapping.
 - **Git: commit straight to `main`** (solo project) — no Git Flow branches.

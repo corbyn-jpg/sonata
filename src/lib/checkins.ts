@@ -3,16 +3,24 @@ import { emotionOf, pitchOf, valenceOf, type Emotion, type Letter, type Mode, ty
 import { decryptPayload, encryptPayload } from '@/lib/crypto';
 import { db } from '@/lib/firebase';
 import { getUserId } from '@/lib/session';
+import type { Instrument } from '@/audio/instruments';
 
 /** Everything here is encrypted; only valence_score and timestamp are stored in plaintext. */
-type Payload = { note: Letter; pitch: Pitch; mode: Mode; emotion: Emotion; reflection?: string };
+type Payload = {
+  note: Letter;
+  pitch: Pitch;
+  mode: Mode;
+  emotion: Emotion;
+  instrument?: Instrument;
+  reflection?: string;
+};
 
 export type Checkin = Payload & { id: string; valence: number; timestamp: Date };
 
 const checkins = collection(db, 'daily_checkins');
 
-export async function saveCheckin(note: Letter, mode: Mode, reflection?: string) {
-  const payload: Payload = { note, pitch: pitchOf(note, mode), mode, emotion: emotionOf(note, mode) };
+export async function saveCheckin(note: Letter, mode: Mode, instrument: Instrument, reflection?: string) {
+  const payload: Payload = { note, pitch: pitchOf(note, mode), mode, emotion: emotionOf(note, mode), instrument };
   const text = reflection?.trim();
   if (text) payload.reflection = text;
 

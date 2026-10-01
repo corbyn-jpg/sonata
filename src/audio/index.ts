@@ -4,38 +4,11 @@ import {
   type AudioPlayer,
 } from "expo-audio";
 import { LETTERS, type Letter, type Mode } from "@/data/notes";
+import { CHIMES, CHORDS, type Chime } from "./chords.generated";
+import type { Instrument } from "./instruments";
 
-// Pre-rendered by scripts/render-chords.mjs — change the voice there, then `npm run render:chords`
-const CHORDS: Record<Letter, Record<Mode, number>> = {
-  C: {
-    major: require("../../assets/sounds/c-major.wav"),
-    minor: require("../../assets/sounds/c-minor.wav"),
-  },
-  D: {
-    major: require("../../assets/sounds/d-major.wav"),
-    minor: require("../../assets/sounds/d-minor.wav"),
-  },
-  E: {
-    major: require("../../assets/sounds/e-major.wav"),
-    minor: require("../../assets/sounds/e-minor.wav"),
-  },
-  F: {
-    major: require("../../assets/sounds/f-major.wav"),
-    minor: require("../../assets/sounds/f-minor.wav"),
-  },
-  G: {
-    major: require("../../assets/sounds/g-major.wav"),
-    minor: require("../../assets/sounds/g-minor.wav"),
-  },
-  A: {
-    major: require("../../assets/sounds/a-major.wav"),
-    minor: require("../../assets/sounds/a-minor.wav"),
-  },
-  B: {
-    major: require("../../assets/sounds/b-major.wav"),
-    minor: require("../../assets/sounds/b-minor.wav"),
-  },
-};
+export { INSTRUMENTS, INSTRUMENT_LABELS, type Instrument } from "./instruments";
+export type { Chime } from "./chords.generated";
 
 const MODES: Mode[] = ["major", "minor"];
 
@@ -56,11 +29,14 @@ function ensureAudioMode() {
   });
 }
 
-function voicesFor(letter: Letter, mode: Mode) {
-  const key = `${letter}-${mode}`;
+const keyOf = (instrument: Instrument, letter: Letter, mode: Mode) =>
+  `${instrument}-${letter}-${mode}`;
+
+function voicesFor(instrument: Instrument, letter: Letter, mode: Mode) {
+  const key = keyOf(instrument, letter, mode);
   let entry = pool.get(key);
   if (!entry) {
-    const source = CHORDS[letter][mode];
+    const source = CHORDS[instrument][letter][mode];
     entry = {
       players: Array.from({ length: VOICES }, () => createAudioPlayer(source)),
       next: 0,
@@ -70,9 +46,14 @@ function voicesFor(letter: Letter, mode: Mode) {
   return entry;
 }
 
-function play(letter: Letter, mode: Mode, volume: number) {
+function play(
+  instrument: Instrument,
+  letter: Letter,
+  mode: Mode,
+  volume: number,
+) {
   ensureAudioMode();
-  const entry = voicesFor(letter, mode);
+  const entry = voicesFor(instrument, letter, mode);
   const player = entry.players[entry.next];
   entry.next = (entry.next + 1) % VOICES;
   player.volume = volume;
@@ -80,18 +61,43 @@ function play(letter: Letter, mode: Mode, volume: number) {
   player.play();
 }
 
-/** Load every chord up front, so the first swipe plays instantly. */
-export function preloadChords() {
+/**
+ * Load one instrument's chords so the first swipe plays instantly, and free the others —
+ * only the chosen instrument is kept in memory.
+ */
+export function preloadChords(instrument: Instrument) {
   ensureAudioMode();
-  for (const letter of LETTERS) for (const mode of MODES) voicesFor(letter, mode);
+  for (const [key, entry] of pool) {
+    if (key.startsWith(`${instrument}-`)) continue;
+    entry.players.forEach((player) => player.remove());
+    pool.delete(key);
+  }
+  for (const letter of LETTERS)
+    for (const mode of MODES) voicesFor(instrument, letter, mode);
 }
 
 /** Soft preview as an orb lands in the centre of the carousel. */
-export function previewNote(letter: Letter, mode: Mode) {
-  play(letter, mode, 0.45);
+export function previewNote(letter: Letter, mode: Mode, instrument: Instrument) {
+  play(instrument, letter, mode, 0.45);
 }
 
 /** Fuller chord when an orb is chosen. */
-export function chooseNote(letter: Letter, mode: Mode) {
-  play(letter, mode, 1);
+export function chooseNote(letter: Letter, mode: Mode, instrument: Instrument) {
+  play(instrument, letter, mode, 1);
+}
+
+// One player per chime: each is short and never overlaps itself
+const chimes = new Map<Chime, AudioPlayer>();
+
+/** A glockenspiel or wind-chime cue: save, week composed, breathing. */
+export function playChime(chime: Chime, volume = 1) {
+  ensureAudioMode();
+  let player = chimes.get(chime);
+  if (!player) {
+    player = createAudioPlayer(CHIMES[chime]);
+    chimes.set(chime, player);
+  }
+  player.volume = volume;
+  player.seekTo(0);
+  player.play();
 }

@@ -33,6 +33,20 @@ export default function Settings() {
           thumbColor={colours.textPrimary}
         />
       </View>
+
+      <Text className="mb-1 mt-8 font-sans-medium text-caption text-secondary">
+        Sound credits
+      </Text>
+      <View className="gap-2 py-4">
+        <Text className="font-sans text-caption text-secondary">
+          Piano: Salamander Grand Piano by Alexander Holm, licensed under CC BY
+          3.0.
+        </Text>
+        <Text className="font-sans text-caption text-secondary">
+          Violin, harp, flute, glockenspiel and chimes: VSCO 2 Community Edition
+          by Versilian Studios (CC0).
+        </Text>
+      </View>
     </Screen>
   );
 }

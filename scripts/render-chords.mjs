@@ -1,63 +1,124 @@
-/* Renders the 14 orb chords (7 Bright, 7 Dark) to WAV files in assets/sounds.
-Run with `npm run render:chords` after changing the voice below, then commit the files.
-This is plain maths so the files come out perfectly clean.
-The phone only plays them back, so there's no real-time synthesis to crackle.
-import { mkdirSync, writeFileSync } from "node:fs";*/
+// Renders every orb chord (7 notes × Bright/Dark) for each instrument, plus the glockenspiel and
+// wind-chime cues, from recorded samples into assets/sounds/, and writes
+// src/audio/chords.generated.ts so the app can load them.
+// Run with `npm run render:chords` after changing anything below, then commit the output.
+//
+// The sample libraries aren't in the project (they're gigabytes). By default they're read from the
+// folder above it; set SONATA_SAMPLES to use another folder.
+//   Salamander Grand Piano V3 by Alexander Holm, CC-BY 3.0 → 44.1khz16bit/
+//   VSCO 2 Community Edition by Versilian Studios, CC0 → Solo Violin/, Harp/, Flute/, Glock/, various/
+import { mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { loadSamples, midiOf, renderNote, renderSound, SAMPLE_RATE } from "./samples.mjs";
 
-const SAMPLE_RATE = 48000; // Android's native rate, so nothing gets resampled on the phone
-const LENGTH = 2.4; // seconds until each note is silent
-const ROLL = 0.06; // seconds between the chord's notes, like a soft strum
-const UPPER_LEVEL = 0.55; // 3rd and 5th sit under the root
-const PEAK = 0.3; // leaves headroom for a few chords ringing over each other
-const OCTAVE = 5; // one above middle C: cleaner on phone speakers
+const LIBRARY = process.env.SONATA_SAMPLES ?? fileURLToPath(new URL("../../", import.meta.url));
+const at = (folder) => join(LIBRARY, folder);
 
+const OCTAVE = 5; // one above middle C: clear on phone speakers
 const SEMITONES_FROM_C = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const FLAT_IN_MINOR = new Set(["E", "A", "B"]); // C natural minor, as in src/data/notes.ts
 // The 3rd makes a chord bright (4) or dark (3), so every Dark orb sounds different
 const TRIADS = { major: [0, 4, 7], minor: [0, 3, 7] };
 
-// Soft, bell-like voice: higher overtones fade sooner, so the note mellows as it rings
-const PARTIALS = [
-  { ratio: 1, gain: 1, decay: 1 },
-  { ratio: 2, gain: 0.18, decay: 0.5 },
-  { ratio: 3, gain: 0.05, decay: 0.25 },
-];
+/** Smooth 0 → 1 ramp (no corners, so no clicks). */
+const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 
-const frequencyOfMidi = (midi) => 440 * 2 ** ((midi - 69) / 12);
+// ---------------------------------------------------------------------------------------------
+// Instruments. File names give each sample's note; VSCO's cello, flute and glockenspiel files are
+// numbered an octave low, which `octave: 1` corrects (checked by measuring their pitch).
+//
+// `roll` staggers the chord's notes like a strum; `upper` is the 3rd and 5th's level under the
+// root; `bass` adds the root an octave down; `release` is the fade at the end; `peak` evens out
+// how loud each instrument feels.
 
-// Exponential envelope: 40 ms rise, settle to half by 350 ms, fade to silence by the end
-function envelope(t) {
-  const expo = (from, to, progress) => from * (to / from) ** progress;
-  if (t < 0.04) return expo(0.0001, 1, t / 0.04);
-  if (t < 0.35) return expo(1, 0.5, (t - 0.04) / 0.31);
-  if (t < LENGTH) return expo(0.5, 0.0001, (t - 0.35) / (LENGTH - 0.35));
-  return 0;
+const INSTRUMENTS = {
+  piano: {
+    samples: () => loadSamples(at("44.1khz16bit"), /^([A-G]#?\d)v8\.wav$/), // 8 of 16 velocities: gentle
+    seconds: 3,
+    roll: 0.03,
+    upper: 0.75,
+    bass: 0.45,
+    release: 1,
+    peak: 0.32,
+  },
+  violin: {
+    samples: () => loadSamples(at("Solo Violin/Arco Vib"), /_([A-G]#?\d)_p\.wav$/), // softly bowed
+    seconds: 2.8,
+    roll: 0.06,
+    upper: 0.8,
+    bass: 0,
+    release: 0.9,
+    peak: 0.28,
+  },
+  harp: {
+    samples: () => loadSamples(at("Harp"), /_([A-G]#?\d)_(?:mp|mf|f)\.wav$/),
+    seconds: 3,
+    roll: 0.07, // a harp chord is always slightly spread
+    upper: 0.85,
+    bass: 0.5,
+    release: 1.1,
+    peak: 0.32,
+  },
+  flute: {
+    samples: () => loadSamples(at("Flute/susvib"), /_([A-G]#?\d)_v1_1\.wav$/, { octave: 1 }),
+    seconds: 2.6,
+    roll: 0.05,
+    upper: 0.8,
+    bass: 0,
+    release: 0.9,
+    peak: 0.26,
+  },
+};
+
+// Short cues used around the app. Glockenspiel notes are rendered from samples; `file` cues are
+// recordings used as they are.
+const CHIMES = {
+  save: { notes: ["G6", "C7"], gap: 0.11, seconds: 2.2, peak: 0.2 }, // Save check-in
+  composed: { notes: ["C6", "E6", "G6", "C7"], gap: 0.14, seconds: 3, peak: 0.2 }, // week is ready
+  breatheIn: { notes: ["G6"], seconds: 2, peak: 0.14 },
+  breatheOut: { notes: ["C6"], seconds: 2, peak: 0.14 },
+  composing: { file: "various/windchimes_slowAsc1.wav", seconds: 8, peak: 0.16 },
+  finish: { file: "various/Fing_Cymb.wav", seconds: 5, peak: 0.18 }, // end of Breathing space
+};
+
+// ---------------------------------------------------------------------------------------------
+
+/** Mix `parts` ({ audio, at: seconds, level }) into `seconds` of audio with the given fades and peak. */
+function mix(parts, seconds, release, peak) {
+  const frames = Math.round(seconds * SAMPLE_RATE);
+  const out = new Float64Array(frames);
+  for (const { audio, at, level } of parts) {
+    const offset = Math.round(at * SAMPLE_RATE);
+    for (let i = 0; i < audio.length && offset + i < frames; i++) out[offset + i] += level * audio[i];
+  }
+
+  let max = 0;
+  for (let i = 0; i < frames; i++) {
+    // 3 ms fade in, `release` fade out, so every file starts and ends at silence
+    out[i] *= ease(i / (0.003 * SAMPLE_RATE)) * ease((frames - i) / (release * SAMPLE_RATE));
+    max = Math.max(max, Math.abs(out[i]));
+  }
+  return out.map((s) => (s / max) * peak); // every chord of an instrument peaks at the same level
 }
 
-function renderChord(rootMidi, mode) {
-  const frames = Math.ceil((LENGTH + 2 * ROLL + 0.05) * SAMPLE_RATE);
-  const samples = new Float64Array(frames);
+function renderChord(instrument, samples, rootMidi, mode) {
+  const { seconds, roll, upper, bass, release, peak } = instrument;
+  const parts = TRIADS[mode].map((interval, n) => ({
+    audio: renderNote(samples, rootMidi + interval, seconds),
+    at: n * roll,
+    level: n === 0 ? 1 : upper,
+  }));
+  if (bass > 0) parts.push({ audio: renderNote(samples, rootMidi - 12, seconds), at: 0, level: bass });
+  return mix(parts, seconds + 2 * roll, release, peak);
+}
 
-  TRIADS[mode].forEach((interval, n) => {
-    const frequency = frequencyOfMidi(rootMidi + interval);
-    const level = n === 0 ? 1 : UPPER_LEVEL;
-    const offset = n * ROLL;
-    for (let i = 0; i < frames; i++) {
-      const t = i / SAMPLE_RATE - offset;
-      if (t < 0 || t >= LENGTH) continue;
-      let sum = 0;
-      for (const p of PARTIALS) {
-        const fade = p.gain * 0.001 ** Math.min(1, t / (LENGTH * p.decay));
-        sum += fade * Math.sin(2 * Math.PI * frequency * p.ratio * t);
-      }
-      samples[i] += level * envelope(t) * sum;
-    }
-  });
-
-  // Every chord gets the same peak, so none is louder than another
-  let peak = 0;
-  for (const s of samples) peak = Math.max(peak, Math.abs(s));
-  return samples.map((s) => (s / peak) * PEAK);
+function renderChime(chime, glock) {
+  const { notes, file, gap = 0, seconds, peak } = chime;
+  const parts = file
+    ? [{ audio: renderSound(at(file), seconds), at: 0, level: 1 }]
+    : notes.map((note, n) => ({ audio: renderNote(glock, midiOf(note), seconds), at: n * gap, level: 1 }));
+  return mix(parts, seconds + gap * (notes?.length ?? 0), Math.min(1.2, seconds / 2), peak);
 }
 
 // Seeded, so re-running the script produces identical files (no noisy git diffs)
@@ -95,15 +156,56 @@ function toWav(samples) {
   return Buffer.concat([header, data]);
 }
 
-const outDir = new URL("../assets/sounds/", import.meta.url);
-mkdirSync(outDir, { recursive: true });
+const soundsDir = new URL("../assets/sounds/", import.meta.url);
+rmSync(soundsDir, { recursive: true, force: true }); // no stale files from older instruments
 
-for (const [letter, semitones] of Object.entries(SEMITONES_FROM_C)) {
-  for (const mode of ["major", "minor"]) {
-    const flat = mode === "minor" && FLAT_IN_MINOR.has(letter) ? 1 : 0;
-    const rootMidi = 12 * (OCTAVE + 1) + semitones - flat;
-    const file = new URL(`${letter.toLowerCase()}-${mode}.wav`, outDir);
-    writeFileSync(file, toWav(renderChord(rootMidi, mode)));
-    console.log(`✓ ${letter.toLowerCase()}-${mode}.wav`);
+const chordLines = [];
+for (const [name, instrument] of Object.entries(INSTRUMENTS)) {
+  const samples = instrument.samples();
+  const dir = new URL(`${name}/`, soundsDir);
+  mkdirSync(dir, { recursive: true });
+  chordLines.push(`  ${name}: {`);
+  for (const [letter, semitones] of Object.entries(SEMITONES_FROM_C)) {
+    const files = {};
+    for (const mode of ["major", "minor"]) {
+      const flat = mode === "minor" && FLAT_IN_MINOR.has(letter) ? 1 : 0;
+      const rootMidi = 12 * (OCTAVE + 1) + semitones - flat;
+      const file = `${letter.toLowerCase()}-${mode}.wav`;
+      writeFileSync(new URL(file, dir), toWav(renderChord(instrument, samples, rootMidi, mode)));
+      files[mode] = `require("../../assets/sounds/${name}/${file}")`;
+    }
+    chordLines.push(`    ${letter}: { major: ${files.major}, minor: ${files.minor} },`);
   }
+  chordLines.push("  },");
+  console.log(`✓ ${name} (${samples.size} samples)`);
 }
+
+const glock = loadSamples(at("Glock"), /_([A-G]#?\d)\.wav$/, { octave: 1, tune: false });
+const chimesDir = new URL("chimes/", soundsDir);
+mkdirSync(chimesDir, { recursive: true });
+const chimeLines = Object.entries(CHIMES).map(([name, chime]) => {
+  writeFileSync(new URL(`${name}.wav`, chimesDir), toWav(renderChime(chime, glock)));
+  return `  ${name}: require("../../assets/sounds/chimes/${name}.wav"),`;
+});
+console.log(`✓ chimes (${chimeLines.length})`);
+
+writeFileSync(
+  new URL("../src/audio/chords.generated.ts", import.meta.url),
+  [
+    "// Generated by scripts/render-chords.mjs (`npm run render:chords`) — don't edit by hand.",
+    'import type { Letter, Mode } from "@/data/notes";',
+    'import type { Instrument } from "./instruments";',
+    "",
+    "export const CHORDS: Record<Instrument, Record<Letter, Record<Mode, number>>> = {",
+    ...chordLines,
+    "};",
+    "",
+    "export const CHIMES = {",
+    ...chimeLines,
+    "} as const;",
+    "",
+    "export type Chime = keyof typeof CHIMES;",
+    "",
+  ].join("\n"),
+);
+console.log("✓ src/audio/chords.generated.ts");
