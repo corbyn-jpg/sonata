@@ -77,8 +77,7 @@ function levelled(audio, rate) {
 }
 
 /**
- * How far out of tune a sample is, in cents: the middle of 12 readings across its first 1.5 s,
- * so vibrato evens out. Returns 0 if the note isn't clearly measurable.
+ How far out of tune a sample is, in cents: the middle of 12 readings across its first 1.5 s, so vibrato evens out. Returns 0 if the note isn't clearly measurable.
  */
 function measureCents(audio, rate, midi) {
   const readings = [];
@@ -92,8 +91,7 @@ function measureCents(audio, rate, midi) {
 }
 
 /**
- * One reading at `start`. Looks for the note's period near where it's expected (YIN), so an
- * overtone can't be mistaken for it. Null if the note isn't clearly periodic there.
+ * One reading at `start`. Looks for the note's period near where it's expected (YIN), so an overtone can't be mistaken for it. Null if the note isn't clearly periodic there.
  */
 function centsAt(audio, rate, midi, start) {
   const expected = rate / frequencyOfMidi(midi); // period in frames
@@ -123,10 +121,7 @@ function centsAt(audio, rate, midi, start) {
 }
 
 /**
- * Every WAV in `dir` whose name matches `pattern`, keyed by MIDI note. The pattern's first group
- * is the note, e.g. "C#4". `octave` fixes libraries that number octaves differently; `tune`
- * measures each sample and corrects it to concert pitch (leave it off for bells, whose overtones
- * confuse the measurement).
+ Every WAV in `dir` whose name matches `pattern`, keyed by MIDI note. The pattern's first group is the note, e.g. "C#4". `octave` fixes libraries that number octaves differently; `tune` measures each sample and corrects it to concert pitch (leave it off for bells, whose overtones confuse the measurement).
  */
 export function loadSamples(dir, pattern, { octave = 0, tune = true } = {}) {
   const samples = new Map();
@@ -143,15 +138,15 @@ export function loadSamples(dir, pattern, { octave = 0, tune = true } = {}) {
 }
 
 /**
- * `seconds` of `midi`, from the nearest recorded sample, resampled to 48 kHz. The nearest sample is
- * at most a couple of semitones away, so the tone barely changes.
+ `seconds` of `midi`, from the nearest recorded sample, resampled to 48 kHz. The nearest sample is at most a couple of semitones away, so the tone barely changes.
  */
-export function renderNote(samples, midi, seconds) {
+export function renderNote(samples, midi, seconds, rate = SAMPLE_RATE) {
   let nearest;
   for (const key of samples.keys())
     if (nearest === undefined || Math.abs(key - midi) < Math.abs(nearest - midi)) nearest = key;
-  const { audio, rate, cents } = samples.get(nearest);
-  return resample(audio, (2 ** ((midi - nearest - cents / 100) / 12) * rate) / SAMPLE_RATE, seconds);
+    const sample = samples.get(nearest);
+  const step = (2 ** ((midi - nearest - sample.cents / 100) / 12) * sample.rate) / rate;
+  return resample(sample.audio, step, seconds, rate);
 }
 
 /** `seconds` of a whole recording (a cymbal, wind chimes) at 48 kHz, unchanged in pitch. */
@@ -161,8 +156,8 @@ export function renderSound(path, seconds) {
 }
 
 /** Read through `audio` `step` frames at a time; a step above 1 raises the pitch. */
-function resample(audio, step, seconds) {
-  const out = new Float64Array(Math.round(seconds * SAMPLE_RATE));
+function resample(audio, step, seconds, rate = SAMPLE_RATE) {
+  const out = new Float64Array(Math.round(seconds * rate));
   for (let i = 0; i < out.length; i++) {
     const x = i * step;
     const k = Math.floor(x);

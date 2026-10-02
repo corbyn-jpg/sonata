@@ -52,6 +52,7 @@ the feeling in and defeats the product.
 | Encryption | AES-256-GCM client-side | `@noble/ciphers` (`gcm`) for encryption · `expo-crypto` `getRandomBytes` for keys and 12-byte IVs · `expo-secure-store` for the key. **Not `crypto-js`** — it has no GCM mode |
 | Version control | Git + GitHub, Git Flow | `main` / `develop` / `feature/*` |
 | Testing | Jest | Harmony engine + valence logic are the priority |
+| AI | Markov chain + GRU neural network, trained on Bach chorales by our own TypeScript trainer | On-device inference only (§7) |
 
 **Versions:** Expo SDK 57 · React Native 0.86 · React 19.2.3 (keep `react-dom` pinned to the same
 exact version) · TypeScript 6 · NativeWind 4 (Tailwind **3**, not 4) · Reanimated 4 (needs
@@ -282,9 +283,41 @@ Home header. Maximum interaction depth: 2 taps.
 
 ## 7. The AI engine
 
-Deterministic on-device **symbolic AI** — Markov chain probability matrices plus music theory
-rules. Explicitly *not* a cloud LLM: no network calls, no third-party inference, no privacy
-exposure. This is the product's core mechanic, not a feature.
+On-device **neuro-symbolic AI**: machine-learned models guided by music theory rules. Explicitly
+*not* a cloud LLM: no network calls, no third-party inference, no privacy exposure. This is the
+product's core mechanic, not a feature. It also has to satisfy the DV 300 theme (machine learning,
+deep learning, ethics of AI), so the AI must be demonstrable, measured and explainable.
+
+| Part | Technique | Code |
+|---|---|---|
+| Mode evaluation | Rules (symbolic AI) | `src/engine/mode.ts` |
+| Chords | **Markov chain learned from data** (major-key and minor-key odds) | `harmony.ts`, `model.ts` |
+| Passing notes | **GRU recurrent neural network** (48 hidden units, ~16k weights) that samples each next interval; rules mask what it may pick (in the scale, in range, able to reach the next day's note) | `melody.ts`, `gru.ts`, `features.ts` |
+| Cadence, Picardy third, voicing | Rules | `compose.ts`, `harmony.ts` |
+
+**Training** (`npm run train:model`, ~15 s, seeded so every run is identical):
+- Data: **JSB Chorales** (382 four-part Bach chorales, train / validation / test split), kept outside
+  the project in `../datasets/Jsb16thSeparated.json`. Bach is public domain, and the app ships only
+  learned numbers, never the music. Credit it in Settings.
+- `scripts/train/chorales.ts` finds each chorale's key (Krumhansl–Kessler profiles), moves it to C,
+  and reads it as a chord progression (scale degrees per beat) and a soprano line.
+- `scripts/train/backprop.ts` is the GRU's backpropagation through time, gradient clipping and Adam,
+  **written from scratch in TypeScript** (no ML library; Python isn't used). `gru.test.ts`
+  checks every gradient against finite differences.
+- `scripts/train-model.ts` trains with early stopping on the validation set, evaluates on the test
+  set against baselines, and writes `src/engine/model.generated.json` (weights, chord odds, scores,
+  and a fixed example the app must reproduce exactly). Commit that JSON.
+- `gru.ts` and `features.ts` have **no imports**, so Node runs the exact files the app runs. This
+  needs `allowImportingTsExtensions` and `"types": ["jest", "node"]` in `tsconfig.json`.
+
+Results on the 77 unseen test chorales (perplexity, lower is better): chords, hand-written rules
+5.77 → learned 4.60; melody, Markov baseline 4.71 → GRU 2.43, with the top guess right 72% of the
+time. The GRU also sees the harmony, which the baselines don't. Report that honestly.
+
+**Ethics (part of the brief):** no personal data is used to train or leaves the phone, and the
+training data is public domain. Low-mood detection only offers help and never diagnoses (below). An
+AI *service* such as OpenAI is deliberately not used because it would break the zero-egress promise;
+confirm with the lecturer that this is acceptable.
 
 ### Pipeline
 ```
@@ -296,8 +329,12 @@ Input: 7 daily notes (e.g. C4, Eb4, G4, Bb4, C5, Ab4, G4)
   3. Voice leading     → connect anchors with consonant passing tones and triads
   4. Picardy cadence   → if the week resolves from negative toward positive, end a
                          minor passage on a major tonic chord (reward prediction error)
-Output: 7-bar MIDI sequence + two-tone disc artwork, rendered locally via react-native-audio-api soundfonts
+Output: 7-bar note sequence (composeWeek → Composition: events, bars, tempo, mode, palette)
+        + two-tone disc artwork, rendered to audio on the phone from the instrument samples
 ```
+
+A missed day rests the melody while the chord holds. Every song ends on C, on the home chord.
+Tempo = 60 + 4 × average valence (68–96 BPM). Brighter days get more, shorter notes.
 
 ### Edge case: dissonant input
 Random selections (C, F#, Bb) could sound jarring. Apply diatonic transposition and harmonise
@@ -336,8 +373,8 @@ Work in this sequence — each stage produces something runnable.
 4. **Home screen** — carousel, grid view, Bright/Dark toggle, responsive atmosphere, save flow
 5. **Audio engine** — pre-rendered chords played with `expo-audio`, preview on selection,
    **instrument picker on Home**, **per-note vibration patterns** (§11)
-6. **Harmony engine** — the symbolic AI. Pure functions, heavily unit-tested, no UI
-   dependencies. Should be testable in isolation with a fixture of 7 notes.
+6. **Harmony engine** ✅ — the AI (§7): rules + learned Markov chords + GRU melody, trained on
+   Bach. Pure functions, heavily unit-tested, no UI dependencies.
 7. **Weekly screen** — spinning disc, wavy transport, generated artwork, composing state,
    **share / download**, **save to playlist** (§11)
 8. **Monthly screen** — calendar, bento analytics, weeks shelf, **monthly song** (§11)

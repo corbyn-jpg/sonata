@@ -18,7 +18,7 @@ const VOICES = 2;
 const pool = new Map<string, { players: AudioPlayer[]; next: number }>();
 let modeSet = false;
 
-function ensureAudioMode() {
+export function ensureAudioMode() {
   if (modeSet) return;
   modeSet = true;
   // Play alongside the user's own music, and stay quiet when an iPhone is on silent
@@ -62,8 +62,7 @@ function play(
 }
 
 /**
- * Load one instrument's chords so the first swipe plays instantly, and free the others —
- * only the chosen instrument is kept in memory.
+ Load one instrument's chords so the first swipe plays instantly, and free the others — only the chosen instrument is kept in memory.
  */
 export function preloadChords(instrument: Instrument) {
   ensureAudioMode();
