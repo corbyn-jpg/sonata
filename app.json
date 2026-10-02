@@ -35,7 +35,17 @@
           "recordAudioAndroid": false,
           "enableBackgroundPlayback": false
         }
-      ]
+      ],
+            [
+        "expo-splash-screen",
+        {
+          "image": "./assets/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#060011"
+        }
+      ],
+      "expo-sharing"
     ],
     "extra": {
       "router": {},
