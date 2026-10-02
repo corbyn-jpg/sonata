@@ -97,6 +97,7 @@ export function useWeekSong() {
 
   return {
     status,
+    weekStart,
     days,
     song,
     instrument,
