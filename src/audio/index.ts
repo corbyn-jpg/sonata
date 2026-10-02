@@ -59,6 +59,12 @@ function play(
   player.volume = volume;
   player.seekTo(0);
   player.play();
+  // Play alongside the user's own music. Media follows the media volume, not the ringer: with this false, Android ignores play() entirely while the phone is on vibrate or silent
+  setAudioModeAsync({
+    playsInSilentMode: true,
+    interruptionMode: "mixWithOthers",
+    shouldPlayInBackground: false,
+  });
 }
 
 /**
@@ -76,7 +82,11 @@ export function preloadChords(instrument: Instrument) {
 }
 
 /** Soft preview as an orb lands in the centre of the carousel. */
-export function previewNote(letter: Letter, mode: Mode, instrument: Instrument) {
+export function previewNote(
+  letter: Letter,
+  mode: Mode,
+  instrument: Instrument,
+) {
   play(instrument, letter, mode, 0.45);
 }
 
