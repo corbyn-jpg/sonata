@@ -1,20 +1,12 @@
-// Step 2: harmonic framing. Each day's note gets a chord that contains it, chosen by a Markov chain so the chords move the way music usually does.
+// Step 2: harmonic framing. Each day's note gets a chord that contains it, chosen by a Markov chain
+// whose odds were learned from Bach's chorales (how often each chord follows each other chord).
+import { CHORD_MODELS } from './model';
 import { pickWeighted } from './random';
 import { BORROW_FROM, chordTones, diatonicChord, pitchClass, withSeventh, type Chord, type WeekMode } from './theory';
 
-// How likely each chord (row) is to move to each other chord (column), by scale degree. Common-practice tendencies: V → I, ii → V, IV → I or V, vi → ii or IV, vii → I. Part 2 replaces these hand-written odds with ones learned from Bach; these stay as the baseline.
-export const TRANSITIONS: readonly (readonly number[])[] = [
-  /* I   */ [0.05, 0.15, 0.05, 0.3, 0.25, 0.15, 0.05],
-  /* II  */ [0.05, 0.05, 0.05, 0.1, 0.55, 0.05, 0.15],
-  /* III */ [0.05, 0.05, 0.05, 0.3, 0.1, 0.4, 0.05],
-  /* IV  */ [0.3, 0.15, 0.05, 0.05, 0.35, 0.05, 0.05],
-  /* V   */ [0.55, 0.05, 0.05, 0.05, 0.05, 0.2, 0.05],
-  /* VI  */ [0.05, 0.3, 0.05, 0.3, 0.2, 0.05, 0.05],
-  /* VII */ [0.7, 0.05, 0.05, 0.05, 0.05, 0.05, 0.05],
-];
-
-/** The first chord leans towards home (I). */
-export const OPENING: readonly number[] = [0.5, 0.05, 0.05, 0.15, 0.1, 0.15, 0];
+/** Major-key odds for bright weeks, minor-key odds for dark ones. */
+export const chordModelFor = (mode: WeekMode) =>
+  CHORD_MODELS[mode === 'ionian' || mode === 'lydian' ? 'major' : 'minor'];
 
 // A chord sounds most like "the day's note" when that note is its root
 const ROLE_WEIGHTS = [1, 0.8, 0.6]; // root, 3rd, 5th
@@ -22,7 +14,8 @@ const ROLE_WEIGHTS = [1, 0.8, 0.6]; // root, 3rd, 5th
 type Option = { chord: Chord; role: number };
 
 /**
- Every chord that contains `anchor` (a pitch class): the week's own chords if any fit, otherwise chords borrowed from a neighbouring mode, with a 7th so the borrowing sounds intentional.
+ * Every chord that contains `anchor` (a pitch class): the week's own chords if any fit, otherwise
+ * chords borrowed from a neighbouring mode, with a 7th so the borrowing sounds intentional.
  */
 export function chordOptions(anchor: number, mode: WeekMode): Option[] {
   const sources: [WeekMode, boolean][] = [[mode, false], ...BORROW_FROM[mode].map((m): [WeekMode, boolean] => [m, true])];
@@ -41,7 +34,8 @@ export function chordOptions(anchor: number, mode: WeekMode): Option[] {
 /** The chord for one day's note, following on from `previous`. Diminished chords are avoided. */
 export function chooseChord(anchor: number, mode: WeekMode, previous: Chord | null, random: () => number): Chord {
   const options = chordOptions(anchor, mode);
-  const odds = previous ? TRANSITIONS[previous.degree] : OPENING;
+  const { opening, transitions } = chordModelFor(mode);
+  const odds = previous ? transitions[previous.degree] : opening;
   const weights = options.map(({ chord, role }) =>
     chord.quality === 'diminished' ? 0 : odds[chord.degree] * ROLE_WEIGHTS[role],
   );
@@ -51,7 +45,8 @@ export function chooseChord(anchor: number, mode: WeekMode, previous: Chord | nu
 const VOICING_LOW = 55; // G3: chords sit under the melody
 
 /**
- Step 3 (harmony): the chord's notes in close position, in whichever inversion moves least from the previous chord, so each voice glides rather than jumps.
+ * Step 3 (harmony): the chord's notes in close position, in whichever inversion moves least from
+ * the previous chord, so each voice glides rather than jumps.
  */
 export function voiceChord(chord: Chord, previous: readonly number[] | null): number[] {
   const tones = chordTones(chord);

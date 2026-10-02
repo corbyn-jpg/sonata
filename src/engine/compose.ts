@@ -1,10 +1,12 @@
-// The whole pipeline: a week of check-ins → a 7-bar song (one bar per day). Deterministic: the same week and seed always give the same song. No network, no React.
+// The whole pipeline: a week of check-ins → a 7-bar song (one bar per day).
+// Deterministic: the same week and seed always give the same song. Runs on the phone: no internet.
 import { pitchOf, valenceOf } from '@/data/notes';
 import { bassNote, chooseChord, voiceChord } from './harmony';
-import { placeNote, passingNotes, rhythmFor } from './melody';
+import { addPassingNotes, MelodyLine, placeNote, rhythmFor } from './melody';
 import { endsInPicardy, evaluateMode, mean, valencesOf } from './mode';
 import { hashString, seededRandom } from './random';
 import {
+  chordTones,
   diatonicChord,
   PITCH_CLASSES,
   pitchClass,
@@ -102,36 +104,38 @@ export function composeWeek(week: Week, seed = ''): Composition {
     };
   });
 
-  const events: NoteEvent[] = [];
+    // Melody: each day's note on its bar's first beat; the neural network writes the notes between
+  const line = new MelodyLine(mode === 'dorian' || mode === 'aeolian', random);
+  const chordAt = (beat: number) => {
+    const { chords } = bars[Math.min(6, Math.floor(beat / BEATS_PER_BAR))];
+    const sounding = chords.filter((c) => c.start <= beat);
+    return chordTones(sounding[sounding.length - 1].chord);
+  };
 
-  // Melody: each day's note on the bar's first beat, then passing notes towards the next day's note
   week.forEach((checkin, day) => {
     const start = day * BEATS_PER_BAR;
     const anchor = anchors[day];
     if (day === 6) {
       if (anchor !== null && pitchClass(anchor) !== 0) {
-        events.push({ part: 'melody', midi: anchor, start, duration: 2, velocity: 0.85 });
-        events.push({ part: 'melody', midi: homeNote, start: start + 2, duration: 2, velocity: 0.8 });
+        line.place(anchor, start, 2, chordAt(start), 0.85);
+        line.place(homeNote, start + 2, 2, chordAt(start + 2), 0.8);
       } else if (anchor !== null) {
-        events.push({ part: 'melody', midi: anchor, start, duration: 4, velocity: 0.85 });
+        line.place(anchor, start, 4, chordAt(start), 0.85);
       } else {
-        events.push({ part: 'melody', midi: homeNote, start: start + 2, duration: 2, velocity: 0.8 });
+        line.place(homeNote, start + 2, 2, chordAt(start + 2), 0.8);
       }
       return;
     }
     if (anchor === null || checkin === null) return;
 
     const rhythm = rhythmFor(valenceOf(checkin.note, checkin.mode));
-    events.push({ part: 'melody', midi: anchor, start, duration: rhythm[0], velocity: 0.85 });
+    line.place(anchor, start, rhythm[0], chordAt(start), 0.85);
     const next = anchors.slice(day + 1).find((a): a is number => a !== null) ?? homeNote;
     const chord = dayChords[day];
-    const passing = passingNotes(anchor, next, rhythm.length - 1, SCALES[chord.source], chord, random);
-    let t = start + rhythm[0];
-    passing.forEach((midi, i) => {
-      events.push({ part: 'melody', midi, start: t, duration: rhythm[i + 1], velocity: 0.65 });
-      t += rhythm[i + 1];
-    });
+    addPassingNotes(line, next, start + rhythm[0], rhythm.slice(1), SCALES[chord.source], chordTones(chord));
   });
+
+  const events: NoteEvent[] = line.notes.map((note) => ({ part: 'melody', ...note }));
 
   // Accompaniment: smooth chord voicings plus the root in the bass
   let voicing: number[] | null = null;

@@ -1,6 +1,8 @@
 import { LETTERS, type Letter, type Mode } from '@/data/notes';
 import { composeWeek } from './compose';
-import { chooseChord, chordOptions, OPENING, TRANSITIONS, voiceChord } from './harmony';
+import { chooseChord, chordOptions, voiceChord } from './harmony';
+import { CHORD_MODELS } from './model';
+import { RULE_OPENING, RULE_TRANSITIONS } from './priors';
 import { hasLowMoodRun, movingAverage } from './lowMood';
 import { MELODY_HIGH, MELODY_LOW } from './melody';
 import { endsInPicardy, evaluateMode } from './mode';
@@ -84,10 +86,19 @@ describe('endsInPicardy', () => {
 });
 
 describe('harmony', () => {
-  it('has transition odds that add up to 1 from every chord', () => {
-    for (const row of [...TRANSITIONS, OPENING]) expect(row.reduce((a, b) => a + b, 0)).toBeCloseTo(1);
+    it('has odds that add up to 1 from every chord (learned and hand-written)', () => {
+    const learned = Object.values(CHORD_MODELS).flatMap((m) => [...m.transitions, m.opening]);
+    for (const row of [...learned, ...RULE_TRANSITIONS, RULE_OPENING])
+      expect(row.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 3);
   });
 
+  it('learned from Bach that V usually goes home to I', () => {
+    for (const { transitions } of Object.values(CHORD_MODELS)) {
+      const fromV = transitions[4];
+      expect(fromV.indexOf(Math.max(...fromV))).toBe(0);
+    }
+  });
+  
   it('finds a chord containing every pitch the orbs can play, in every mode', () => {
     for (const mode of MODES)
       for (const pc of [0, 2, 3, 4, 5, 7, 8, 9, 10, 11])
