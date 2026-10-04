@@ -14,6 +14,7 @@ import { decryptPayload, encryptPayload } from "@/lib/crypto";
 import { db } from "@/lib/firebase";
 import { localCheckins, markSynced, storeCheckins, type StoredCheckin } from "@/lib/localCheckins";
 import { getUserId } from "@/lib/session";
+import { withTimeout } from "@/lib/timeout";
 
 // Offline-first: check-ins are saved on the phone and read from there, so the app works with no connection. Firestore is the backup: new check-ins are uploaded whenever there's a connection.
 
@@ -35,14 +36,6 @@ export type Checkin = Payload & {
 
 const checkins = collection(db, "daily_checkins");
 const IMPORTED_KEY = "sonata.checkins.imported";
-const SERVER_TIMEOUT = 4000; // ms to wait for Firestore before carrying on without it
-
-function withTimeout<T>(promise: Promise<T>): Promise<T> {
-  return Promise.race([
-    promise,
-    new Promise<never>((_, reject) => setTimeout(() => reject(new Error("Firestore timed out")), SERVER_TIMEOUT)),
-  ]);
-}
 
 export async function saveCheckin(note: Letter, mode: Mode, instrument: Instrument, reflection?: string) {
   const payload: Payload = { note, pitch: pitchOf(note, mode), mode, emotion: emotionOf(note, mode), instrument };

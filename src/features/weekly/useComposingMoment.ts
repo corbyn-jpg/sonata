@@ -25,7 +25,6 @@ export function useComposingMoment(weekKey: string | null, songReady: boolean) {
         if (cancelled || revealed === weekKey) return;
         setRevealing(true);
         setWaited(false);
-        playChime("composed", 0.4);
         timer.current = setTimeout(() => setWaited(true), MIN_SECONDS * 1000);
       });
     return () => {

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Platform, Pressable, Text, View } from "react-native";
-import { Download, Share2 } from "lucide-react-native";
+import { Download, ListPlus, Share2 } from "lucide-react-native";
+import { AddToPlaylistSheet } from "@/features/playlists/AddToPlaylistSheet";
+import type { PlaylistSong } from "@/lib/playlistSongs";
 import colours from "@/theme/colours";
 import { saveSong, shareSong } from "./shareSong";
 import { ShareSheet } from "./ShareSheet";
@@ -10,13 +12,16 @@ type Props = {
   uri: string | null;
   /** What the file is called once it leaves the app. */
   fileName: string;
+  /** The week's song as a playlist entry, or null when it can't be added (e.g. an example week). */
+  playlistSong: PlaylistSong | null;
 };
 
-/** Share the week's song, or save it to the phone. */
-export function SongActions({ uri, fileName }: Props) {
+/** Share the week's song, save it to the phone, or add it to a playlist. */
+export function SongActions({ uri, fileName, playlistSong }: Props) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [writing, setWriting] = useState(false); // the "add a message" sheet is open
+  const [choosing, setChoosing] = useState(false); // the playlist sheet is open
 
   // A confirmation shows for a few seconds, then fades from the layout
   useEffect(() => {
@@ -54,6 +59,15 @@ export function SongActions({ uri, fileName }: Props) {
               run(async (song) =>
                 (await saveSong(song, fileName)) ? "Saved to your phone" : null,
               ),
+          },
+        ]
+      : []),
+    ...(playlistSong
+      ? [
+          {
+            label: "Playlist",
+            Icon: ListPlus,
+            onPress: () => setChoosing(true),
           },
         ]
       : []),
@@ -102,6 +116,12 @@ export function SongActions({ uri, fileName }: Props) {
         visible={writing}
         onShare={share}
         onClose={() => setWriting(false)}
+      />
+            <AddToPlaylistSheet
+        visible={choosing}
+        song={playlistSong}
+        onDone={setMessage}
+        onClose={() => setChoosing(false)}
       />
     </View>
   );

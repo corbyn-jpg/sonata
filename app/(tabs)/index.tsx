@@ -14,7 +14,7 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { interpolateColors } from "@shopify/react-native-skia";
-import { FileMusic, Music2, Settings } from "lucide-react-native";
+import { FileMusic, Settings } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
 import { Sky } from "@/components/Sky";
 import { LETTERS, type Letter, type Mode } from "@/data/notes";
@@ -147,23 +147,6 @@ export default function Home() {
               {greeting()}
             </Text>
             <View className="flex-row items-center">
-              {/* No pill at 0*/}
-              {streak > 0 && (
-                <View
-                  accessible
-                  accessibilityLabel={`${streak}-day streak`}
-                  className="mr-1 h-8 flex-row items-center gap-1 rounded-pill border border-border px-3"
-                >
-                  <Music2
-                    color={colours.textSecondary}
-                    size={14}
-                    strokeWidth={1.5}
-                  />
-                  <Text className="font-sans-medium text-caption text-secondary">
-                    {streak}
-                  </Text>
-                </View>
-              )}
               <Link href="/composer" asChild>
                 <Pressable
                   accessibilityLabel="Open composer"

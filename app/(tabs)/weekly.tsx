@@ -41,6 +41,7 @@ import {
 import { useWeekSong } from "@/features/weekly/useWeekSong";
 import { SongActions } from "@/features/weekly/SongActions";
 import { dayKey } from "@/lib/dates";
+import type { PlaylistSong } from "@/lib/playlistSongs";
 import colours from "@/theme/colours";
 
 const ART_SIZE = Math.round(230 * PixelRatio.get()); // the disc's size in real pixels
@@ -62,9 +63,7 @@ export default function Weekly() {
   const isFocused = useIsFocused();
   const ready = status === "ready";
 
-  // Where we are in the song, in seconds. The player doesn't report new times while paused, so after
-  // a jump we show where we jumped to while the player is still reporting the old spot. (Worked out
-  // here rather than copied into state in an effect, which would re-render on every report.)
+  // Where we are in the song, in seconds. The player doesn't report new times while paused, so after a jump we show where we jumped to while the player is still reporting the old spot. (Worked out here rather than copied into state in an effect, which would re-render on every report.)
   const [jump, setJump] = useState<{ to: number; from: number } | null>(null);
   const position =
     jump &&
@@ -140,7 +139,7 @@ export default function Weekly() {
   };
 
   // "Composing your week" after each new check-in, then (if the week has been heavy) a gentle offer
-    const { revealing, replay } = useComposingMoment(weekKey, ready);
+  const { revealing, replay } = useComposingMoment(weekKey, ready);
   const { offer, dismiss } = useLowMoodOffer(demo ? DEMO_WEEKS[demo] : null);
   // Shown a moment after it becomes due, to let the song settle in first
   const due = offer && !revealing && isFocused ? weekKey : null;
@@ -158,6 +157,16 @@ export default function Weekly() {
   };
 
   const started = playback.playing || position > 0;
+  // The week as a playlist entry (its notes, so it always sounds the same). Example weeks can't be added.
+  const playlistSong: PlaylistSong | null =
+    days && song && !demo
+      ? {
+          kind: "week",
+          week: dayKey(weekStart),
+          instrument,
+          days: days.map((d) => d && { note: d.note, mode: d.mode }),
+        }
+      : null;
   const currentDay =
     song && ready && started ? barAt(position, song.tempo) : null;
   const next = song ? nextBarStart(position, song.tempo) : null;
@@ -174,14 +183,15 @@ export default function Weekly() {
         // Try every record design without waiting a week. Not in release builds.
         <View className="mt-2 flex-row flex-wrap justify-center gap-1">
           {[null, ...DEMO_NAMES].map((option) => (
-                      <Pressable
-            onPress={replay}
-            className="rounded-pill border border-border px-3 py-1"
-          >
-            <Text className="font-sans text-caption text-secondary">
-              Replay composing
-            </Text>
-          </Pressable>
+            <Pressable
+              key={option ?? "real"}
+              onPress={() => setDemo(option)}
+              className={`rounded-pill border px-3 py-1 ${demo === option ? "border-violet-500 bg-violet-700/60" : "border-border"}`}
+            >
+              <Text className="font-sans text-caption text-secondary">
+                {option ?? "This week"}
+              </Text>
+            </Pressable>
           ))}
         </View>
       )}
@@ -274,6 +284,7 @@ export default function Weekly() {
             <SongActions
               uri={uri}
               fileName={songFileName(weekStart, INSTRUMENT_LABELS[instrument])}
+              playlistSong={playlistSong}
             />
 
             <Text className="font-sans text-caption text-muted">
