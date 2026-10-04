@@ -7,9 +7,9 @@ import {
   Text,
   View,
 } from "react-native";
-import { useIsFocused } from "expo-router";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Skia } from "@shopify/react-native-skia";
+import { router, useIsFocused } from "expo-router";
 import { useSharedValue } from "react-native-reanimated";
 import { Screen } from "@/components/Screen";
 import { Sky } from "@/components/Sky";
@@ -20,7 +20,15 @@ import { InstrumentPills } from "@/features/weekly/InstrumentPills";
 import { SongDisc } from "@/features/weekly/SongDisc";
 import { WavyTransport } from "@/features/weekly/WavyTransport";
 import { makeDiscArt } from "@/features/weekly/discArt";
-import { DEMO_NAMES, type DemoWeek } from "@/features/weekly/demoWeeks";
+import {
+  DEMO_NAMES,
+  DEMO_WEEKS,
+  type DemoWeek,
+} from "@/features/weekly/demoWeeks";
+import { ComposingMoment } from "@/features/weekly/ComposingMoment";
+import { LowMoodSheet } from "@/features/weekly/LowMoodSheet";
+import { useComposingMoment } from "@/features/weekly/useComposingMoment";
+import { useLowMoodOffer } from "@/features/weekly/useLowMoodOffer";
 import {
   barAt,
   barStart,
@@ -37,8 +45,16 @@ const ART_SIZE = Math.round(230 * PixelRatio.get()); // the disc's size in real 
 
 export default function Weekly() {
   const [demo, setDemo] = useState<DemoWeek | null>(null); // development builds only
-  const { status, weekStart, days, song, instrument, setInstrument, uri } =
-    useWeekSong(demo);
+  const {
+    status,
+    weekStart,
+    weekKey,
+    days,
+    song,
+    instrument,
+    setInstrument,
+    uri,
+  } = useWeekSong(demo);
   const player = useAudioPlayer(null, { updateInterval: 250 }); // the disc animates the ring in between
   const playback = useAudioPlayerStatus(player);
   const isFocused = useIsFocused();
@@ -109,6 +125,21 @@ export default function Weekly() {
     if (!playback.playing) player.play();
   };
 
+  // "Composing your week" after each new check-in, then (if the week has been heavy) a gentle offer
+  const revealing = useComposingMoment(weekKey, ready);
+  const { offer, dismiss } = useLowMoodOffer(demo ? DEMO_WEEKS[demo] : null);
+  const [offerShown, setOfferShown] = useState(false);
+  useEffect(() => {
+    if (!offer || revealing || !isFocused) return setOfferShown(false);
+    const timer = setTimeout(() => setOfferShown(true), 1200); // let the song settle in first
+    return () => clearTimeout(timer);
+  }, [offer, revealing, isFocused]);
+  const ground = () => {
+    dismiss();
+    player.pause();
+    router.navigate("/oasis"); // Breathing space, once the Oasis is built (Stage 9)
+  };
+
   const started = playback.playing || position > 0;
   const currentDay =
     song && ready && started ? barAt(position, song.tempo) : null;
@@ -142,79 +173,90 @@ export default function Weekly() {
   );
 
   return (
-    <Screen
-      header={header}
-      background={<Sky glow={wash} animated={isFocused} pace={1.4} />}
-    >
-      {status === "loading" && (
-        <ActivityIndicator color={colours.violet[200]} />
-      )}
+    <View className="flex-1">
+      <Screen
+        header={header}
+        background={<Sky glow={wash} animated={isFocused} pace={1.4} />}
+      >
+        {status === "loading" && (
+          <ActivityIndicator color={colours.violet[200]} />
+        )}
 
-      {status === "empty" && (
-        <Text className="text-center font-sans text-body text-secondary">
-          Your song begins with your first check-in this week.
-        </Text>
-      )}
-
-      {status === "offline" && (
-        <Text className="text-center font-sans text-body text-secondary">
-          Your week couldn&apos;t be loaded. Check your connection, then open
-          this tab again.
-        </Text>
-      )}
-
-      {status === "error" && (
-        <Text className="text-center font-sans text-body text-secondary">
-          Your song couldn&apos;t be made just now. Try opening this tab again.
-        </Text>
-      )}
-
-      {song && days && (status === "composing" || ready) && (
-        <ScrollView
-          contentContainerClassName="items-center gap-5 pb-8"
-          showsVerticalScrollIndicator={false}
-        >
-          <SongDisc
-            art={art}
-            glow={glowColour}
-            playing={playback.playing}
-            currentTime={position}
-            duration={ready ? playback.duration : 0}
-            active={isFocused}
-            onSeek={seek}
-          />
-
-          {ready ? (
-            <Text className="font-mono text-body text-secondary">
-              {clock(position)} · {clock(playback.duration)}
-            </Text>
-          ) : (
-            <View className="flex-row items-center gap-3">
-              <ActivityIndicator color={colours.violet[200]} />
-              <Text className="font-sans text-body text-secondary">
-                Composing your week&apos;s melody…
-              </Text>
-            </View>
-          )}
-
-          <WavyTransport
-            playing={playback.playing}
-            disabled={!ready}
-            canGoForward={next !== null}
-            onToggle={toggle}
-            onBack={() => song && seek(previousBarStart(position, song.tempo))}
-            onForward={() => next !== null && seek(next)}
-          />
-
-          <InstrumentPills instrument={instrument} onChange={setInstrument} />
-
-          <DayChips days={days} current={currentDay} onSelect={playFromDay} />
-
-          <Text className="font-sans text-caption text-muted">
-            {MODE_NAMES[song.mode]} · {song.tempo} BPM
+        {status === "empty" && (
+          <Text className="text-center font-sans text-body text-secondary">
+            Your song begins with your first check-in this week.
           </Text>
-        </ScrollView>
-      )}
-    </Screen>
+        )}
+
+        {status === "offline" && (
+          <Text className="text-center font-sans text-body text-secondary">
+            Your week couldn&apos;t be loaded. Check your connection, then open
+            this tab again.
+          </Text>
+        )}
+
+        {status === "error" && (
+          <Text className="text-center font-sans text-body text-secondary">
+            Your song couldn&apos;t be made just now. Try opening this tab
+            again.
+          </Text>
+        )}
+
+        {song && days && (status === "composing" || ready) && (
+          <ScrollView
+            contentContainerClassName="items-center gap-5 pb-8"
+            showsVerticalScrollIndicator={false}
+          >
+            <SongDisc
+              art={art}
+              glow={glowColour}
+              playing={playback.playing}
+              currentTime={position}
+              duration={ready ? playback.duration : 0}
+              active={isFocused}
+              onSeek={seek}
+            />
+
+            {ready ? (
+              <Text className="font-mono text-body text-secondary">
+                {clock(position)} · {clock(playback.duration)}
+              </Text>
+            ) : (
+              <View className="flex-row items-center gap-3">
+                <ActivityIndicator color={colours.violet[200]} />
+                <Text className="font-sans text-body text-secondary">
+                  Composing your week&apos;s melody…
+                </Text>
+              </View>
+            )}
+
+            <WavyTransport
+              playing={playback.playing}
+              disabled={!ready}
+              canGoForward={next !== null}
+              onToggle={toggle}
+              onBack={() =>
+                song && seek(previousBarStart(position, song.tempo))
+              }
+              onForward={() => next !== null && seek(next)}
+            />
+
+            <InstrumentPills instrument={instrument} onChange={setInstrument} />
+
+            <DayChips days={days} current={currentDay} onSelect={playFromDay} />
+
+            <Text className="font-sans text-caption text-muted">
+              {MODE_NAMES[song.mode]} · {song.tempo} BPM
+            </Text>
+          </ScrollView>
+        )}
+      </Screen>
+      <ComposingMoment visible={revealing} days={days ?? []} />
+      <LowMoodSheet
+        visible={offerShown}
+        onGround={ground}
+        onDismiss={dismiss}
+      />
+    </View>
   );
 }

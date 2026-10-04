@@ -23,9 +23,9 @@ import {
 import colours from "@/theme/colours";
 import { clock } from "./songTime";
 
-const DISC = 230;
+const DISC = 240;
 const RING = DISC / 2 + 14; // progress ring radius, just outside the disc
-const SIZE = 2 * (RING + 16); // room for the ring's glow and the knob
+const SIZE = 2 * (RING + 40); // room for the ring's glow and the knob
 const C = SIZE / 2;
 const SPIN = (2 * Math.PI) / 40; // one turn every 40 s while playing
 const GRAB = 32; // how far from the ring a touch still counts as grabbing it

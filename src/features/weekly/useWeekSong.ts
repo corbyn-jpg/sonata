@@ -113,6 +113,7 @@ export function useWeekSong(demo: DemoWeek | null = null) {
   return {
     status,
     weekStart,
+    weekKey,
     days,
     song,
     instrument,
