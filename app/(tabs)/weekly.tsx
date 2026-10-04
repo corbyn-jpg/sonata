@@ -13,7 +13,7 @@ import { router, useIsFocused } from "expo-router";
 import { useSharedValue } from "react-native-reanimated";
 import { Screen } from "@/components/Screen";
 import { Sky } from "@/components/Sky";
-import { ensureAudioMode } from "@/audio";
+import { ensureAudioMode, INSTRUMENT_LABELS } from "@/audio";
 import { MODE_NAMES } from "@/engine";
 import { DayChips } from "@/features/weekly/DayChips";
 import { InstrumentPills } from "@/features/weekly/InstrumentPills";
@@ -36,8 +36,10 @@ import {
   nextBarStart,
   previousBarStart,
   weekRange,
+  songFileName,
 } from "@/features/weekly/songTime";
 import { useWeekSong } from "@/features/weekly/useWeekSong";
+import { SongActions } from "@/features/weekly/SongActions";
 import { dayKey } from "@/lib/dates";
 import colours from "@/theme/colours";
 
@@ -138,7 +140,7 @@ export default function Weekly() {
   };
 
   // "Composing your week" after each new check-in, then (if the week has been heavy) a gentle offer
-  const revealing = useComposingMoment(weekKey, ready);
+    const { revealing, replay } = useComposingMoment(weekKey, ready);
   const { offer, dismiss } = useLowMoodOffer(demo ? DEMO_WEEKS[demo] : null);
   // Shown a moment after it becomes due, to let the song settle in first
   const due = offer && !revealing && isFocused ? weekKey : null;
@@ -172,15 +174,14 @@ export default function Weekly() {
         // Try every record design without waiting a week. Not in release builds.
         <View className="mt-2 flex-row flex-wrap justify-center gap-1">
           {[null, ...DEMO_NAMES].map((option) => (
-            <Pressable
-              key={option ?? "real"}
-              onPress={() => setDemo(option)}
-              className={`rounded-pill border px-3 py-1 ${demo === option ? "border-violet-500 bg-violet-700/60" : "border-border"}`}
-            >
-              <Text className="font-sans text-caption text-secondary">
-                {option ?? "This week"}
-              </Text>
-            </Pressable>
+                      <Pressable
+            onPress={replay}
+            className="rounded-pill border border-border px-3 py-1"
+          >
+            <Text className="font-sans text-caption text-secondary">
+              Replay composing
+            </Text>
+          </Pressable>
           ))}
         </View>
       )}
@@ -269,6 +270,11 @@ export default function Weekly() {
             <InstrumentPills instrument={instrument} onChange={setInstrument} />
 
             <DayChips days={days} current={currentDay} onSelect={playFromDay} />
+
+            <SongActions
+              uri={uri}
+              fileName={songFileName(weekStart, INSTRUMENT_LABELS[instrument])}
+            />
 
             <Text className="font-sans text-caption text-muted">
               {MODE_NAMES[song.mode]} · {song.tempo} BPM

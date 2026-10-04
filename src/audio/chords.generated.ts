@@ -46,7 +46,6 @@ export const CHIMES = {
   composed: require("../../assets/sounds/chimes/composed.wav"),
   breatheIn: require("../../assets/sounds/chimes/breatheIn.wav"),
   breatheOut: require("../../assets/sounds/chimes/breatheOut.wav"),
-  composing: require("../../assets/sounds/chimes/composed.wav"),
   finish: require("../../assets/sounds/chimes/finish.wav"),
 } as const;
 

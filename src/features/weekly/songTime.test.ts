@@ -5,6 +5,7 @@ import {
   nextBarStart,
   previousBarStart,
   weekRange,
+  songFileName,
 } from "./songTime";
 
 // At 60 BPM a 4-beat bar lasts exactly 4 seconds
@@ -44,5 +45,11 @@ describe("songTime", () => {
     expect(clock(43.9)).toBe("0:43");
     expect(clock(120)).toBe("2:00");
     expect(weekRange(new Date(2026, 8, 28))).toBe("28 Sep – 4 Oct");
+  });
+
+  it("names a shared song by its week and instrument only", () => {
+    expect(songFileName(new Date(2026, 8, 28), "Harp")).toBe(
+      "Sonata - week of 28 Sep 2026 - Harp.wav",
+    );
   });
 });

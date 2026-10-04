@@ -44,8 +44,7 @@
           "resizeMode": "contain",
           "backgroundColor": "#060011"
         }
-      ],
-      "expo-sharing"
+      ]
     ],
     "extra": {
       "router": {},
