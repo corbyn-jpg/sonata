@@ -18,7 +18,7 @@ import { MODE_NAMES } from "@/engine";
 import { DayChips } from "@/features/weekly/DayChips";
 import { InstrumentPills } from "@/features/weekly/InstrumentPills";
 import { SongDisc } from "@/features/weekly/SongDisc";
-import { WavyTransport } from "@/features/weekly/WavyTransport";
+import { OrbitTransport } from "@/features/weekly/OrbitTransport";
 import { makeDiscArt } from "@/features/weekly/discArt";
 import {
   DEMO_NAMES,
@@ -60,20 +60,22 @@ export default function Weekly() {
   const isFocused = useIsFocused();
   const ready = status === "ready";
 
-  // Where we are in the song, in seconds. The player doesn't report new times while paused, so after a jump we show where we jumped to until the player reports a time of its own. (Worked out here rather than copied into state in an effect, which would re-render on every report.)
-  const [jump, setJump] = useState<{
-    to: number;
-    at: number;
-    from: number;
-  } | null>(null);
+  // Where we are in the song, in seconds. The player doesn't report new times while paused, so after
+  // a jump we show where we jumped to while the player is still reporting the old spot. (Worked out
+  // here rather than copied into state in an effect, which would re-render on every report.)
+  const [jump, setJump] = useState<{ to: number; from: number } | null>(null);
   const position =
-    jump && (Date.now() - jump.at < 400 || playback.currentTime === jump.from)
+    jump &&
+    Math.abs(playback.currentTime - jump.from) < 1 &&
+    Math.abs(playback.currentTime - jump.to) > 1
       ? jump.to
       : playback.currentTime;
 
   // Switching instrument loads a new file: carry on from the same moment
   const resume = useRef({ time: 0, playing: false });
-  resume.current = { time: position, playing: playback.playing };
+  useEffect(() => {
+    resume.current = { time: position, playing: playback.playing };
+  });
   useEffect(() => {
     if (!uri) return;
     const { time, playing } = resume.current;
@@ -110,11 +112,21 @@ export default function Weekly() {
 
   const seek = (seconds: number) => {
     const time = Math.min(Math.max(0, seconds), playback.duration || Infinity);
-    setJump({ to: time, at: Date.now(), from: playback.currentTime });
+    setJump({ to: time, from: playback.currentTime });
     player.seekTo(time);
   };
 
   const toggle = () => {
+    if (__DEV__) {
+      // Shows in the Expo terminal: if this never appears, the tap isn't reaching the button
+      console.log("Play pressed", {
+        status,
+        loaded: playback.isLoaded,
+        duration: playback.duration,
+        playing: playback.playing,
+        error: playback.error,
+      });
+    }
     if (playback.playing) return player.pause();
     if (playback.duration > 0 && position >= playback.duration - 0.05) seek(0); // finished: start again
     player.play();
@@ -128,12 +140,15 @@ export default function Weekly() {
   // "Composing your week" after each new check-in, then (if the week has been heavy) a gentle offer
   const revealing = useComposingMoment(weekKey, ready);
   const { offer, dismiss } = useLowMoodOffer(demo ? DEMO_WEEKS[demo] : null);
-  const [offerShown, setOfferShown] = useState(false);
+  // Shown a moment after it becomes due, to let the song settle in first
+  const due = offer && !revealing && isFocused ? weekKey : null;
+  const [settled, setSettled] = useState<string | null>(null);
   useEffect(() => {
-    if (!offer || revealing || !isFocused) return setOfferShown(false);
-    const timer = setTimeout(() => setOfferShown(true), 1200); // let the song settle in first
+    if (!due) return;
+    const timer = setTimeout(() => setSettled(due), 1200);
     return () => clearTimeout(timer);
-  }, [offer, revealing, isFocused]);
+  }, [due]);
+  const offerShown = due !== null && settled === due;
   const ground = () => {
     dismiss();
     player.pause();
@@ -230,10 +245,20 @@ export default function Weekly() {
               </View>
             )}
 
-            <WavyTransport
+            <OrbitTransport
               playing={playback.playing}
               disabled={!ready}
               canGoForward={next !== null}
+              orb={
+                song
+                  ? colours.orb[song.palette[0].note][song.palette[0].mode]
+                  : colours.orb.C.major
+              }
+              moon={
+                song
+                  ? colours.orb[song.palette[1].note][song.palette[1].mode]
+                  : colours.orb.C.major
+              }
               onToggle={toggle}
               onBack={() =>
                 song && seek(previousBarStart(position, song.tempo))

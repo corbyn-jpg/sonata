@@ -7,6 +7,7 @@ import { useFonts, DMMono_400Regular, DMMono_500Medium } from '@expo-google-font
 import { Roboto_400Regular, Roboto_500Medium, Roboto_700Bold } from '@expo-google-fonts/roboto';
 import colours from '@/theme/colours';
 import { getUserId } from '@/lib/session';
+import { ensureAudioMode } from '@/audio';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 SplashScreen.preventAutoHideAsync();
@@ -27,6 +28,11 @@ export default function RootLayout() {
   // Sign in early so the first check-in doesn't wait on it. Failures retry on save.
   useEffect(() => {
     getUserId().catch(() => {});
+  }, []);
+
+  // Set how the app's sound behaves once, at launch, before anything plays
+  useEffect(() => {
+    ensureAudioMode();
   }, []);
 
   if (!loaded && !error) return null;

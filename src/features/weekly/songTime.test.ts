@@ -1,4 +1,11 @@
-import { barAt, barStart, clock, nextBarStart, previousBarStart, weekRange } from "./songTime";
+import {
+  barAt,
+  barStart,
+  clock,
+  nextBarStart,
+  previousBarStart,
+  weekRange,
+} from "./songTime";
 
 // At 60 BPM a 4-beat bar lasts exactly 4 seconds
 const TEMPO = 60;
@@ -15,6 +22,13 @@ describe("songTime", () => {
     expect(previousBarStart(10, TEMPO)).toBe(8); // mid-Wednesday → start of Wednesday
     expect(previousBarStart(8.5, TEMPO)).toBe(4); // just into Wednesday → Tuesday
     expect(previousBarStart(0.5, TEMPO)).toBe(0); // can't go before Monday
+  });
+
+  it("keeps going forward after a jump the player rounded down to the millisecond", () => {
+    const tempo = 73; // a bar lasts 3.28767… s; the player lands at 3.287
+    const landed = Math.floor(barStart(1, tempo) * 1000) / 1000;
+    expect(barAt(landed, tempo)).toBe(1);
+    expect(nextBarStart(landed, tempo)).toBeCloseTo(barStart(2, tempo));
   });
 
   it("goes forward a day, but not past Sunday", () => {

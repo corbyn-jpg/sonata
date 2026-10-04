@@ -40,6 +40,8 @@
     "@types/node": "^26.6.4",
     "@types/react": "~19.2.2",
     "babel-preset-expo": "~57.0.13",
+    "eslint": "^9.0.0",
+    "eslint-config-expo": "~57.0.2",
     "jest": "~29.7.0",
     "jest-expo": "~57.0.5",
     "prettier-plugin-tailwindcss": "^0.5.14",
@@ -53,7 +55,8 @@
     "web": "expo start --web",
     "test": "jest",
     "render:chords": "node scripts/render-chords.mjs",
-    "train:model": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/train-model.ts"
+    "train:model": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/train-model.ts",
+    "lint": "expo lint"
   },
   "jest": {
     "preset": "jest-expo",

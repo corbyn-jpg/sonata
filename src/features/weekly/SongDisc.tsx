@@ -23,7 +23,7 @@ import {
 import colours from "@/theme/colours";
 import { clock } from "./songTime";
 
-const DISC = 240;
+const DISC = 220;
 const RING = DISC / 2 + 14; // progress ring radius, just outside the disc
 const SIZE = 2 * (RING + 40); // room for the ring's glow and the knob
 const C = SIZE / 2;
@@ -168,7 +168,7 @@ export function SongDisc({ art, glow, playing, currentTime, duration, active, on
           </Circle>
 
           {/* Progress ring: faint track, glowing arc, and a knob to grab */}
-          <Circle cx={C} cy={C} r={RING} style="stroke" strokeWidth={3} color={colours.border} />
+          <Circle cx={C} cy={C} r={RING} style="stroke" strokeWidth={3} color={colours.teal[700]} />
           <Path path={ringPath} start={0} end={progress} style="stroke" strokeWidth={8} strokeCap="round" color={colours.violet[500]} opacity={0.6}>
             <BlurMask blur={6} style="normal" />
           </Path>

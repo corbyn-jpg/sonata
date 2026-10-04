@@ -9,9 +9,12 @@ const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "
 /** How long one bar (one day) lasts, in seconds. */
 export const barSeconds = (tempo: number) => (BEATS_PER_BAR * 60) / tempo;
 
+// The player works in whole milliseconds, so after jumping to a bar's start it can report a time a fraction of a millisecond before it. Anything this close to a bar line counts as the new bar.
+const BAR_LINE_TOLERANCE = 0.05; // seconds
+
 /** Which day's bar is playing at `seconds` (0 = Monday). */
 export const barAt = (seconds: number, tempo: number) =>
-  Math.min(LAST_BAR, Math.max(0, Math.floor(seconds / barSeconds(tempo))));
+  Math.min(LAST_BAR, Math.max(0, Math.floor((seconds + BAR_LINE_TOLERANCE) / barSeconds(tempo))));
 
 export const barStart = (bar: number, tempo: number) => bar * barSeconds(tempo);
 

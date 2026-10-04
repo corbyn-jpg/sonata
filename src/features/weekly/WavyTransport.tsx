@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { Pressable, View } from "react-native";
 import { BlurMask, Canvas, Circle, Group, Path, Skia } from "@shopify/react-native-skia";
-import { Pause, Play, SkipBack, SkipForward } from "lucide-react-native";
+import { Pause, Play, Rewind, FastForward } from "lucide-react-native";
 import colours from "@/theme/colours";
 
 // One continuous capsule that swells into three bumps: back, play (biggest), forward
@@ -72,9 +72,9 @@ export function WavyTransport({ playing, disabled, canGoForward, onToggle, onBac
   const iconColour = (enabled: boolean) => (enabled ? colours.textPrimary : colours.textMuted);
 
   const buttons = [
-    { label: "Back a day", onPress: onBack, enabled: !disabled, Icon: SkipBack, size: 22 },
+    { label: "Back a day", onPress: onBack, enabled: !disabled, Icon: Rewind, size: 26 },
     { label: playing ? "Pause" : "Play", onPress: onToggle, enabled: !disabled, Icon: playing ? Pause : Play, size: 30 },
-    { label: "Forward a day", onPress: onForward, enabled: !disabled && canGoForward, Icon: SkipForward, size: 22 },
+    { label: "Forward a day", onPress: onForward, enabled: !disabled && canGoForward, Icon: FastForward, size: 26 },
   ];
 
   return (
