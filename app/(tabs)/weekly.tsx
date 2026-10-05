@@ -9,7 +9,8 @@ import {
 } from "react-native";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Skia } from "@shopify/react-native-skia";
-import { router, useIsFocused } from "expo-router";
+import { Link, router, useIsFocused } from "expo-router";
+import { ListMusic } from "lucide-react-native";
 import { useSharedValue } from "react-native-reanimated";
 import { Screen } from "@/components/Screen";
 import { Sky } from "@/components/Sky";
@@ -172,29 +173,24 @@ export default function Weekly() {
   const next = song ? nextBarStart(position, song.tempo) : null;
 
   const header = (
-    <View className="mb-6 items-center gap-1">
-      <Text className="font-mono-medium text-h3 text-primary">
-        Your week in sound
-      </Text>
+          <View className="mb-6 items-center gap-1">
+      <View className="flex-row items-center justify-center gap-4">
+        <Text className="font-mono-medium text-h3 text-primary">
+          Your week in sound
+        </Text>
+        <Link href="/playlists" asChild>
+          <Pressable
+            accessibilityLabel="Your playlists"
+            className="h-11 w-11 items-center justify-center"
+          >
+            <ListMusic color={colours.textSecondary} size={24} strokeWidth={1.5} />
+          </Pressable>
+        </Link>
+      </View>
       <Text className="font-sans text-caption text-secondary">
-        {demo ? `Example week · ${demo}` : weekRange(weekStart)}
+        {weekRange(weekStart)}
       </Text>
-      {__DEV__ && (
-        // Try every record design without waiting a week. Not in release builds.
-        <View className="mt-2 flex-row flex-wrap justify-center gap-1">
-          {[null, ...DEMO_NAMES].map((option) => (
-            <Pressable
-              key={option ?? "real"}
-              onPress={() => setDemo(option)}
-              className={`rounded-pill border px-3 py-1 ${demo === option ? "border-violet-500 bg-violet-700/60" : "border-border"}`}
-            >
-              <Text className="font-sans text-caption text-secondary">
-                {option ?? "This week"}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
-      )}
+      
     </View>
   );
 

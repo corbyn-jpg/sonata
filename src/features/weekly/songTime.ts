@@ -47,8 +47,9 @@ export function weekRange(weekStart: Date) {
   return `${day(weekStart)} – ${day(end)}`;
 }
 
-/** What a shared or saved song is called: the week and the instrument, nothing about how the days felt. */
 export function songFileName(weekStart: Date, instrument: string) {
-  const date = `${weekStart.getDate()} ${MONTHS[weekStart.getMonth()]} ${weekStart.getFullYear()}`;
-  return `Sonata - week of ${date} - ${instrument}.wav`;
+  return `Sonata - week of ${longDate(weekStart)} - ${instrument}.wav`;
 }
+
+/** e.g. "28 Sep 2026". */
+export const longDate = (date: Date) => `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;

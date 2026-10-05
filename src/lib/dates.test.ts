@@ -1,4 +1,4 @@
-import { addDays, dayKey, startOfWeek, streakLength } from "./dates";
+import { addDays, dayKey, startOfWeek, streakLength, fromDayKey } from "./dates";
 
 // Month is 0-based: new Date(2026, 8, 30) is Wednesday 30 September 2026
 const wed = new Date(2026, 8, 30, 15, 30);
@@ -6,6 +6,13 @@ const wed = new Date(2026, 8, 30, 15, 30);
 describe("dayKey", () => {
   it("uses the local calendar date", () => {
     expect(dayKey(new Date(2026, 0, 5, 23, 59))).toBe("2026-01-05");
+  });
+});
+
+describe("fromDayKey", () => {
+  it("turns a day key back into that local date", () => {
+    expect(dayKey(fromDayKey("2026-09-28"))).toBe("2026-09-28");
+    expect(fromDayKey("2026-01-05").getHours()).toBe(0);
   });
 });
 

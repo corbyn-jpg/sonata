@@ -8,6 +8,12 @@ export function dayKey(date: Date): string {
   return `${y}-${m}-${d}`;
 }
 
+/** The date a day key stands for (the reverse of dayKey), at local midnight. */
+export function fromDayKey(key: string): Date {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
+
 export function startOfDay(date: Date): Date {
   const day = new Date(date);
   day.setHours(0, 0, 0, 0);
