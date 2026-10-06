@@ -1,12 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useFocusEffect } from "expo-router";
-import type { Instrument } from "@/audio/instruments";
+import { mostUsedInstrument, type Instrument } from "@/audio/instruments";
 import { renderSong } from "@/audio/song";
 import { composeWeek, type DayNote } from "@/engine";
 import { hashString } from "@/engine/random";
 import { getCheckins } from "@/lib/checkins";
 import { addDays, dayKey, startOfWeek } from "@/lib/dates";
 import { DEMO_WEEKS, type DemoWeek } from "./demoWeeks";
+
 
 export type WeekDay = (DayNote & { instrument?: Instrument }) | null;
 
@@ -47,15 +48,6 @@ function useThisWeek() {
   return { weekStart, days, loadFailed };
 }
 
-/** The instrument used most this week (the latest wins a tie), so the song sounds like the days did. */
-function weekInstrument(days: readonly WeekDay[] | null): Instrument | null {
-  const counts = new Map<Instrument, number>();
-  for (const day of days ?? []) if (day?.instrument) counts.set(day.instrument, (counts.get(day.instrument) ?? 0) + 1);
-  let best: Instrument | null = null;
-  for (const [instrument, count] of counts) if (!best || count >= counts.get(best)!) best = instrument;
-  return best;
-}
-
 /**
  This week's song: composed by the engine from the check-ins so far, then rendered to a file.
  `status` is "composing" while the audio is being made (about a second on a phone).
@@ -67,7 +59,8 @@ export function useWeekSong(demo: DemoWeek | null = null) {
   const days = demo ? DEMO_WEEKS[demo] : real.days;
   const loadFailed = !demo && real.loadFailed;
   const [chosen, setInstrument] = useState<Instrument | null>(null);
-  const instrument = chosen ?? weekInstrument(days) ?? "piano";
+  // By default, the instrument used most this week, so the song sounds like the days did
+  const instrument = chosen ?? mostUsedInstrument((days ?? []).map((d) => d?.instrument)) ?? "piano";
 
   // Only the notes matter to the song, so the song (and its file) are keyed by them
   const notes = days?.map((d) => d && { note: d.note, mode: d.mode }) ?? null;

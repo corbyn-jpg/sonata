@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { ActivityIndicator, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useIsFocused } from "expo-router";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
@@ -8,6 +14,8 @@ import { MonthBento } from "@/features/monthly/MonthBento";
 import { MonthCalendar } from "@/features/monthly/MonthCalendar";
 import { addMonths, monthTitle, startOfMonth } from "@/features/monthly/month";
 import { useMonth } from "@/features/monthly/useMonth";
+import { WeeksShelf } from "@/features/monthly/WeeksShelf";
+import { dayKey } from "@/lib/dates";
 import colours from "@/theme/colours";
 
 export default function Monthly() {
@@ -26,9 +34,16 @@ export default function Monthly() {
         accessibilityLabel="Previous month"
         className="h-11 w-11 items-center justify-center"
       >
-        <ChevronLeft color={colours.textSecondary} size={24} strokeWidth={1.5} />
+        <ChevronLeft
+          color={colours.textSecondary}
+          size={24}
+          strokeWidth={1.5}
+        />
       </Pressable>
-      <Text className="font-mono-medium text-h3 text-primary" accessibilityRole="header">
+      <Text
+        className="font-mono-medium text-h3 text-primary"
+        accessibilityRole="header"
+      >
         {monthTitle(month)}
       </Text>
       <Pressable
@@ -39,20 +54,40 @@ export default function Monthly() {
         accessibilityState={{ disabled: atLatest }}
         className={`h-11 w-11 items-center justify-center ${atLatest ? "opacity-30" : ""}`}
       >
-        <ChevronRight color={colours.textSecondary} size={24} strokeWidth={1.5} />
+        <ChevronRight
+          color={colours.textSecondary}
+          size={24}
+          strokeWidth={1.5}
+        />
       </Pressable>
     </View>
   );
 
   return (
-    <Screen header={header} background={<Sky animated={isFocused} pace={1.6} />}>
-      <ScrollView contentContainerClassName="gap-6 pb-32" showsVerticalScrollIndicator={false}>
+    <Screen
+      header={header}
+      background={<Sky animated={isFocused} pace={1.6} />}
+    >
+      <ScrollView
+        contentContainerClassName="gap-6 pb-32"
+        showsVerticalScrollIndicator={false}
+      >
         {loading || !summary ? (
           <ActivityIndicator color={colours.violet[200]} />
         ) : (
           <>
             <MonthCalendar month={month} days={summary.days} today={today} />
-            <MonthBento summary={summary} streak={streak} isCurrentMonth={atLatest} />
+            <MonthBento
+              summary={summary}
+              streak={streak}
+              isCurrentMonth={atLatest}
+            />
+            {/* Keyed by month, so changing month stops whatever was playing */}
+            <WeeksShelf
+              key={dayKey(month)}
+              weeks={summary.weeks}
+              today={today}
+            />
           </>
         )}
       </ScrollView>

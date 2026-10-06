@@ -27,7 +27,7 @@ export function useMonth(month: Date) {
       Promise.all([getCheckins(first, to), getCheckinDates(addDays(new Date(), -STREAK_LOOKBACK_DAYS))])
         .then(([checkins, dates]) => {
           if (cancelled) return;
-          setLoaded({ key, checkins: checkins.map(({ note, mode, timestamp }) => ({ note, mode, timestamp })), dates });
+          setLoaded({ key, checkins: checkins.map(({ note, mode, instrument, timestamp }) => ({ note, mode, instrument, timestamp })), dates });
         })
         .catch((error) => {
           if (cancelled) return;
