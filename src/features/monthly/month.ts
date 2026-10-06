@@ -27,6 +27,9 @@ const MONTHS = [
   "December",
 ];
 
+/** e.g. "October". */
+export const monthName = (month: Date) => MONTHS[month.getMonth()];
+
 /** e.g. "5 Oct". */
 export const shortDate = (date: Date) =>
   `${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)}`;

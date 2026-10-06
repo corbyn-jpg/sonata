@@ -12,6 +12,7 @@ import { Screen } from "@/components/Screen";
 import { Sky } from "@/components/Sky";
 import { MonthBento } from "@/features/monthly/MonthBento";
 import { MonthCalendar } from "@/features/monthly/MonthCalendar";
+import { MonthSongCard } from "@/features/monthly/MonthSongCard";
 import { addMonths, monthTitle, startOfMonth } from "@/features/monthly/month";
 import { useMonth } from "@/features/monthly/useMonth";
 import { WeeksShelf } from "@/features/monthly/WeeksShelf";
@@ -69,7 +70,7 @@ export default function Monthly() {
       background={<Sky animated={isFocused} pace={1.6} />}
     >
       <ScrollView
-        contentContainerClassName="gap-6 pb-32"
+        contentContainerClassName="gap-6 pb-10"
         showsVerticalScrollIndicator={false}
       >
         {loading || !summary ? (
@@ -82,6 +83,13 @@ export default function Monthly() {
               streak={streak}
               isCurrentMonth={atLatest}
             />
+            {summary.melodies > 0 && (
+              <MonthSongCard
+                key={`song-${dayKey(month)}`}
+                month={month}
+                weeks={summary.weeks}
+              />
+            )}
             {/* Keyed by month, so changing month stops whatever was playing */}
             <WeeksShelf
               key={dayKey(month)}

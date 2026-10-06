@@ -2,13 +2,17 @@ import { useEffect, useRef, useState } from "react";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { useIsFocused } from "expo-router";
 import { renderSong } from "@/audio/song";
+import { takeTurn } from "@/audio/turns";
 import type { Composition } from "@/engine";
 import { songCacheName, type PlaylistSong } from "@/lib/playlistSongs";
 
 /**
  Plays a playlist in order. Each song is made just before it plays (about a second, or straight away if it's been played before), so a long playlist never has to be made all at once.
  */
-export function usePlaylistPlayer(songs: readonly PlaylistSong[], compositions: readonly Composition[]) {
+export function usePlaylistPlayer(
+  songs: readonly PlaylistSong[],
+  compositions: readonly Composition[],
+) {
   const player = useAudioPlayer(null);
   const status = useAudioPlayerStatus(player);
   const isFocused = useIsFocused();
@@ -25,9 +29,14 @@ export function usePlaylistPlayer(songs: readonly PlaylistSong[], compositions: 
     setCurrent(index);
     setLoading(true);
     try {
-      const file = await renderSong(compositions[index], songs[index].instrument, songCacheName(songs[index]));
+      const file = await renderSong(
+        compositions[index],
+        songs[index].instrument,
+        songCacheName(songs[index]),
+      );
       if (ticket !== request.current) return;
       player.replace({ uri: file.uri });
+      takeTurn(player, () => player.pause()); // anything else playing pauses
       player.play();
     } catch (error) {
       console.warn("Couldn't play a playlist song:", error);
@@ -44,9 +53,12 @@ export function usePlaylistPlayer(songs: readonly PlaylistSong[], compositions: 
     };
   });
   useEffect(() => {
-    const subscription = player.addListener("playbackStatusUpdate", (update) => {
-      if (update.didJustFinish) onFinish.current();
-    });
+    const subscription = player.addListener(
+      "playbackStatusUpdate",
+      (update) => {
+        if (update.didJustFinish) onFinish.current();
+      },
+    );
     return () => subscription.remove();
   }, [player]);
 
@@ -58,7 +70,9 @@ export function usePlaylistPlayer(songs: readonly PlaylistSong[], compositions: 
   const toggle = (index: number) => {
     if (index !== current) return void playAt(index);
     if (status.playing) return player.pause();
-    if (status.duration > 0 && status.currentTime >= status.duration - 0.05) player.seekTo(0); // finished: start again
+    if (status.duration > 0 && status.currentTime >= status.duration - 0.05)
+      player.seekTo(0); // finished: start again
+    takeTurn(player, () => player.pause()); // anything else playing pauses
     player.play();
   };
 
