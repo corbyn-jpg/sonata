@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,7 +7,13 @@ import {
   type AccessibilityActionEvent,
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
-import { Canvas, Group, mixColors, Oval, vec } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Group,
+  mixColors,
+  Oval,
+  vec,
+} from "@shopify/react-native-skia";
 import Animated, {
   cancelAnimation,
   clamp,
@@ -75,73 +81,57 @@ export function OrbCarousel({
   const step = width * 0.45; // puts the neighbours' centres near the screen edges
   const start = useSharedValue(0);
 
-    // The gesture is built once, so it must read the latest state and callbacks through refs otherwise it keeps calling the first render's versions 
-  const focusedRef = useRef(focused);
-  focusedRef.current = focused;
-  const onFocusChangeRef = useRef(onFocusChange);
-  onFocusChangeRef.current = onFocusChange;
-  const onSelectRef = useRef(onSelect);
-  onSelectRef.current = onSelect;
-
   const settle = (index: number) => {
-    if (index === focusedRef.current) return;
-        onFocusChangeRef.current(index);
+    if (index !== focused) onFocusChange(index);
   };
 
   const goTo = (index: number) => {
-    position.value = withSpring(index, SPRING);
+    position.set(withSpring(index, SPRING));
     settle(index);
   };
 
   const onTap = (offset: number) => {
-    const current = focusedRef.current;
-        if (offset === 0) return onSelectRef.current(LETTERS[current]);
+    if (offset === 0) onSelect(LETTERS[focused]);
   };
 
-  const gesture = useMemo(() => {
-    const pan = Gesture.Pan()
-      .activeOffsetX([-10, 10])
-      .failOffsetY([-15, 15]) // leave vertical swipes for the Bright/Dark pages
-      .onStart(() => {
-        start.value = position.value;
-      })
-      .onUpdate((e) => {
-        // Slight rubber-band past the first and last orb
-        position.value = clamp(
-          start.value - e.translationX / step,
-          -0.35,
-          LAST + 0.35,
-        );
-      })
-      .onEnd((e) => {
-        const from = Math.round(start.value);
-        let target = Math.round(position.value);
-        if (target === from && Math.abs(e.velocityX) > FLICK_VELOCITY)
-          target = from - Math.sign(e.velocityX);
-        target = clamp(target, Math.max(0, from - 1), Math.min(LAST, from + 1)); // one swipe = one orb
-        position.value = withSpring(target, {
-          ...SPRING,
-          velocity: -e.velocityX / step,
-        });
-        runOnJS(settle)(target);
-      });
-
-    const tap = Gesture.Tap().onEnd((e, success) => {
-      if (success) runOnJS(onTap)(Math.round((e.x - width / 2) / step));
+  // Rebuilt on each render (only when the focused orb changes), so it always calls the latest
+  // callbacks. Shared values use get()/set(): the React Compiler rules forbid writing .value here.
+  const pan = Gesture.Pan()
+    .activeOffsetX([-10, 10])
+    .failOffsetY([-15, 15]) // leave vertical swipes for the Bright/Dark pages
+    .onStart(() => {
+      start.set(position.get());
+    })
+    .onUpdate((e) => {
+      // Slight rubber-band past the first and last orb
+      position.set(
+        clamp(start.get() - e.translationX / step, -0.35, LAST + 0.35),
+      );
+    })
+    .onEnd((e) => {
+      const from = Math.round(start.get());
+      let target = Math.round(position.get());
+      if (target === from && Math.abs(e.velocityX) > FLICK_VELOCITY)
+        target = from - Math.sign(e.velocityX);
+      target = clamp(target, Math.max(0, from - 1), Math.min(LAST, from + 1)); // one swipe = one orb
+      position.set(
+        withSpring(target, { ...SPRING, velocity: -e.velocityX / step }),
+      );
+      runOnJS(settle)(target);
     });
 
-    return Gesture.Race(pan, tap);
-    // settle/onTap read focusedRef, so the gesture only needs rebuilding when the layout changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [width, step]);
+  const tap = Gesture.Tap().onEnd((e, success) => {
+    if (success) runOnJS(onTap)(Math.round((e.x - width / 2) / step));
+  });
+
+  const gesture = Gesture.Race(pan, tap);
 
   const onAccessibilityAction = (e: AccessibilityActionEvent) => {
-    const current = focusedRef.current;
     if (e.nativeEvent.actionName === "increment")
-      goTo(Math.min(LAST, current + 1));
+      goTo(Math.min(LAST, focused + 1));
     if (e.nativeEvent.actionName === "decrement")
-      goTo(Math.max(0, current - 1));
-    if (e.nativeEvent.actionName === "activate") onSelect(LETTERS[current]);
+      goTo(Math.max(0, focused - 1));
+    if (e.nativeEvent.actionName === "activate") onSelect(LETTERS[focused]);
   };
 
   const letter = LETTERS[focused];
@@ -308,23 +298,25 @@ const CarouselOrb = memo(function CarouselOrb({
 
   // Only the centred orb shimmers
   useEffect(() => {
-    if (!isFocused || !animated || reduceMotion) return;
-    glow.value = withRepeat(
-      withTiming(0.7, { duration: 4000, easing: Easing.inOut(Easing.sin) }),
-      -1,
-      true,
+    glow.set(
+      withRepeat(
+        withTiming(0.7, { duration: 4000, easing: Easing.inOut(Easing.sin) }),
+        -1,
+        true,
+      ),
     );
     return () => {
       cancelAnimation(glow);
-      glow.value = 1;
+      glow.set(1);
     };
   }, [isFocused, animated, reduceMotion, glow]);
 
   useEffect(() => {
-    if (!isSelected) return;
-    pulse.value = withSequence(
-      withTiming(1.12, { duration: 150, easing: ease }),
-      withTiming(1, { duration: 250, easing: ease }),
+    pulse.set(
+      withSequence(
+        withTiming(1.12, { duration: 150, easing: ease }),
+        withTiming(1, { duration: 250, easing: ease }),
+      ),
     );
   }, [isSelected, pulse]);
 

@@ -27,13 +27,13 @@ function ringPoint(theta: number, scale = 1) {
 }
 
 function ringPath(from: number, to: number, scale = 1) {
-  const path = Skia.Path.Make();
+  const path = Skia.PathBuilder.Make()
   for (let s = 0; s <= 90; s++) {
     const { x, y } = ringPoint(from + ((to - from) * s) / 90, scale);
     if (s === 0) path.moveTo(x, y);
     else path.lineTo(x, y);
   }
-  return path;
+  return path.build();
 }
 
 // Drawn once: the ring never changes

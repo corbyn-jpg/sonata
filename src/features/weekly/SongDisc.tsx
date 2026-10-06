@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect } from "react";
 import { View, type AccessibilityActionEvent } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
@@ -29,6 +29,17 @@ const SIZE = 2 * (RING + 40); // room for the ring's glow and the knob
 const C = SIZE / 2;
 const SPIN = (2 * Math.PI) / 40; // one turn every 40 s while playing
 const GRAB = 32; // how far from the ring a touch still counts as grabbing it
+// The progress ring, drawn once: a full circle starting at 12 o'clock
+const RING_PATH = Skia.PathBuilder.Make()
+  .addArc(Skia.XYWHRect(C - RING, C - RING, 2 * RING, 2 * RING), -90, 359.9)
+  .build();
+
+/** Touch position → how far through the song (12 o'clock = start, clockwise). */
+function progressAt(x: number, y: number) {
+  "worklet";
+  const a = Math.atan2(y - C, x - C) + Math.PI / 2;
+  return (a < 0 ? a + 2 * Math.PI : a) / (2 * Math.PI);
+}
 
 type Props = {
   art: SkImage | null;
@@ -56,30 +67,30 @@ export function SongDisc({ art, glow, playing, currentTime, duration, active, on
   const total = useSharedValue(0);
   const scrubbing = useSharedValue(false);
 
-  useEffect(() => {
-    advancing.value = playing;
-    spinning.value = playing && !reduceMotion; // with Reduce Motion on, the disc stays still
+    useEffect(() => {
+    advancing.set(playing);
+    spinning.set(playing && !reduceMotion); // with Reduce Motion on, the disc stays still
   }, [playing, reduceMotion, advancing, spinning]);
 
   useEffect(() => {
-    total.value = duration;
+    total.set(duration);
   }, [duration, total]);
 
   // The player reports coarsely; between reports the ring moves on by itself, so only correct it when it has drifted (or after a seek)
   useEffect(() => {
-    if (scrubbing.value || duration <= 0) return;
+    if (scrubbing.get() || duration <= 0) return;
     const reported = Math.min(1, currentTime / duration);
-    if (!playing || Math.abs(reported - progress.value) > 0.015) progress.value = reported;
+    if (!playing || Math.abs(reported - progress.get()) > 0.015) progress.set(reported);
   }, [currentTime, duration, playing, progress, scrubbing]);
 
   const frame = useFrameCallback((info) => {
     const dt = (info.timeSincePreviousFrame ?? 16) / 1000;
     // Ease the spin up and down rather than starting and stopping dead
-    const target = spinning.value ? SPIN : 0;
-    speed.value += (target - speed.value) * Math.min(1, dt * 1.5);
-    angle.value = (angle.value + speed.value * dt) % (2 * Math.PI);
-    if (advancing.value && !scrubbing.value && total.value > 0)
-      progress.value = Math.min(1, progress.value + dt / total.value);
+    const target = spinning.get() ? SPIN : 0;
+    speed.set(speed.get() + (target - speed.get()) * Math.min(1, dt * 1.5));
+    angle.set((angle.get() + speed.get() * dt) % (2 * Math.PI));
+    if (advancing.get() && !scrubbing.get() && total.get() > 0)
+      progress.set(Math.min(1, progress.get() + dt / total.get()));
   }, false);
 
   useEffect(() => {
@@ -88,46 +99,29 @@ export function SongDisc({ art, glow, playing, currentTime, duration, active, on
 
   const rotation = useDerivedValue(() => [{ rotate: angle.value }]);
 
-  const ringPath = useMemo(() => {
-    const path = Skia.Path.Make();
-    path.addArc({ x: C - RING, y: C - RING, width: 2 * RING, height: 2 * RING }, -90, 359.9);
-    return path;
-  }, []);
   const knob = useDerivedValue(() => {
     const a = -Math.PI / 2 + progress.value * 2 * Math.PI;
     return vec(C + Math.cos(a) * RING, C + Math.sin(a) * RING);
   });
 
-  // The gesture is built once, so it reads the latest callback and duration through a ref
-  const latest = useRef({ onSeek, duration });
-  latest.current = { onSeek, duration };
-
-  const gesture = useMemo(() => {
-    // Touch angle → how far through the song (12 o'clock = start, clockwise)
-    const progressAt = (x: number, y: number) => {
-      "worklet";
-      const a = Math.atan2(y - C, x - C) + Math.PI / 2;
-      return (a < 0 ? a + 2 * Math.PI : a) / (2 * Math.PI);
-    };
-    const seek = (fraction: number) => latest.current.onSeek(fraction * latest.current.duration);
-
-    return Gesture.Pan()
-      .minDistance(0)
-      .onBegin((e) => {
-        // Only touches near the ring scrub; the rest of the disc is just a picture
-        if (Math.abs(Math.hypot(e.x - C, e.y - C) - RING) > GRAB) return;
-        scrubbing.value = true;
-        progress.value = progressAt(e.x, e.y);
-      })
-      .onUpdate((e) => {
-        if (scrubbing.value) progress.value = progressAt(e.x, e.y);
-      })
-      .onFinalize(() => {
-        if (!scrubbing.value) return;
-        scrubbing.value = false;
-        runOnJS(seek)(progress.value);
-      });
-  }, [progress, scrubbing]);
+    // Rebuilt on each render, so it always seeks with the latest callback and duration
+  const seek = (fraction: number) => onSeek(fraction * duration);
+  const gesture = Gesture.Pan()
+    .minDistance(0)
+    .onBegin((e) => {
+      // Only touches near the ring scrub; the rest of the disc is just a picture
+      if (Math.abs(Math.hypot(e.x - C, e.y - C) - RING) > GRAB) return;
+      scrubbing.set(true);
+      progress.set(progressAt(e.x, e.y));
+    })
+    .onUpdate((e) => {
+      if (scrubbing.get()) progress.set(progressAt(e.x, e.y));
+    })
+    .onFinalize(() => {
+      if (!scrubbing.get()) return;
+      scrubbing.set(false);
+      runOnJS(seek)(progress.get());
+    });
 
   const onAccessibilityAction = (e: AccessibilityActionEvent) => {
     const step = e.nativeEvent.actionName === "increment" ? 5 : -5;
@@ -169,10 +163,10 @@ export function SongDisc({ art, glow, playing, currentTime, duration, active, on
 
           {/* Progress ring: faint track, glowing arc, and a knob to grab */}
           <Circle cx={C} cy={C} r={RING} style="stroke" strokeWidth={3} color={colours.teal[700]} />
-          <Path path={ringPath} start={0} end={progress} style="stroke" strokeWidth={8} strokeCap="round" color={colours.violet[500]} opacity={0.6}>
+          <Path path={RING_PATH} start={0} end={progress} style="stroke" strokeWidth={8} strokeCap="round" color={colours.violet[500]} opacity={0.6}>
             <BlurMask blur={6} style="normal" />
           </Path>
-          <Path path={ringPath} start={0} end={progress} style="stroke" strokeWidth={3} strokeCap="round" color={colours.violet[200]} />
+          <Path path={RING_PATH} start={0} end={progress} style="stroke" strokeWidth={3} strokeCap="round" color={colours.violet[200]} />
           <Circle c={knob} r={7} color={colours.textPrimary} />
         </Canvas>
       </View>

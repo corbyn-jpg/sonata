@@ -55,7 +55,7 @@ export default function Home() {
   const [selected, setSelected] = useState<Letter | null>(null);
   const [reflection, setReflection] = useState("");
   const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
-  const { days, todayIndex, todayLogged, streak, loaded, logToday } = useWeek();
+  const { days, todayIndex, todayLogged, loaded, logToday } = useWeek();
   const feelNotes = usePreference("feelNotes");
   const instrument = usePreference("instrument");
 
@@ -98,10 +98,12 @@ export default function Home() {
     setMode(next);
     setSelected(null);
     setStatus("idle");
-    page.value = withTiming(next === "minor" ? 1 : 0, {
-      duration: 600,
-      easing: Easing.inOut(Easing.quad),
-    });
+    page.set(
+      withTiming(next === "minor" ? 1 : 0, {
+        duration: 600,
+        easing: Easing.inOut(Easing.quad),
+      }),
+    );
     previewNote(LETTERS[focused], next, instrument);
     if (feelNotes) feelNote(LETTERS[focused], next);
     else Haptics.selectionAsync();

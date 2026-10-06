@@ -1,8 +1,7 @@
+import mockAsyncStorage from "@react-native-async-storage/async-storage/jest/async-storage-mock";
 import { localCheckins, markSynced, mergeCheckins, storeCheckins, type StoredCheckin } from "./localCheckins";
 
-jest.mock("@react-native-async-storage/async-storage", () =>
-  require("@react-native-async-storage/async-storage/jest/async-storage-mock"),
-);
+jest.mock("@react-native-async-storage/async-storage", () => mockAsyncStorage);
 
 const record = (id: string, timestamp: number, synced = false): StoredCheckin => ({
   id,

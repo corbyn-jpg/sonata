@@ -22,7 +22,6 @@ import { SongDisc } from "@/features/weekly/SongDisc";
 import { OrbitTransport } from "@/features/weekly/OrbitTransport";
 import { makeDiscArt } from "@/features/weekly/discArt";
 import {
-  DEMO_NAMES,
   DEMO_WEEKS,
   type DemoWeek,
 } from "@/features/weekly/demoWeeks";
@@ -48,7 +47,7 @@ import colours from "@/theme/colours";
 const ART_SIZE = Math.round(230 * PixelRatio.get()); // the disc's size in real pixels
 
 export default function Weekly() {
-  const [demo, setDemo] = useState<DemoWeek | null>(null); // development builds only
+  const [demo] = useState<DemoWeek | null>(null); // development builds only
   const {
     status,
     weekStart,
@@ -140,7 +139,7 @@ export default function Weekly() {
   };
 
   // "Composing your week" after each new check-in, then (if the week has been heavy) a gentle offer
-  const { revealing, replay } = useComposingMoment(weekKey, ready);
+  const { revealing } = useComposingMoment(weekKey, ready);
   const { offer, dismiss } = useLowMoodOffer(demo ? DEMO_WEEKS[demo] : null);
   // Shown a moment after it becomes due, to let the song settle in first
   const due = offer && !revealing && isFocused ? weekKey : null;

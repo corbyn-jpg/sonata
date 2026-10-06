@@ -40,7 +40,10 @@ function paintOf(brush: Brush) {
     paint.setStrokeCap(StrokeCap.Round);
     paint.setStrokeJoin(StrokeJoin.Round);
   }
-  if (brush.blur) paint.setMaskFilter(Skia.MaskFilter.MakeBlur(BlurStyle.Normal, brush.blur, true));
+  if (brush.blur)
+    paint.setMaskFilter(
+      Skia.MaskFilter.MakeBlur(BlurStyle.Normal, brush.blur, true),
+    );
   if (brush.glow) paint.setBlendMode(BlendMode.Screen);
   return paint;
 }
@@ -50,21 +53,27 @@ export function skiaPainter(canvas: SkCanvas): Painter {
   return {
     circle: (x, y, r, brush) => canvas.drawCircle(x, y, r, paintOf(brush)),
     arc: (cx, cy, radius, start, sweep, brush) => {
-      const path = Skia.Path.Make();
-      path.addArc(Skia.XYWHRect(cx - radius, cy - radius, 2 * radius, 2 * radius), start, sweep);
+      const path = Skia.PathBuilder.Make()
+        .addArc(
+          Skia.XYWHRect(cx - radius, cy - radius, 2 * radius, 2 * radius),
+          start,
+          sweep,
+        )
+        .build();
       canvas.drawPath(path, paintOf(brush));
     },
     polyline: (points, closed, brush) => {
-      const path = Skia.Path.Make();
-      points.forEach(([x, y], i) => (i ? path.lineTo(x, y) : path.moveTo(x, y)));
+      const path = Skia.PathBuilder.Make();
+      points.forEach(([x, y], i) =>
+        i ? path.lineTo(x, y) : path.moveTo(x, y),
+      );
       if (closed) path.close();
-      canvas.drawPath(path, paintOf(brush));
+      canvas.drawPath(path.build(), paintOf(brush));
     },
-    rect: (x, y, width, height, brush) => canvas.drawRect(Skia.XYWHRect(x, y, width, height), paintOf(brush)),
+    rect: (x, y, width, height, brush) =>
+      canvas.drawRect(Skia.XYWHRect(x, y, width, height), paintOf(brush)),
     clipCircle: (x, y, r) => {
-      const path = Skia.Path.Make();
-      path.addCircle(x, y, r);
-      canvas.clipPath(path, ClipOp.Intersect, true);
+      canvas.clipPath(Skia.Path.Circle(x, y, r), ClipOp.Intersect, true);
     },
     save: () => {
       canvas.save();

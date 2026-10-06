@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Modal, Pressable, Text } from "react-native";
 import {
   AudioWaveform,
   Check,

@@ -13,8 +13,7 @@ Each entry has:
 
 ## Open problems
 
-- **React Compiler lint errors** ("Cannot access refs during render", "This value cannot be modified") in several Home and Weekly files. The app runs, but `npx expo lint` fails. These need a clean-up pass before the audit (stage 11).
-- **`WavyTransport.tsx` is unused.** It was replaced by `OrbitTransport` and can be deleted.
+- None. The clean-up pass (problems 44–46) brings `npx expo lint` to 0 problems once applied.
 
 ---
 
@@ -220,3 +219,26 @@ Each entry has:
 ### 43. The playlist icon crowded the Weekly title on narrow phones
 - **Cause:** the icon was pinned to the right edge, so a long title could run into it.
 - **Fix:** put the title and icon in a row with a fixed `gap-4`.
+
+---
+
+## Clean-up pass (after stage 7)
+
+### 44. 22 React Compiler lint errors ("This value cannot be modified", "Cannot access refs during render", "setState in an effect")
+- **Cause:** three patterns the React 19 hook rules reject:
+  - Writing Reanimated shared values with `.value = …` in component code.
+  - The "latest ref" trick (`ref.current = prop` during render) used so gestures built once in `useMemo` could call fresh callbacks.
+  - Resetting state at the start of an effect (`setFailed(false)`, `setRevealing(false)`).
+- **Fix:**
+  - Shared values use `.get()` and `.set()`, Reanimated's React Compiler-safe API.
+  - Gestures are rebuilt on each render instead of memoised, so they capture the current callbacks directly and the refs go.
+  - State that was reset in an effect is worked out during render instead: a failure is keyed by song and instrument, and the composing moment is `{ key, waited }`, finished when the song is ready.
+- **Lesson:** if a value can be derived from props or state, derive it; don't copy it into state or a ref.
+
+### 45. Skia warnings: `SkPath.moveTo()` / `lineTo()` / `addArc()` / `addCircle()` / `cubicTo()` are deprecated
+- **Cause:** paths were built by mutating `Skia.Path.Make()`. Skia 2.6 moves building to `Skia.PathBuilder`.
+- **Fix:** `Skia.PathBuilder.Make()…build()` in `SongDisc`, `OrbitTransport`, `ComposingMoment` and the disc painter; `Skia.Path.Circle()` for the disc's clip.
+
+### 46. Smaller lint warnings
+- **Cause:** unused imports and variables (`View`, `streak`), the Weekly development chips missing from the header (so `DEMO_NAMES`, `setDemo` and `replay` were unused), a tab icon defined as an anonymous component, and `require()` in two test files.
+- **Fix:** removed the unused names, restored the development chips, named the tab icon component, imported the AsyncStorage mock instead of requiring it, and renamed two test files to match the files they test.

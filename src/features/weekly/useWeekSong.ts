@@ -79,13 +79,14 @@ export function useWeekSong(demo: DemoWeek | null = null) {
   );
 
   const [rendered, setRendered] = useState<{ key: string; uri: string } | null>(null);
-  const [failed, setFailed] = useState(false);
+    // Which song and instrument last failed to render, so a new one starts fresh without resetting state in the effect
+  const [failedKey, setFailedKey] = useState<string | null>(null);
   const fileKey = `${weekKey}-${instrument}`;
+  const failed = failedKey === fileKey;
 
   useEffect(() => {
     if (!song) return;
     let cancelled = false;
-    setFailed(false);
     // Mixing blocks JavaScript for about a second, so let the "composing" state draw first
     const timer = setTimeout(() => {
       renderSong(song, instrument, `song-${weekKey}`)
@@ -93,7 +94,7 @@ export function useWeekSong(demo: DemoWeek | null = null) {
         .catch((error) => {
           if (cancelled) return;
           console.warn("Couldn't render the week's song:", error);
-          setFailed(true);
+          setFailedKey(fileKey);
         });
     }, 50);
     return () => {

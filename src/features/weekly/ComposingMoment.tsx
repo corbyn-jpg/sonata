@@ -79,14 +79,14 @@ export function ComposingMoment({ visible, days }: Props) {
 
   // A smooth line through the notes, drawn as the notes arrive
   const melody = useMemo(() => {
-    const path = Skia.Path.Make();
+    const path = Skia.PathBuilder.Make()
     notes.forEach(({ x, y }, i) => {
       if (i === 0) return path.moveTo(x, y);
       const prev = notes[i - 1];
       const mid = (prev.x + x) / 2;
       path.cubicTo(mid, prev.y, mid, y, x, y);
     });
-    return path;
+    return path.build();
   }, [notes]);
 
   const fade = useAnimatedStyle(() => ({ opacity: opacity.value }));

@@ -3,11 +3,12 @@ import type { ColorValue } from 'react-native';
 import { CalendarDays, Disc3, House, Orbit, type LucideIcon } from 'lucide-react-native';
 import colours from '@/theme/colours';
 
-const icon =
-  (Icon: LucideIcon) =>
-  ({ color: colour }: { color: ColorValue }) => (
-    <Icon color={colour as string} size={24} strokeWidth={1.5} />
-  );
+/** A tab's icon, in the colour the tab bar asks for (brighter when active). */
+function icon(Icon: LucideIcon) {
+  return function TabIcon({ color: colour }: { color: ColorValue }) {
+    return <Icon color={colour as string} size={24} strokeWidth={1.5} />;
+  };
+}
 
 export default function TabLayout() {
   return (
