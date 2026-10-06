@@ -12,7 +12,7 @@ type Props = {
   uri: string | null;
   /** What the file is called once it leaves the app. */
   fileName: string;
-  /** The week's song as a playlist entry, or null when it can't be added (e.g. an example week). */
+  /** The week's song as a playlist entry, or null while there's no song to add yet. */
   playlistSong: PlaylistSong | null;
 };
 

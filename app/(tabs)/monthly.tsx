@@ -83,14 +83,15 @@ export default function Monthly() {
               streak={streak}
               isCurrentMonth={atLatest}
             />
+            {/* Keyed by month, so changing month stops whatever was playing */}
             {summary.melodies > 0 && (
               <MonthSongCard
                 key={`song-${dayKey(month)}`}
                 month={month}
+                days={summary.days}
                 weeks={summary.weeks}
               />
             )}
-            {/* Keyed by month, so changing month stops whatever was playing */}
             <WeeksShelf
               key={dayKey(month)}
               weeks={summary.weeks}

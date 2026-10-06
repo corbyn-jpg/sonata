@@ -57,6 +57,13 @@ export function monthGrid(month: Date): (Date | null)[][] {
   );
 }
 
+/** Every day of the month in order: its check-in, or null if there wasn't one. */
+export function daysOfMonth(days: ReadonlyMap<string, DayNote>, month: Date): (DayNote | null)[] {
+  const first = startOfMonth(month);
+  const length = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+  return Array.from({ length }, (_, i) => days.get(dayKey(addDays(first, i))) ?? null);
+}
+
 /** The Mondays of the weeks that start in this month. Each of those weeks' songs belongs to this month. */
 export function weeksOfMonth(month: Date): Date[] {
   const first = startOfMonth(month);

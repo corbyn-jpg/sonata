@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 import { useFocusEffect } from "expo-router";
-import { hasLowMoodRun, type DayNote, type Week } from "@/engine";
+import { hasLowMoodRun, type DayNote } from "@/engine";
 import { getCheckins } from "@/lib/checkins";
 import { addDays, dayKey, startOfDay } from "@/lib/dates";
 
@@ -10,16 +10,12 @@ let dismissedThisSession = false;
 /**
  Whether to gently offer a grounding moment: 4 or more Dark check-ins in a row within the last 7 calendar days (missed days skipped).
  */
-export function useLowMoodOffer(example: Week | null) {
+export function useLowMoodOffer() {
   const [heavy, setHeavy] = useState(false);
   const [dismissed, setDismissed] = useState(dismissedThisSession);
 
   useFocusEffect(
     useCallback(() => {
-      if (example) {
-        setHeavy(hasLowMoodRun(example));
-        return;
-      }
       let cancelled = false;
       const today = startOfDay(new Date());
       const keys = Array.from({ length: 7 }, (_, i) => dayKey(addDays(today, i - 6)));
@@ -36,7 +32,7 @@ export function useLowMoodOffer(example: Week | null) {
       return () => {
         cancelled = true;
       };
-    }, [example]),
+    }, []),
   );
 
   const dismiss = () => {

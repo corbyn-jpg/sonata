@@ -1,7 +1,5 @@
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { ActivityIndicator, PixelRatio, Pressable, ScrollView, Text, View } from "react-native";
-import { Canvas, Circle, Group, Image, Skia, vec, type SkImage } from "@shopify/react-native-skia";
-import { useDerivedValue, useFrameCallback, useReducedMotion, useSharedValue } from "react-native-reanimated";
 import { Pause, Play } from "lucide-react-native";
 import { INSTRUMENT_LABELS } from "@/audio";
 import { composeWeek } from "@/engine";
@@ -11,12 +9,10 @@ import { dayKey, startOfWeek } from "@/lib/dates";
 import type { PlaylistSong } from "@/lib/playlistSongs";
 import colours from "@/theme/colours";
 import { shortDate, type MonthWeek } from "./month";
+import { SmallDisc } from "./SmallDisc";
 
 const DISC = 84;
-const C = DISC / 2;
 const ART_PX = Math.round(DISC * PixelRatio.get()); // the art's size in real pixels
-const CLIP = Skia.Path.Circle(C, C, C);
-const SPIN = (2 * Math.PI) / 40; // the same speed as the Weekly disc: one turn every 40 s
 
 type Props = { weeks: readonly MonthWeek[]; today: Date };
 
@@ -74,7 +70,7 @@ export function WeeksShelf({ weeks, today }: Props) {
               className="items-center gap-2"
             >
               <View style={{ width: DISC, height: DISC }}>
-                <ShelfDisc art={art ?? null} active={active} spinning={active && playing} />
+                <SmallDisc art={art ?? null} size={DISC} active={active} spinning={active && playing} />
                 {active && (
                   <View className="absolute inset-0 items-center justify-center">
                     <View className="h-9 w-9 items-center justify-center rounded-full bg-canvas/70">
@@ -95,28 +91,5 @@ export function WeeksShelf({ weeks, today }: Props) {
         })}
       </ScrollView>
     </View>
-  );
-}
-
-/** One small record: its art, turning while it plays, with a ring when it's the one loaded. */
-function ShelfDisc({ art, active, spinning }: { art: SkImage | null; active: boolean; spinning: boolean }) {
-  const reduceMotion = useReducedMotion();
-  const angle = useSharedValue(0);
-  const frame = useFrameCallback((info) => {
-    const dt = (info.timeSincePreviousFrame ?? 16) / 1000;
-    angle.set((angle.get() + SPIN * dt) % (2 * Math.PI));
-  }, false);
-  useEffect(() => {
-    frame.setActive(spinning && !reduceMotion); // with Reduce Motion on, it stays still
-  }, [spinning, reduceMotion, frame]);
-  const rotation = useDerivedValue(() => [{ rotate: angle.get() }]);
-
-  return (
-    <Canvas style={{ width: DISC, height: DISC }}>
-      <Group clip={CLIP} origin={vec(C, C)} transform={rotation}>
-        {art && <Image image={art} x={0} y={0} width={DISC} height={DISC} fit="cover" />}
-      </Group>
-      {active && <Circle cx={C} cy={C} r={C - 1} style="stroke" strokeWidth={2} color={colours.violet[200]} />}
-    </Canvas>
   );
 }

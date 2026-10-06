@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, PixelRatio, Pressable, Text, View } from "react-native";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { useIsFocused } from "expo-router";
 import { Pause, Play } from "lucide-react-native";
@@ -8,23 +8,38 @@ import { songSeconds } from "@/audio/mixer";
 import { renderSong } from "@/audio/song";
 import { takeTurn } from "@/audio/turns";
 import { BentoCard } from "@/components/BentoCard";
-import { composeMonth } from "@/engine";
+import { composeMonth, type DayNote } from "@/engine";
 import { hashString } from "@/engine/random";
 import { clock } from "@/features/weekly/songTime";
 import { dayKey } from "@/lib/dates";
 import colours from "@/theme/colours";
-import { monthName, type MonthWeek } from "./month";
+import { makeMonthArt } from "./disc/monthArt";
+import { daysOfMonth, monthName, type MonthWeek } from "./month";
+import { SmallDisc } from "./SmallDisc";
 
-type Props = { month: Date; weeks: readonly MonthWeek[] };
+const DISC = 80;
+const ART_PX = Math.round(DISC * PixelRatio.get()); // the art's size in real pixels
+
+type Props = {
+  month: Date;
+  /** Each day's check-in, by day key (for the beads round the record's rim). */
+  days: ReadonlyMap<string, DayNote>;
+  weeks: readonly MonthWeek[];
+};
 
 /**
  The month's song: every week with a song, joined into one piece (composeMonth). It's made the first time it's played (a few seconds, as it's several weeks long), then kept, so it plays straight away after that.
  */
-export function MonthSongCard({ month, weeks }: Props) {
+export function MonthSongCard({ month, days, weeks }: Props) {
   const withSongs = useMemo(() => weeks.filter((w) => w.mode !== null), [weeks]);
   const song = useMemo(
     () => composeMonth(withSongs.map((w) => ({ week: w.days, seed: dayKey(w.start) })), dayKey(month)),
     [withSongs, month],
+  );
+  // Its own record: the month's moon phases, one moon per week
+  const art = useMemo(
+    () => makeMonthArt(daysOfMonth(days, month), weeks.map((w) => w.days), ART_PX, dayKey(month)),
+    [days, weeks, month],
   );
   const instrument = mostUsedInstrument(withSongs.map((w) => w.instrument)) ?? "piano";
   // The file name changes whenever the month's notes do, so a new check-in makes a new song
@@ -63,27 +78,14 @@ export function MonthSongCard({ month, weeks }: Props) {
     }
   };
 
-  const [main, second] = song.palette;
+  const [main, second] = song.palette; // the card's corner glow
   const title = `${monthName(month)}'s song`;
   const weeksText = withSongs.length === 1 ? "1 week" : `${withSongs.length} weeks`;
 
   return (
     <BentoCard glow={[colours.orb[main.note][main.mode].core, colours.orb[second.note][second.mode].core]}>
       <View className="flex-row items-center gap-4">
-        {/* A small record in the month's two most common colours */}
-        <View
-          style={{
-            width: 56,
-            height: 56,
-            borderRadius: 28,
-            backgroundColor: colours.orb[main.note][main.mode].core,
-            borderWidth: 5,
-            borderColor: colours.orb[second.note][second.mode].core,
-          }}
-          className="items-center justify-center"
-        >
-          <View className="h-3 w-3 rounded-full bg-canvas" />
-        </View>
+        <SmallDisc art={art} size={DISC} active={loaded !== null} spinning={status.playing} />
         <View className="flex-1 gap-0.5">
           <Text className="font-mono-medium text-h4 text-primary">{title}</Text>
           <Text className="font-sans text-caption text-muted">

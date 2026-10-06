@@ -21,10 +21,6 @@ import { InstrumentPills } from "@/features/weekly/InstrumentPills";
 import { SongDisc } from "@/features/weekly/SongDisc";
 import { OrbitTransport } from "@/features/weekly/OrbitTransport";
 import { makeDiscArt } from "@/features/weekly/discArt";
-import {
-  DEMO_WEEKS,
-  type DemoWeek,
-} from "@/features/weekly/demoWeeks";
 import { ComposingMoment } from "@/features/weekly/ComposingMoment";
 import { LowMoodSheet } from "@/features/weekly/LowMoodSheet";
 import { useComposingMoment } from "@/features/weekly/useComposingMoment";
@@ -47,7 +43,6 @@ import colours from "@/theme/colours";
 const ART_SIZE = Math.round(230 * PixelRatio.get()); // the disc's size in real pixels
 
 export default function Weekly() {
-  const [demo] = useState<DemoWeek | null>(null); // development builds only
   const {
     status,
     weekStart,
@@ -57,7 +52,7 @@ export default function Weekly() {
     instrument,
     setInstrument,
     uri,
-  } = useWeekSong(demo);
+  } = useWeekSong();
   const player = useAudioPlayer(null, { updateInterval: 250 }); // the disc animates the ring in between
   const playback = useAudioPlayerStatus(player);
   const isFocused = useIsFocused();
@@ -118,16 +113,6 @@ export default function Weekly() {
   };
 
   const toggle = () => {
-    if (__DEV__) {
-      // Shows in the Expo terminal: if this never appears, the tap isn't reaching the button
-      console.log("Play pressed", {
-        status,
-        loaded: playback.isLoaded,
-        duration: playback.duration,
-        playing: playback.playing,
-        error: playback.error,
-      });
-    }
     if (playback.playing) return player.pause();
     if (playback.duration > 0 && position >= playback.duration - 0.05) seek(0); // finished: start again
     player.play();
@@ -140,7 +125,7 @@ export default function Weekly() {
 
   // "Composing your week" after each new check-in, then (if the week has been heavy) a gentle offer
   const { revealing } = useComposingMoment(weekKey, ready);
-  const { offer, dismiss } = useLowMoodOffer(demo ? DEMO_WEEKS[demo] : null);
+  const { offer, dismiss } = useLowMoodOffer();
   // Shown a moment after it becomes due, to let the song settle in first
   const due = offer && !revealing && isFocused ? weekKey : null;
   const [settled, setSettled] = useState<string | null>(null);
@@ -157,9 +142,9 @@ export default function Weekly() {
   };
 
   const started = playback.playing || position > 0;
-  // The week as a playlist entry (its notes, so it always sounds the same). Example weeks can't be added.
+  // The week as a playlist entry (its notes, so it always sounds the same)
   const playlistSong: PlaylistSong | null =
-    days && song && !demo
+    days && song
       ? {
           kind: "week",
           week: dayKey(weekStart),

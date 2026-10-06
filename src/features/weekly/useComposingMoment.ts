@@ -12,7 +12,6 @@ const MIN_SECONDS = 3.2; // long enough to feel like a moment, even when the son
 export function useComposingMoment(weekKey: string | null, songReady: boolean) {
   // The version of the week being revealed, and whether it has had its minimum time on screen
   const [moment, setMoment] = useState<{ key: string; waited: boolean } | null>(null);
-  const [replays, setReplays] = useState(0); // development builds: "Replay composing"
 
   // Start: a version of the week we haven't revealed yet
   useEffect(() => {
@@ -33,7 +32,7 @@ export function useComposingMoment(weekKey: string | null, songReady: boolean) {
       cancelled = true;
       clearTimeout(timer);
     };
-  }, [weekKey, replays]);
+  }, [weekKey]);
 
   // Worked out during render rather than stored: showing until the song is ready and the moment has had its time
   const current = moment !== null && moment.key === weekKey;
@@ -50,11 +49,5 @@ export function useComposingMoment(weekKey: string | null, songReady: boolean) {
       .finally(() => setMoment(null));
   }, [finished, weekKey]);
 
-  /** Development builds only: forget this week was shown, so the moment plays again. */
-  const replay = async () => {
-    await AsyncStorage.removeItem(REVEALED_KEY).catch(() => {});
-    setReplays((n) => n + 1);
-  };
-
-  return { revealing, replay };
+  return { revealing };
 }

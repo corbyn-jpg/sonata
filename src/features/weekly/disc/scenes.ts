@@ -15,8 +15,8 @@ export const SCENE_FOR_MODE: Record<WeekMode, Scene> = {
   aeolian: "eclipse", // heavy: a dark centre with light all around it
 };
 
-type Orb = { core: string; edge: string };
-type Context = {
+export type Orb = { core: string; edge: string };
+export type Context = {
   p: Painter;
   /** Centre and radius of the disc. */
   c: number;
@@ -28,22 +28,22 @@ type Context = {
   palette: readonly [Orb, Orb];
 };
 
-const orbOf = (day: DayNote): Orb => colours.orb[day.note][day.mode];
+export const orbOf = (day: DayNote): Orb => colours.orb[day.note][day.mode];
 const logged = (week: readonly (DayNote | null)[]) =>
   week.flatMap((day, i) => (day ? [{ ...day, day: i }] : []));
-const pointAt = ({ c }: Context, angle: number, distance: number): Point => [
+export const pointAt = ({ c }: Context, angle: number, distance: number): Point => [
   c + Math.cos(angle) * distance,
   c + Math.sin(angle) * distance,
 ];
 
 /** Black vinyl with fine grooves. */
-function vinyl({ p, c, r, px }: Context, inner = "#16101F", outer = "#07040C") {
+export function vinyl({ p, c, r, px }: Context, inner = "#16101F", outer = "#07040C") {
   p.circle(c, c, r, { gradient: { x: c, y: c, r, colours: [inner, outer] } });
   for (let k = 0; k < 40; k++) p.circle(c, c, r * (0.3 + k * 0.0175), { colour: "#FFFFFF", alpha: 0.035, stroke: px });
 }
 
 /** Scattered specks of starlight. */
-function stardust(ctx: Context, count: number) {
+export function stardust(ctx: Context, count: number) {
   const { p, r, px, random } = ctx;
   for (let i = 0; i < count; i++) {
     const [x, y] = pointAt(ctx, random() * Math.PI * 2, r * (0.3 + random() * 0.68));
@@ -53,7 +53,7 @@ function stardust(ctx: Context, count: number) {
 }
 
 /** The small dark spindle hole in the middle. */
-function spindleHole({ p, c, r, px }: Context) {
+export function spindleHole({ p, c, r, px }: Context) {
   p.circle(c, c, r * 0.045, { colour: colours.canvas });
   p.circle(c, c, r * 0.045, { colour: "#FFFFFF", alpha: 0.3, stroke: 2 * px });
 }

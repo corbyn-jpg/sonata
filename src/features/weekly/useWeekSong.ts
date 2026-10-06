@@ -6,8 +6,6 @@ import { composeWeek, type DayNote } from "@/engine";
 import { hashString } from "@/engine/random";
 import { getCheckins } from "@/lib/checkins";
 import { addDays, dayKey, startOfWeek } from "@/lib/dates";
-import { DEMO_WEEKS, type DemoWeek } from "./demoWeeks";
-
 
 export type WeekDay = (DayNote & { instrument?: Instrument }) | null;
 
@@ -51,20 +49,16 @@ function useThisWeek() {
 /**
  This week's song: composed by the engine from the check-ins so far, then rendered to a file.
  `status` is "composing" while the audio is being made (about a second on a phone).
- Pass `demo` (development builds only) to hear and see an example week instead.
  */
-export function useWeekSong(demo: DemoWeek | null = null) {
-  const real = useThisWeek();
-  const weekStart = real.weekStart;
-  const days = demo ? DEMO_WEEKS[demo] : real.days;
-  const loadFailed = !demo && real.loadFailed;
+export function useWeekSong() {
+  const { weekStart, days, loadFailed } = useThisWeek();
   const [chosen, setInstrument] = useState<Instrument | null>(null);
   // By default, the instrument used most this week, so the song sounds like the days did
   const instrument = chosen ?? mostUsedInstrument((days ?? []).map((d) => d?.instrument)) ?? "piano";
 
   // Only the notes matter to the song, so the song (and its file) are keyed by them
   const notes = days?.map((d) => d && { note: d.note, mode: d.mode }) ?? null;
-  const weekKey = notes ? `${demo ?? dayKey(weekStart)}-${hashString(JSON.stringify(notes)).toString(36)}` : null;
+  const weekKey = notes ? `${dayKey(weekStart)}-${hashString(JSON.stringify(notes)).toString(36)}` : null;
   const song = useMemo(
     () => (notes?.some(Boolean) ? composeWeek(notes, dayKey(weekStart)) : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- weekKey changes exactly when notes do

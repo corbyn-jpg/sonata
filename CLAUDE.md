@@ -45,12 +45,15 @@ the feeling in and defeats the product.
 |---|---|---|
 | Framework | React Native + TypeScript, Expo | Expo managed workflow with a **development build** (`expo-dev-client`) — Expo Go can't load the native audio module |
 | Styling | NativeWind (Tailwind for RN) | Design tokens in `tailwind.config.js` |
-| Animation | React Native Reanimated 3 | All ambient motion runs on the UI thread |
-| Audio | `react-native-audio-api` + SoundFont samples | WebAudio-style API on native. Local synthesis, no server round-trips. **Not Tone.js** — it needs a browser WebAudio context |
+| Animation | React Native Reanimated 4 | All ambient motion runs on the UI thread. Shared values use `.get()` / `.set()` (React Compiler lint rules) |
+| Graphics | `@shopify/react-native-skia` 2.6 | Every glow, orb, wash, disc and chart. Build paths with `Skia.PathBuilder` (the mutating `SkPath` methods are deprecated) |
+| Audio | `expo-audio` + pre-rendered WAVs from recorded samples | Chords and chimes rendered offline by a script; songs mixed to a WAV in JS on the phone. No live synthesis (§12) |
+| Sharing | `react-native-share` | Shares a file **and** a message together on Android (`expo-sharing` can't). Needs a development build |
+| Local storage | AsyncStorage (sealed records) | Offline-first: check-ins and playlists are saved on the phone first, uploaded in the background (§12) |
 | Database | Firebase Cloud Firestore | Firebase JS SDK (`firebase` package, modular imports only) |
 | Auth | Firebase Anonymous Auth | `firebase/auth` with `getReactNativePersistence(AsyncStorage)` so the anonymous UID survives restarts — no email, no PII |
 | Encryption | AES-256-GCM client-side | `@noble/ciphers` (`gcm`) for encryption · `expo-crypto` `getRandomBytes` for keys and 12-byte IVs · `expo-secure-store` for the key. **Not `crypto-js`** — it has no GCM mode |
-| Version control | Git + GitHub, Git Flow | `main` / `develop` / `feature/*` |
+| Version control | Git + GitHub | Commit straight to `main` (solo project) |
 | Testing | Jest | Harmony engine + valence logic are the priority |
 | AI | Markov chain + GRU neural network, trained on Bach chorales by our own TypeScript trainer | On-device inference only (§7) |
 
@@ -65,8 +68,8 @@ and trend queries. The encryption key is generated on-device and never transmitt
 Security Rules validate document *shape* only; they never need payload access.
 
 ```ts
-// every write follows this shape
-await db.collection('daily_checkins').add({
+// every write follows this shape: sealed on the phone, stored locally, then uploaded
+await setDoc(doc(checkins, id), {   // id made on the phone, so a record keeps one id everywhere
   user_id,                  // plaintext — Firebase Anonymous UID
   encrypted_payload,        // AES-256-GCM ciphertext
   initialization_vector_iv, // per-record IV
@@ -105,6 +108,13 @@ WEEKLY_MELODIES
   week_start_date           datetime
   week_end_date             datetime
 
+PLAYLISTS
+  playlist_id               string  PK   — made on the phone
+  user_id                   string  FK
+  encrypted_payload         string       — name + songs (each song keeps the notes it was made from)
+  initialization_vector_iv  string
+  updated_at                datetime     — the newest version wins; deletes are uploaded too
+
 CBT_THOUGHT_RECORDS
   record_id                 string  PK
   user_id                   string  FK
@@ -114,7 +124,12 @@ CBT_THOUGHT_RECORDS
 ```
 
 Relationships: `USERS 1—∞ DAILY_CHECKINS` · `USERS 1—∞ WEEKLY_MELODIES` ·
-`USERS 1—∞ CBT_THOUGHT_RECORDS` · `WEEKLY_MELODIES 1—7 DAILY_CHECKINS`
+`USERS 1—∞ CBT_THOUGHT_RECORDS` · `USERS 1—∞ PLAYLISTS` · `WEEKLY_MELODIES 1—7 DAILY_CHECKINS`
+
+**In practice, songs aren't stored.** The engine is deterministic, so a week's (or month's) song is
+recomposed on the phone from its check-ins whenever it's needed, and its audio is cached as a WAV
+named by a hash of its notes. `WEEKLY_MELODIES` stays in the ERD for the pitch document. Firestore
+security rules for `daily_checkins` and `playlists` check ownership and document shape only.
 
 ---
 
@@ -214,9 +229,8 @@ silhouette inside the bloom. CTA "Get started". Background atmosphere crossfades
 
 ### 2. Home / Daily Canvas  ← core screen, build first
 - Header: time-aware greeting, streak pill, settings gear, composer entry
-- Bright/Dark indicator — **two full pages swiped vertically**, not a toggle switch. Bright =
-  warmer washes, brighter cores, faster drift. Dark = cooler, dimmer, slower. Blur-crossfade
-  between them.
+- Bright/Dark **toggle** (sun / moon, §12). Bright = warmer washes, brighter cores, faster drift.
+  Dark = cooler, dimmer, slower. Crossfades between them, never snaps.
 - View toggle (circle / grid icons):
   - **Carousel (default):** centred orb ~150pt at full glow, unlabelled. Adjacent orbs at the
     screen edges, ~60% scale, heavily blurred, ~35% opacity. Horizontal swipe. Whole-screen
@@ -229,24 +243,42 @@ silhouette inside the bloom. CTA "Get started". Background atmosphere crossfades
 
 **Target: complete in under 15 seconds.**
 
-### 3. Weekly Melody Studio
-- Spinning disc ~230pt, rotates once per ~40s while playing, eases to stop on pause. Face is
-  generated two-tone artwork from that week's dominant emotion colours. Small dark centre hole.
-- Circular progress ring traces the disc edge; drag anywhere on it to seek.
-- **Wavy transport capsule** — one continuous undulating shape housing skip/play/skip, play
-  bulging largest at centre. Not three separate buttons.
-- Instrument pills: the Home picker's list (§11.1)
-- Row of 7 day chips in emotion colours — these *do* carry emotion words (review context, not
-  picking context). Tap to seek to that bar.
-- **"Composing your week" transitional state:** full-screen orb with colours visibly swirling,
-  caption "Composing your week's melody…". Shown after the 7th check-in.
+### 3. Weekly Melody Studio ✅
+- Header: "Your week in sound" with a playlists icon beside it (opens `app/playlists/`), the
+  week's dates underneath.
+- Spinning disc ~230pt, one turn per ~40s while playing, eases to a stop on pause (still with
+  Reduce Motion). Its face is a **generated space scene chosen by the week's mode** (Ionian solar
+  system · Lydian aurora · Dorian comets · Aeolian eclipse), each day a planet, ribbon, comet or
+  ray in its orb's colours. Small dark centre hole.
+- Circular progress ring traces the disc edge; drag on it to seek.
+- **Ringed-planet transport** (`OrbitTransport`): play/pause is a planet in the week's main
+  colour, back/forward a day are moons at the ends of a tilted ring in the second colour. Still,
+  not animated, so the spinning disc stays the focus. Replaces the wavy capsule (§12).
+- Instrument pills: Piano · Violin · Harp · Flute. Changing instrument carries on from the same moment.
+- 7 day chips: day letter, a dot in the orb's colour and the note name (no emotion words). Tap
+  to play from that day.
+- Song actions: **Share** (with an optional message), **Save** (Android: to a folder the user
+  picks) and **Playlist** (§11).
+- **Composing moment:** shown once for each new version of the week (after every check-in),
+  for at least 3 s: "COMPOSING" over a staff where the week's notes arrive Monday to Sunday and
+  a fine line traces the melody, then "Your week, as one melody". Wind chimes while it lasts; a
+  glockenspiel chime and success haptic when the song is ready.
+- Low-mood offer (Flow D, §7) as a bottom sheet, a moment after the song settles.
 
-### 4. Monthly Rhythm
-- Calendar grid, glowing dots per logged day, outline circles for unlogged, violet ring on today
-- **Bento analytics grid** (mixed card sizes, corner glows): wide card = dominant mode ·
-  two small cards = streak, melodies generated · medium card = weekly valence line chart with
-  glowing data points, thin strokes not heavy bars
-- Horizontally scrollable weeks shelf — each week's disc artwork as a thumbnail
+### 4. Monthly Rhythm ✅
+- Month title with ‹ › (future months disabled).
+- Calendar: a logged day is a small glowing orb in its colours, a missed day a faint outline
+  (neutral, not a failure), today a violet ring. One Skia canvas for all the dots.
+- **Bento cards** (`BentoCard`, two-tone corner glow): wide = most-used mode ("2 weeks of 3 with a
+  song") · half = streak (an earlier month shows days logged instead) and melodies · wide =
+  weekly valence line, one glowing point per week, a gap for a week without check-ins.
+- **Month's song card:** the monthly song (§7), with its own **moon-phases record**: one moon per
+  week in that week's colours (fuller for a brighter week, a new moon for a week without
+  check-ins), a bead per day round the rim, the month's two main colours in the centre. Made the
+  first time it's played (a few seconds), then cached.
+- **Weeks shelf:** a small record per week that starts in the month (its weekly disc art); tap to
+  play its song, the next week follows on. Weeks without a song are dashed outlines.
+- Only one song plays at a time across the app (`src/audio/turns.ts`).
 
 ### 5. Custom Composer  (reached from Home header, NOT the tab bar)
 Functional screen — flat surfaces, no ambient washes, no starfield. Horizontal piano-roll grid,
@@ -294,6 +326,7 @@ deep learning, ethics of AI), so the AI must be demonstrable, measured and expla
 | Chords | **Markov chain learned from data** (major-key and minor-key odds) | `harmony.ts`, `model.ts` |
 | Passing notes | **GRU recurrent neural network** (48 hidden units, ~16k weights) that samples each next interval; rules mask what it may pick (in the scale, in range, able to reach the next day's note) | `melody.ts`, `gru.ts`, `features.ts` |
 | Cadence, Picardy third, voicing | Rules | `compose.ts`, `harmony.ts` |
+| Monthly song links | Rules (harmony) + the same GRU (melody) | `month.ts` |
 
 **Training** (`npm run train:model`, ~15 s, seeded so every run is identical):
 - Data: **JSB Chorales** (382 four-part Bach chorales, train / validation / test split), kept outside
@@ -336,6 +369,15 @@ Output: 7-bar note sequence (composeWeek → Composition: events, bars, tempo, m
 A missed day rests the melody while the chord holds. Every song ends on C, on the home chord.
 Tempo = 60 + 4 × average valence (68–96 BPM). Brighter days get more, shorter notes.
 
+### The monthly song (`composeMonth`)
+Every week **that starts in the month** and has check-ins, in order, each **exactly as it sounds
+on Weekly** (same notes, same seed). Between each pair, a one-bar **link** written by the engine:
+the next week's home chord (so its mode is heard coming), then the dominant 7th of the chord that
+week opens on (A minor is approached from E7); the GRU writes the link's melody from where one
+week ended to a step from where the next begins. The song has one tempo (the weeks' mean) and
+each part is stretched so every week keeps its own pace; links ease between neighbours. It plays
+on the instrument used most across the month and grows as the month goes on.
+
 ### Edge case: dissonant input
 Random selections (C, F#, Bb) could sound jarring. Apply diatonic transposition and harmonise
 root notes with complementary major/minor 7th chords to preserve musicality.
@@ -364,20 +406,21 @@ diagnostic language.** The system offers; the user decides.
 
 Work in this sequence — each stage produces something runnable.
 
-1. **Foundation** — Expo + TypeScript scaffold as a development build (`expo-dev-client`), NativeWind with design tokens wired into
+1. **Foundation** ✅ — Expo + TypeScript scaffold as a development build (`expo-dev-client`), NativeWind with design tokens wired into
    `tailwind.config.js`, navigation shell with the 4 tabs, DM Mono + Roboto loaded
-2. **Security layer** — Firebase Anonymous Auth, Firestore, the AES-256-GCM encrypt/decrypt
+2. **Security layer** ✅ — Firebase Anonymous Auth, Firestore, the AES-256-GCM encrypt/decrypt
    wrapper. **Build and unit-test this before any real data flows through the app.**
-3. **Glow orb component** — the reusable two-tone orb (core + halo + aura). Everything visual
+3. **Glow orb component** ✅ — the reusable two-tone orb (core + halo + aura). Everything visual
    depends on this. Get it right before building screens around it.
-4. **Home screen** — carousel, grid view, Bright/Dark toggle, responsive atmosphere, save flow
-5. **Audio engine** — pre-rendered chords played with `expo-audio`, preview on selection,
+4. **Home screen** ✅ — carousel, grid view, Bright/Dark toggle, responsive atmosphere, save flow
+5. **Audio engine** ✅ — pre-rendered chords played with `expo-audio`, preview on selection,
    **instrument picker on Home**, **per-note vibration patterns** (§11)
 6. **Harmony engine** ✅ — the AI (§7): rules + learned Markov chords + GRU melody, trained on
    Bach. Pure functions, heavily unit-tested, no UI dependencies.
-7. **Weekly screen** — spinning disc, wavy transport, generated artwork, composing state,
-   **share / download**, **save to playlist** (§11)
-8. **Monthly screen** — calendar, bento analytics, weeks shelf, **monthly song** (§11)
+7. **Weekly screen** ✅ — spinning disc, ringed-planet transport, generated artwork, composing
+   moment, low-mood offer, **share / save**, **playlists** (§11)
+8. **Monthly screen** ✅ — calendar, bento analytics, weeks shelf, **monthly song** with its
+   moon-phases record (§7, §11)
 9. **Grounding Oasis** — bento grid + 4 sub-screens, **sheet music from your songs** (§11)
 10. **Composer, Settings, onboarding**
 11. **Audit** — network proxy check for zero unencrypted egress, Jest coverage, a11y pass
@@ -396,11 +439,18 @@ Work in this sequence — each stage produces something runnable.
   `font-sans-bold`). On RN each font weight is its own family — use `font-sans-bold`, never
   `font-sans font-bold`.
 
-- **Git Flow:** `main` (releases) / `develop` (integration) / `feature/*`
-  (e.g. `feature/harmony-engine`, `feature/firebase-crypto`)
-- Pre-commit hooks: ESLint, Prettier, TypeScript check
+- **Screens only in `app/`.** A screen file under `src/` is never found by Expo Router (the
+  playlists screens live in `app/playlists/`). File names must match their imports exactly,
+  including capitals.
+- **Before calling work done:** `npx tsc --noEmit`, `npx expo lint` (0 problems) and `npm test`.
+  Check the "Test Suites" line too: a file that fails to load isn't counted in "Tests".
+- **React Compiler lint rules:** no `ref.current` reads or writes during render, no
+  `sharedValue.value =` in components (use `.get()` / `.set()`), no `setState` at the start of an
+  effect. If a value can be worked out from props or state, work it out during render.
 - Jest unit tests are mandatory for the harmony engine and valence calculations — these are
   pure logic and the most likely place for silent bugs
+- **Problem log:** every bug, error or failed build that gets fixed is recorded in
+  `docs/PROBLEM_LOG.md` (seen / cause / fix / lesson).
 - **No analytics SDKs.** No Firebase Analytics, no Meta Pixel, no Sentry, nothing that phones
   home. Audit `package.json` on every dependency addition. The zero-tracker claim is a core
   product promise, not a nice-to-have.
@@ -415,8 +465,12 @@ Work in this sequence — each stage produces something runnable.
 - **Bright/Dark is a toggle** (§12), but switching must still crossfade the palette and
   atmosphere — never snap.
 - **Don't skip the atmosphere crossfade.** Without it the app is just a dark theme.
-- **Don't use standard three-button transport controls.** The wavy capsule is the detail that
+- **Don't use standard three-button transport controls.** The ringed planet is the detail that
   makes the player feel custom.
+- **Only one song at a time.** Call `takeTurn(player, pause)` (`src/audio/turns.ts`) before any
+  player starts, or two of the app's own players can overlap.
+- **A song's file name must change when its notes do** (hash of the notes in the name), because an
+  existing cached WAV with the same name is reused.
 - **Don't apply ambient blur/starfield to functional screens** (Composer, Settings, forms).
   It's meaningful, not wallpaper.
 - **DM Mono has no Bold.** Medium is the heaviest weight available.
@@ -428,29 +482,34 @@ Work in this sequence — each stage produces something runnable.
 
 Features added after the original brief. Each is slotted into the build order in §8.
 
-1. **Instrument picker on Home** (Stage 5) — a button on Home lets the user choose what their
-   daily check-in sounds like: **Piano / Strings / Harp**, plus **Marimba / Flute** on trial
-   (kept only if they sound good). The same list is used for the Weekly instrument pills. The
-   chosen instrument is stored **inside the encrypted check-in payload**, so each day keeps its
-   sound and the weekly melody can use it; the picker remembers the last choice. Each
-   instrument is a set of 14 chord files pre-rendered from recorded samples (see §12, audio).
+1. **Instrument picker on Home** (Stage 5) ✅ — a button on Home lets the user choose what their
+   daily check-in sounds like: **Piano / Violin / Harp / Flute**. The same list is used for the
+   Weekly instrument pills. The chosen instrument is stored **inside the encrypted check-in
+   payload**, so each day keeps its sound; a week's (and month's) song plays on the instrument
+   used most (`mostUsedInstrument`). The picker remembers the last choice. Each instrument is 14
+   chord files plus single notes, pre-rendered from recorded samples (see §12, audio).
 2. **Per-note vibration for deaf / hard-of-hearing users** (Stage 5) — every note has its own
    recognisable vibration: **pulse count = scale degree** (C = 1 … B = 7, grouped so they're
    countable), **Bright = light, quick pulses; Dark = heavier, slower pulses**. Melody playback
    pulses in rhythm. Controlled by a **"Feel notes"** setting. Android plays exact patterns;
    iOS approximates with its preset impacts.
-3. **Monthly song** (Stage 8) — at month end the month's weekly melodies are combined into one
-   piece: **every week that starts in that month** (so 4 or 5), joined with short linking
-   passages so it plays as one song.
-4. **Share / download songs** (Stage 7) — through the **OS share sheet** (WhatsApp, Instagram,
-   email, "Save to Files"): an audio file, optionally a short video with the disc artwork.
-   **No in-app user-to-user sharing** — it would need visible accounts, which conflicts with the
-   anonymous, zero-tracker design. Shared files contain music and dates only, never emotion
-   words or reflections.
-5. **Save to playlist** (Stage 7) — in-app playlists of the user's own weekly songs, monthly
-   songs and Composer pieces. Playlist names are user content, so they're **encrypted** like
-   every other payload (new collection `PLAYLISTS`). External services (Spotify, Apple Music)
-   don't allow third-party audio, so they're out of scope.
+3. **Monthly song** (Stage 8) ✅ — the month's weekly songs combined into one piece: **every week
+   that starts in that month** (so 4 or 5), joined with one-bar linking passages (§7). Playable
+   at any point in the month (it grows week by week), with its own moon-phases record (§6).
+4. **Share / save songs** (Stage 7) ✅ — **Share** opens a sheet for an optional message (up to 200
+   characters, never stored by the app), then the **OS share sheet** with the WAV and the message
+   (`react-native-share`). **Save** (Android) writes the file to a folder the user picks; on iPhone
+   the share sheet's "Save to Files" does this. Files are named by week and instrument only
+   (`Sonata - week of 28 Sep 2026 - Harp.wav`): music and dates, never emotion words or
+   reflections. A video with the disc artwork is not built. **No in-app user-to-user sharing** —
+   it would need visible accounts, which conflicts with the anonymous, zero-tracker design.
+5. **Save to playlist** (Stage 7) ✅ — in-app playlists of the user's own weekly songs (monthly
+   songs and Composer pieces later: `PlaylistSong.kind`). Each song keeps the notes it was made
+   from, so it always sounds the same; adding the same week on the same instrument again updates
+   it in place. Whole playlists are **encrypted** and offline-first like check-ins (collection
+   `playlists`). Screens: `app/playlists/index.tsx` (all) and `app/playlists/[id].tsx` (play all in
+   order, rename, remove, delete). External services (Spotify, Apple Music) don't allow
+   third-party audio, so they're out of scope.
 6. **Sheet music in the Oasis** (Stage 9) — users turn any of their songs into sheet music: a
    scrolling treble-staff view in the Home staff's style, exportable as **PDF** (MusicXML
    optional, for MuseScore / Sibelius).
@@ -479,14 +538,16 @@ These override earlier sections. Don't "fix" them back.
   `react-native-svg` remains only for Lucide icons.
 - **Audio: pre-rendered WAVs played with `expo-audio`** — not `react-native-audio-api`, whose
   real-time synthesis crackled on device. `scripts/render-chords.mjs` renders the chords and
-  chimes (`npm run render:chords`); the Weekly melody and monthly song will be rendered to
-  files in JS the same way. The `expo-audio` plugin is configured with **no microphone
-  permission and no background playback** — the app must never request the microphone.
+  chimes (`npm run render:chords`). The weekly and monthly songs are mixed to WAV files on the
+  phone in JS (`src/audio/mixer.ts`, `song.ts`) from single-note samples, then cached. Audio mode:
+  `playsInSilentMode: true` (with it false, Android ignores `play()` on vibrate/silent). The
+  `expo-audio` plugin is configured with **no microphone permission and no background
+  playback** — the app must never request the microphone.
 - **Sounds come from recorded samples, not synthesis** (the synthesised voices sounded poor):
   - Piano: **Salamander Grand Piano V3** (44.1 kHz 16-bit), **CC-BY 3.0**, so Settings must
     credit "Salamander Grand Piano by Alexander Holm (CC-BY 3.0)".
-  - Strings, Harp, Marimba, Flute and Glockenspiel: **VSCO 2 Community Edition** (CC0, no
-    credit needed; credited anyway as good practice).
+  - Violin, Harp, Flute, Glockenspiel and wind chimes: **VSCO 2 Community Edition** (CC0, no
+    credit needed; credited anyway as good practice). Strings and Marimba were tried and dropped.
   - The raw libraries (gigabytes) live **outside the project and outside Google Drive**
     (`C:\sonata-samples\`). Only the rendered WAVs are committed.
   - **Ambient is dropped; Harp replaces it.** VSCO file names don't always use scientific
@@ -494,3 +555,16 @@ These override earlier sections. Don't "fix" them back.
 - **Carousel gestures** use `react-native-gesture-handler` 2.32 (SDK 57 pin) on the UI thread,
   not ScrollView snapping.
 - **Git: commit straight to `main`** (solo project) — no Git Flow branches.
+- **Weekly transport is a ringed planet**, not the wavy capsule (the user disliked the capsule's
+  shape, and its animation while playing distracted from the disc). Still one shape, not three
+  separate buttons.
+- **Offline-first:** check-ins and playlists are sealed (AES-GCM) and saved on the phone first
+  (AsyncStorage), then uploaded with `setDoc` and a phone-made id whenever there's a connection.
+  The app reads from the phone, so it works offline. Check-ins made before this are imported once.
+- **Sharing uses `react-native-share`**, not `expo-sharing`, because only it can send a message
+  with the file on Android.
+- **Disc art:** weekly records are a space scene per mode; the monthly record is moon phases.
+  Both are drawn by the same painter (`src/features/weekly/disc/`), so the scenes are tested
+  without a screen.
+- **No demo data in the app.** The example weeks and month used while building were removed
+  (October 2026); test with real check-ins.
