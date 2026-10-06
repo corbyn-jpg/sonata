@@ -4,6 +4,7 @@ import { useIsFocused } from "expo-router";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
 import { Sky } from "@/components/Sky";
+import { MonthBento } from "@/features/monthly/MonthBento";
 import { MonthCalendar } from "@/features/monthly/MonthCalendar";
 import { addMonths, monthTitle, startOfMonth } from "@/features/monthly/month";
 import { useMonth } from "@/features/monthly/useMonth";
@@ -14,7 +15,7 @@ export default function Monthly() {
   const [today] = useState(() => new Date());
   const thisMonth = startOfMonth(today);
   const [month, setMonth] = useState(thisMonth);
-  const { loading, summary } = useMonth(month);
+  const { loading, summary, streak } = useMonth(month);
   const atLatest = month.getTime() >= thisMonth.getTime(); // nothing to show in future months
 
   const header = (
@@ -49,7 +50,10 @@ export default function Monthly() {
         {loading || !summary ? (
           <ActivityIndicator color={colours.violet[200]} />
         ) : (
-          <MonthCalendar month={month} days={summary.days} today={today} />
+          <>
+            <MonthCalendar month={month} days={summary.days} today={today} />
+            <MonthBento summary={summary} streak={streak} isCurrentMonth={atLatest} />
+          </>
         )}
       </ScrollView>
     </Screen>

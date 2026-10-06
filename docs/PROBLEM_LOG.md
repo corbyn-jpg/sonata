@@ -242,3 +242,17 @@ Each entry has:
 ### 46. Smaller lint warnings
 - **Cause:** unused imports and variables (`View`, `streak`), the Weekly development chips missing from the header (so `DEMO_NAMES`, `setDemo` and `replay` were unused), a tab icon defined as an anonymous component, and `require()` in two test files.
 - **Fix:** removed the unused names, restored the development chips, named the tab icon component, imported the AsyncStorage mock instead of requiring it, and renamed two test files to match the files they test.
+
+---
+
+## Stage 8: Monthly
+
+### 47. "Cannot find module '@/components/BentoCard'" and "Cannot find name 'shortDate'"
+- **Cause:** the new files were saved as `BentoCards.tsx`, `MonthlyBento.tsx` and `ValenceCharts.tsx`, but the code imports `BentoCard`, `MonthBento` and `ValenceChart`. The test also used `shortDate` without importing it, and `monthly.tsx` hadn't been updated yet.
+- **Fix:** renamed the three files to match their imports, added `shortDate` to the test's import, and finished the `monthly.tsx` changes. Also moved `"private": true` to the top level of `package.json`, which stopped Jest's "Unknown option" warning.
+- **Lesson:** a file's name must match its import exactly (see also problem 34).
+
+### 48. "105 passed" when there should have been 110
+- **Cause:** in `localPlaylists.test.ts` the mock import sat below the `./localPlaylists` import, so AsyncStorage loaded before the mock existed and the whole file crashed. Jest's summary counts tests, not files that failed to load, so it still said "passed".
+- **Fix:** made the mock import the first line of the file.
+- **Lesson:** check the "Test Suites" line as well as "Tests".

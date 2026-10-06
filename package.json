@@ -1,6 +1,7 @@
 {
   "name": "sonata",
   "version": "1.0.0",
+  "private": true,
   "main": "expo-router/entry",
   "dependencies": {
     "@expo-google-fonts/dm-mono": "^0.4.2",

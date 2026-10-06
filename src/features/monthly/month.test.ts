@@ -1,5 +1,5 @@
 import { dayKey } from "@/lib/dates";
-import { addMonths, monthGrid, monthTitle, summariseMonth, weeksOfMonth, type DatedNote } from "./month";
+import { addMonths, monthGrid, monthTitle, shortDate, summariseMonth, weeksOfMonth, type DatedNote } from "./month";
 
 // Month is 0-based: new Date(2026, 9, 1) is Thursday 1 October 2026
 const october = new Date(2026, 9, 1);
@@ -38,6 +38,10 @@ describe("addMonths and monthTitle", () => {
   it("steps across the end of the year", () => {
     expect(monthTitle(addMonths(new Date(2026, 11, 1), 1))).toBe("January 2027");
     expect(monthTitle(addMonths(october, -10))).toBe("December 2025");
+  });
+
+  it("shortens a date for chart labels", () => {
+    expect(shortDate(new Date(2026, 9, 5))).toBe("5 Oct");
   });
 });
 

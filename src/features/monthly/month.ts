@@ -11,6 +11,9 @@ export const addMonths = (month: Date, n: number) => new Date(month.getFullYear(
 
 const MONTHS = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
+/** e.g. "5 Oct". */
+export const shortDate = (date: Date) => `${date.getDate()} ${MONTHS[date.getMonth()].slice(0, 3)}`;
+
 /** e.g. "October 2026". */
 export const monthTitle = (month: Date) => `${MONTHS[month.getMonth()]} ${month.getFullYear()}`;
 
