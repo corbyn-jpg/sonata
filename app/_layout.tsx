@@ -60,7 +60,8 @@ export default function RootLayout() {
         <Stack.Screen name="settings" />
         <Stack.Screen name="composer" />
         <Stack.Screen name="breathing" />
-        <Stack.Screen name="thought-record" />
+        <Stack.Screen name="thought-record/index" />
+        <Stack.Screen name="thought-record/new" />
         <Stack.Screen name="calming-sounds" />
         <Stack.Screen name="sheet-music" />
         <Stack.Screen name="helplines" />

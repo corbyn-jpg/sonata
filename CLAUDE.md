@@ -129,7 +129,8 @@ Relationships: `USERS 1—∞ DAILY_CHECKINS` · `USERS 1—∞ WEEKLY_MELODIES`
 **In practice, songs aren't stored.** The engine is deterministic, so a week's (or month's) song is
 recomposed on the phone from its check-ins whenever it's needed, and its audio is cached as a WAV
 named by a hash of its notes. `WEEKLY_MELODIES` stays in the ERD for the pitch document. Firestore
-security rules for `daily_checkins` and `playlists` check ownership and document shape only.
+security rules for `daily_checkins`, `playlists` and `cbt_thought_records` check ownership and
+document shape only.
 
 ---
 
@@ -297,8 +298,12 @@ Sub-screens:
   it expands. Phase label inside the orb with a dark halo behind the type. Progress ring.
   60 BPM entrainment. *This is the one place a word sits on an orb — it's an instruction, not a
   category.*
-- **Thought record** — CBT fields: Situation / Automatic thought / Cognitive distortion (chip
-  selector, not free text) / Rational reframe. 32px between fields.
+- **Thought record** ✅ — `app/thought-record/index.tsx` (past records, newest first; tap to open,
+  Delete with a confirmation since it's permanent) and `new.tsx` (the form). Fields in plain words:
+  "What happened?" / "What went through your mind?" (the only required one) / "Does it follow a
+  pattern?" (chips from `PATTERNS` in `src/features/oasis/thoughts.ts`, one line explaining the
+  chosen one, "Not sure" allowed) / "A kinder, more balanced thought". Each step is its own panel (question, hint and answer together; the answer box has a darker fill and no border of its own), 20px between panels, 500
+  characters each. Encrypted and offline-first in `cbt_thought_records` (`src/lib/thoughtRecords.ts`).
 - **Calming sounds** — track list; playing track shows a small spinning disc
 - **Helplines** — name, one-line description, clear "Call" pill per row
 
@@ -561,9 +566,12 @@ These override earlier sections. Don't "fix" them back.
 - **Weekly transport is a ringed planet**, not the wavy capsule (the user disliked the capsule's
   shape, and its animation while playing distracted from the disc). Still one shape, not three
   separate buttons.
-- **Offline-first:** check-ins and playlists are sealed (AES-GCM) and saved on the phone first
-  (AsyncStorage), then uploaded with `setDoc` and a phone-made id whenever there's a connection.
-  The app reads from the phone, so it works offline. Check-ins made before this are imported once.
+- **Offline-first:** check-ins, playlists and thought records are sealed (AES-GCM) and saved on the
+  phone first (AsyncStorage), then uploaded with `setDoc` and a phone-made id whenever there's a
+  connection. The app reads from the phone, so it works offline. Check-ins made before this are
+  imported once. Editable records (playlists, thought records) share one store:
+  `sealedCollection(name)` in `src/lib/sealedCollection.ts` (on the phone: `sealedStore.ts`, key
+  `sonata.<name>.v1`), so a new collection is a few lines, never a copy.
 - **Sharing uses `react-native-share`**, not `expo-sharing`, because only it can send a message
   with the file on Android.
 - **Disc art:** weekly records are a space scene per mode; the monthly record is moon phases.
