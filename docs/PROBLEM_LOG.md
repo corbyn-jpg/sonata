@@ -256,3 +256,12 @@ Each entry has:
 - **Cause:** in `localPlaylists.test.ts` the mock import sat below the `./localPlaylists` import, so AsyncStorage loaded before the mock existed and the whole file crashed. Jest's summary counts tests, not files that failed to load, so it still said "passed".
 - **Fix:** made the mock import the first line of the file.
 - **Lesson:** check the "Test Suites" line as well as "Tests".
+
+---
+
+## Stage 9: Grounding Oasis
+
+### 49. "Type '(Awaited<Opened<Content>> | null)[]' is not assignable" in `sealedCollection.ts`
+- **Cause:** when the playlist store became the generic `sealedCollection<Content>`, the decrypt step returned `record | null` and then filtered out the nulls with a type guard. Once `Content` is a generic type, TypeScript can't prove that `Awaited<Opened<Content>>` is the same as `Opened<Content>`, so the type guard is rejected.
+- **Fix:** push each record that opens into an `Opened<Content>[]` array and skip the ones that don't, so there are no nulls to filter.
+- **Lesson:** in generic code, collect results directly rather than returning `null` and filtering afterwards.

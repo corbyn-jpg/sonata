@@ -83,8 +83,8 @@ export default function Breathing() {
 
   return (
     <Screen header={<BackHeader title="Breathing space" />}>
-      <View className="flex-1 items-center justify-between pb-10">
-        <View className="flex-1 items-center justify-center gap-6">
+      <View className="flex-1 items-center justify-between pb-20">
+        <View className="flex-1 items-center justify-center ">
           <View style={{ width: BREATHING_SIZE, height: BREATHING_SIZE }}>
             <BreathingOrb elapsed={elapsed} still={reduceMotion} />
             <View className="absolute inset-0 items-center justify-center" pointerEvents="none">

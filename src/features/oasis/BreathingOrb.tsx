@@ -4,10 +4,10 @@ import { Orb } from "@/components/GlowOrb";
 import colours from "@/theme/colours";
 import { breathAt } from "./breathing";
 
-export const BREATHING_SIZE = 300;
+export const BREATHING_SIZE = 500;
 const C = BREATHING_SIZE / 2;
 const ORB = 200; // diameter when the lungs are full
-const RING = C - 6;
+const RING = C - 120;
 const RING_PATH = Skia.PathBuilder.Make()
   .addArc(Skia.XYWHRect(C - RING, C - RING, 2 * RING, 2 * RING), -90, 359.9)
   .build();
@@ -26,7 +26,7 @@ export function BreathingOrb({ elapsed, still }: Props) {
   const fullness = useDerivedValue(() => breathAt(elapsed.get()).fullness);
   const progress = useDerivedValue(() => breathAt(elapsed.get()).progress);
   const transform = useDerivedValue(() => [{ scale: still ? 0.85 : 0.55 + 0.45 * fullness.get() }]);
-  const glow = useDerivedValue(() => 0.35 + 0.65 * fullness.get());
+  const glow = useDerivedValue(() => 0.35 + 0.5 * fullness.get());
 
   return (
     <Canvas style={{ width: BREATHING_SIZE, height: BREATHING_SIZE }}>

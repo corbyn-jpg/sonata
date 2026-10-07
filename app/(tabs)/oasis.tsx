@@ -4,8 +4,8 @@ import { router, type Href } from "expo-router";
 import { Canvas } from "@shopify/react-native-skia";
 import { ChevronRight, FileMusic, Headphones, LifeBuoy, PenLine, Wind, type LucideIcon } from "lucide-react-native";
 import { BentoCard } from "@/components/BentoCard";
-import { Orb } from "@/components/GlowOrb";
 import { Screen } from "@/components/Screen";
+import { Sky } from "@/components/Sky";
 import colours from "@/theme/colours";
 
 type ToolProps = {
@@ -58,20 +58,17 @@ export default function Oasis() {
   );
 
   return (
-    <Screen header={header}>
-      <ScrollView contentContainerClassName="gap-3 pb-32" showsVerticalScrollIndicator={false}>
+    <Screen header={header}
+    background={<Sky pace={1.4} />}>
+      <ScrollView contentContainerClassName="gap-4" showsVerticalScrollIndicator={false}>
         <Tool
           href="/breathing"
           title="Breathing space"
-          blurb="Six slow breaths with a glowing orb · 1 min"
+          blurb="Breathing exercise · 1 min"
           Icon={Wind}
           glow={[colours.teal[300], colours.violet[500]]}
-          className="h-48"
+          className="h-44"
         >
-          {/* The breathing orb, resting in the corner */}
-          <Canvas style={{ position: "absolute", right: -30, top: -10, width: 200, height: 200 }} pointerEvents="none">
-            <Orb cx={100} cy={100} size={110} core={colours.teal[300]} edge={colours.violet[500]} glow={0.6} />
-          </Canvas>
         </Tool>
 
         <View className="flex-row gap-3">
@@ -81,7 +78,7 @@ export default function Oasis() {
             blurb="Untangle a thought"
             Icon={PenLine}
             glow={[colours.violet[200], colours.violet[700]]}
-            className="h-44 flex-1"
+            className="h-48 flex-1"
           />
           <Tool
             href="/calming-sounds"
@@ -89,7 +86,7 @@ export default function Oasis() {
             blurb="Rain, drones, chimes"
             Icon={Headphones}
             glow={[colours.teal[300], colours.teal[700]]}
-            className="h-44 flex-1"
+            className="h-48 flex-1"
           />
         </View>
 
