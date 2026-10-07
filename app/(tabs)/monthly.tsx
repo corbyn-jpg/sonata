@@ -78,11 +78,6 @@ export default function Monthly() {
         ) : (
           <>
             <MonthCalendar month={month} days={summary.days} today={today} />
-            <MonthBento
-              summary={summary}
-              streak={streak}
-              isCurrentMonth={atLatest}
-            />
             {/* Keyed by month, so changing month stops whatever was playing */}
             {summary.melodies > 0 && (
               <MonthSongCard
@@ -92,6 +87,11 @@ export default function Monthly() {
                 weeks={summary.weeks}
               />
             )}
+            <MonthBento
+              summary={summary}
+              streak={streak}
+              isCurrentMonth={atLatest}
+            />
             <WeeksShelf
               key={dayKey(month)}
               weeks={summary.weeks}

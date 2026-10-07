@@ -138,7 +138,7 @@ export default function Weekly() {
   const ground = () => {
     dismiss();
     player.pause();
-    router.navigate("/oasis"); // Breathing space, once the Oasis is built (Stage 9)
+    router.push("/breathing");
   };
 
   const started = playback.playing || position > 0;
@@ -157,7 +157,7 @@ export default function Weekly() {
   const next = song ? nextBarStart(position, song.tempo) : null;
 
   const header = (
-          <View className="mb-6 items-center gap-1">
+    <View className="mb-6 items-center gap-1">
       <View className="flex-row items-center justify-center gap-4">
         <Text className="font-mono-medium text-h3 text-primary">
           Your week in sound
@@ -167,14 +167,17 @@ export default function Weekly() {
             accessibilityLabel="Your playlists"
             className="h-11 w-11 items-center justify-center"
           >
-            <ListMusic color={colours.textSecondary} size={24} strokeWidth={1.5} />
+            <ListMusic
+              color={colours.textSecondary}
+              size={24}
+              strokeWidth={1.5}
+            />
           </Pressable>
         </Link>
       </View>
       <Text className="font-sans text-caption text-secondary">
         {weekRange(weekStart)}
       </Text>
-      
     </View>
   );
 
