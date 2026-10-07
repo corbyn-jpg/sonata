@@ -1,4 +1,4 @@
-import { songCacheName, withSong, type PlaylistSong } from "./playlistSongs";
+import { songCacheName, withSong, withSongAt, type PlaylistSong } from "./playlistSongs";
 
 const song = (week: string, instrument: PlaylistSong["instrument"], note: "C" | "G" = "C"): PlaylistSong => ({
   kind: "week",
@@ -21,6 +21,17 @@ describe("withSong", () => {
 
   it("keeps the same week on another instrument as its own song", () => {
     expect(withSong([song("2026-09-28", "piano")], song("2026-09-28", "harp"))).toHaveLength(2);
+  });
+});
+
+describe("withSongAt", () => {
+  it("puts an undone song back where it was", () => {
+    const songs = withSongAt([song("2026-09-14", "piano"), song("2026-09-28", "piano")], 1, song("2026-09-21", "piano"));
+    expect(songs.map((s) => s.week)).toEqual(["2026-09-14", "2026-09-21", "2026-09-28"]);
+  });
+
+  it("doesn't add it twice if it was added again meanwhile", () => {
+    expect(withSongAt([song("2026-09-21", "piano")], 0, song("2026-09-21", "piano"))).toHaveLength(1);
   });
 });
 

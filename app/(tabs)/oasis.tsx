@@ -1,9 +1,8 @@
 import type { ReactNode } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { router, type Href } from "expo-router";
-import { Canvas } from "@shopify/react-native-skia";
-import { ChevronRight, FileMusic, Headphones, LifeBuoy, PenLine, Wind, type LucideIcon } from "lucide-react-native";
 import { BentoCard } from "@/components/BentoCard";
+import { GlowOrb } from "@/components/GlowOrb";
 import { Screen } from "@/components/Screen";
 import { Sky } from "@/components/Sky";
 import colours from "@/theme/colours";
@@ -13,39 +12,33 @@ type ToolProps = {
   title: string;
   /** One line on what it's for. */
   blurb: string;
-  Icon: LucideIcon;
-  glow: [string, string];
   className?: string;
-  /** Laid out in a row (icon, words, arrow) rather than stacked. */
-  slim?: boolean;
+  /** Shown above the words, e.g. the breathing orb. */
   children?: ReactNode;
 };
 
-function Tool({ href, title, blurb, Icon, glow, className = "", slim = false, children }: ToolProps) {
+/** A ritual in the bento: words at the bottom of the card, so every card in the grid reads from the same line. */
+function Tool({ href, title, blurb, className = "", children }: ToolProps) {
   return (
     <Pressable
       onPress={() => router.push(href)}
       accessibilityRole="button"
       accessibilityLabel={`${title}. ${blurb}`}
-      className={className}
+      className={`active:opacity-80 ${className}`}
     >
-      <BentoCard glow={glow} className={slim ? "flex-row items-center gap-3" : "flex-1 justify-between gap-6"}>
+      <BentoCard className="flex-1 justify-end gap-3">
         {children}
-        <View className="h-11 w-11 items-center justify-center rounded-card bg-canvas/40">
-          <Icon color={colours.textPrimary} size={22} strokeWidth={1.5} />
-        </View>
-        <View className={slim ? "flex-1 gap-0.5" : "gap-1"}>
-          <Text className="font-mono-medium text-h4 text-primary">{title}</Text>
+        <View className="gap-1">
+          <Text className="font-mono-medium text-body text-primary">{title}</Text>
           <Text className="font-sans text-caption text-secondary">{blurb}</Text>
         </View>
-        {slim && <ChevronRight color={colours.textMuted} size={20} strokeWidth={1.5} />}
       </BentoCard>
     </Pressable>
   );
 }
 
 /**
- Grounding Oasis: small, opt-in rituals. A bento rather than a uniform grid, so the main one (breathing) carries the most weight, and help is always one tap away without being pushed.
+ Grounding Oasis: small, opt-in rituals. A bento where size follows content: breathing is the main ritual and shows its own orb, the two smaller rituals sit beside it, and sheet music and support share the bottom row.
  */
 export default function Oasis() {
   const header = (
@@ -58,55 +51,26 @@ export default function Oasis() {
   );
 
   return (
-    <Screen header={header}
-    background={<Sky pace={1.4} />}>
-      <ScrollView contentContainerClassName="gap-4" showsVerticalScrollIndicator={false}>
-        <Tool
-          href="/breathing"
-          title="Breathing space"
-          blurb="Breathing exercise · 1 min"
-          Icon={Wind}
-          glow={[colours.teal[300], colours.violet[500]]}
-          className="h-44"
-        >
-        </Tool>
-
+    <Screen header={header} background={<Sky pace={1.6} />}>
+      <ScrollView contentContainerClassName="gap-3 pb-10" showsVerticalScrollIndicator={false}>
         <View className="flex-row gap-3">
-          <Tool
-            href="/thought-record"
-            title="Thought record"
-            blurb="Untangle a thought"
-            Icon={PenLine}
-            glow={[colours.violet[200], colours.violet[700]]}
-            className="h-48 flex-1"
-          />
-          <Tool
-            href="/calming-sounds"
-            title="Calming sounds"
-            blurb="Rain, drones, chimes"
-            Icon={Headphones}
-            glow={[colours.teal[300], colours.teal[700]]}
-            className="h-48 flex-1"
-          />
+          <Tool href="/breathing" title="Breathing space" blurb="A breathing exercise" className="min-h-[240px] flex-[3]">
+            {/* The same orb the exercise uses, resting */}
+            <View className="flex-1 items-center justify-center">
+              <GlowOrb size={72} core={colours.teal[300]} edge={colours.violet[500]} shimmer={false} />
+            </View>
+          </Tool>
+          <View className="flex-[2] gap-3">
+            <Tool href="/thought-record" title="Thought record" blurb="Write down your thoughts" className="flex-1" />
+            <Tool href="/calming-sounds" title="Calming sounds" blurb="Sounds to help calm you down" className="flex-1" />
+          </View>
         </View>
 
-        <Tool
-          href="/sheet-music"
-          title="Sheet music"
-          blurb="Turn any of your songs into a score"
-          Icon={FileMusic}
-          glow={[colours.violet[500], colours.teal[300]]}
-          slim
-        />
-
-        <Tool
-          href="/helplines"
-          title="Support & helplines"
-          blurb="Talk to someone now"
-          Icon={LifeBuoy}
-          glow={[colours.violet[200], colours.teal[700]]}
-          slim
-        />
+        {/* The bottom row mirrors the top one (2/5 then 3/5), so the two rows interlock instead of lining up */}
+        <View className="flex-row gap-3">
+          <Tool href="/sheet-music" title="Sheet music" blurb="Your songs as a score" className="min-h-[120px] flex-[2]" />
+          <Tool href="/helplines" title="Support & helplines" blurb="Talk to someone when needed" className="min-h-[120px] flex-[3]" />
+        </View>
       </ScrollView>
     </Screen>
   );

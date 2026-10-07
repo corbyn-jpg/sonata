@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useIsFocused } from "expo-router";
 import {
+  AccessibilityInfo,
   KeyboardAvoidingView,
   Pressable,
   Text,
@@ -54,7 +55,8 @@ export default function Home() {
   const [focused, setFocused] = useState(START_INDEX);
   const [selected, setSelected] = useState<Letter | null>(null);
   const [reflection, setReflection] = useState("");
-  const [status, setStatus] = useState<"idle" | "saved" | "error">("idle");
+  // Success is silent (the dot appears and the button says so); only a failure gets a message
+  const [status, setStatus] = useState<"idle" | "error">("idle");
   const { days, todayIndex, todayLogged, loaded, logToday } = useWeek();
   const feelNotes = usePreference("feelNotes");
   const instrument = usePreference("instrument");
@@ -120,7 +122,8 @@ export default function Home() {
     logToday({ note: selected, mode }); // show the dot now
     playChime("save");
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    setStatus("saved");
+    setStatus("idle");
+    AccessibilityInfo.announceForAccessibility("Check-in saved"); // sighted users see the dot and the button change
     setSelected(null);
     setReflection("");
     // addDoc only resolves once the server confirms, so don't wait on it (offline writes are queued)
@@ -220,19 +223,15 @@ export default function Home() {
             accessibilityState={{ disabled: !canSave }}
             className={`min-h-[52px] items-center justify-center rounded-pill bg-violet-700 ${canSave ? "" : "opacity-40"}`}
           >
-            <Text className="font-sans-bold text-body text-white">
+            <Text className="font-sans-bold text-body text-primary">
               {todayLogged ? "Checked in for today" : "Save check-in"}
             </Text>
           </Pressable>
           <Text
             accessibilityLiveRegion="polite"
-            className={`h-5 text-center font-sans text-caption ${status === "error" ? "text-secondary" : "text-teal-300"}`}
+            className="h-5 text-center font-sans text-caption text-secondary"
           >
-            {status === "saved"
-              ? "Check-in saved"
-              : status === "error"
-                ? "Couldn't save. Check your connection."
-                : ""}
+            {status === "error" ? "Couldn't save. Check your connection." : ""}
           </Text>
         </View>
       </KeyboardAvoidingView>

@@ -127,10 +127,10 @@ export function ComposingMoment({ visible, days }: Props) {
       </Canvas>
 
       <Text
-        style={{ position: "absolute", top: bottom - GAP * 4 - 56, left: 24, right: 24, letterSpacing: 4 }}
-        className="text-center font-mono text-caption uppercase text-muted"
+        style={{ position: "absolute", top: bottom - GAP * 4 - 56, left: 24, right: 24 }}
+        className="text-center font-mono text-body text-muted"
       >
-        Composing
+        Composing…
       </Text>
       <View style={{ position: "absolute", top: bottom + GAP * 2 + 36, left: 24, right: 24 }}>
         <Text className="text-center font-sans text-body text-secondary" accessibilityLiveRegion="polite">

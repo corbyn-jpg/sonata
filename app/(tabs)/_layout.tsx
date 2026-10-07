@@ -1,25 +1,23 @@
 import { Tabs } from 'expo-router';
 import type { ColorValue } from 'react-native';
 import { CalendarDays, Disc3, House, Orbit, type LucideIcon } from 'lucide-react-native';
+import { CapsuleTabBar } from '@/components/CapsuleTabBar';
 import colours from '@/theme/colours';
 
 /** A tab's icon, in the colour the tab bar asks for (brighter when active). */
 function icon(Icon: LucideIcon) {
-  return function TabIcon({ color: colour }: { color: ColorValue }) {
-    return <Icon color={colour as string} size={24} strokeWidth={1.5} />;
+  return function TabIcon({ color: colour, size }: { color: ColorValue; size: number }) {
+    return <Icon color={colour as string} size={size} strokeWidth={1.5} />;
   };
 }
 
 export default function TabLayout() {
   return (
     <Tabs
+      tabBar={(props) => <CapsuleTabBar {...props} />}
       screenOptions={{
         headerShown: false,
         sceneStyle: { backgroundColor: colours.canvas },
-        tabBarActiveTintColor: colours.violet[200],
-        tabBarInactiveTintColor: colours.textMuted,
-        tabBarStyle: { backgroundColor: colours.surface, borderTopColor: colours.border, marginBottom: 10},
-        tabBarLabelStyle: { fontFamily: 'Roboto_500Medium', fontSize: 13 },
       }}
     >
       <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: icon(House) }} />

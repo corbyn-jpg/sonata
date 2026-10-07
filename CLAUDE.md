@@ -171,9 +171,9 @@ and the mode; the engine never works out the mode from the pitch alone.
 
 ### Colour tokens
 ```
-bg-canvas          #08050d   app background (violet-black, never neutral grey)
-bg-surface         #110521   cards, sheets
-bg-surface-raised  #291F35   modals, elevated cards
+bg-canvas          #060011   app background (violet-black, never neutral grey)
+bg-surface         #15052A   cards, sheets
+bg-surface-raised  #2A1642   modals, elevated cards, the current tab
 border             #493461   dividers, input borders
 text-primary       #f3ebfa
 text-secondary     #c2bfd6
@@ -260,7 +260,7 @@ silhouette inside the bloom. CTA "Get started". Background atmosphere crossfades
 - Song actions: **Share** (with an optional message), **Save** (Android: to a folder the user
   picks) and **Playlist** (§11).
 - **Composing moment:** shown once for each new version of the week (after every check-in),
-  for at least 3 s: "COMPOSING" over a staff where the week's notes arrive Monday to Sunday and
+  for at least 3 s: "Composing…" over a staff where the week's notes arrive Monday to Sunday and
   a fine line traces the melody, then "Your week, as one melody". Wind chimes while it lasts; a
   glockenspiel chime and success haptic when the song is ready.
 - Low-mood offer (Flow D, §7) as a bottom sheet, a moment after the song settles.
@@ -269,9 +269,10 @@ silhouette inside the bloom. CTA "Get started". Background atmosphere crossfades
 - Month title with ‹ › (future months disabled).
 - Calendar: a logged day is a small glowing orb in its colours, a missed day a faint outline
   (neutral, not a failure), today a violet ring. One Skia canvas for all the dots.
-- **Bento cards** (`BentoCard`, two-tone corner glow): wide = most-used mode ("2 weeks of 3 with a
-  song") · half = streak (an earlier month shows days logged instead) and melodies · wide =
-  weekly valence line, one glowing point per week, a gap for a week without check-ins.
+- **Month card** (`MonthBento`, one card, no corner glow): "Week by week", the valence line with one
+  glowing point per week and a gap for a week without check-ins; under it one line of three
+  figures split by hairlines: most-used mode ("in 2 of 3 weeks"), streak (an earlier month shows
+  days logged instead) and melodies. Not a row of matching stat tiles (§12).
 - **Month's song card:** the monthly song (§7), with its own **moon-phases record**: one moon per
   week in that week's colours (fuller for a brighter week, a new moon for a week without
   check-ins), a bead per day round the rim, the month's two main colours in the centre. Made the
@@ -286,9 +287,10 @@ Functional screen — flat surfaces, no ambient washes, no starfield. Horizontal
 notes. Bottom toolbar: instrument, tempo slider 60–160 BPM, play/stop, save. Keep sparse.
 
 ### 6. Grounding Oasis
-**Bento grid, not uniform 2×2:** one full-width tall card (Breathing space), two half-width
-(Thought record, Calming sounds), one full-width short (Support & helplines). Each card gets a
-soft two-tone corner glow in its colour family.
+**Bento grid where size follows content:** Breathing space is the big card (3/5 width) and shows
+the exercise's own orb, resting; Thought record and Calming sounds are stacked beside it (2/5).
+The bottom row mirrors it: Sheet music (2/5) and Support & helplines (3/5), so the rows interlock.
+Every card's words sit at the bottom. No icon tiles and no corner glows (the orb is the only glow).
 
 Sub-screens:
 - **Breathing space** — large glow orb expanding/contracting on a slow rhythm, brightening as
@@ -308,8 +310,9 @@ Data (export PDF, backup encryption key) · Danger zone ("Delete all data" in mu
 with outline trash icon — never a solid red button).
 
 ### Navigation
-Bottom tab bar, 4 items: **Home · Weekly · Monthly · Oasis**. Settings via gear. Composer via
-Home header. Maximum interaction depth: 2 taps.
+Bottom tab bar, 4 items: **Home · Weekly · Monthly · Oasis**, drawn by `CapsuleTabBar` as a
+floating capsule inset 24px from the edges (surface fill, border), the current tab on a lighter
+pill. Settings via gear. Composer via Home header. Maximum interaction depth: 2 taps.
 
 ---
 
@@ -568,3 +571,14 @@ These override earlier sections. Don't "fix" them back.
   without a screen.
 - **No demo data in the app.** The example weeks and month used while building were removed
   (October 2026); test with real check-ins.
+- **Design audit (Hallmark, October 2026)** — rules so the app reads as made, not generated:
+  - **Glow only where it means something** (an orb, a song's own colours). `BentoCard`'s `glow` is
+    optional; most cards go without and stand out by their lighter surface.
+  - **No icon tiles** (an icon in a coloured square above a heading), **no rows of matching stat
+    tiles**, and **no spaced-out uppercase labels**. Icons sit inline with their text, or not at all.
+  - **Bento sizes follow content**, never a fixed pattern of equal cards.
+  - **Undo, not "Are you sure?", for anything reversible** (removing a song from a playlist: gone
+    straight away, "Undo" for 5 s). Confirmation stays for permanent deletes.
+  - **Silent success:** a save shows itself (the day's dot, the button's new label); screen readers
+    get an announcement. Only failures get a message.
+  - **No pure white:** text uses `text-primary`.

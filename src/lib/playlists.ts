@@ -3,7 +3,7 @@ import { collection, deleteDoc, doc, setDoc, Timestamp } from "firebase/firestor
 import { decryptPayload, encryptPayload } from "@/lib/crypto";
 import { db } from "@/lib/firebase";
 import { localPlaylists, markPlaylistsSynced, storePlaylists, type StoredPlaylist } from "@/lib/localPlaylists";
-import { withSong, type PlaylistSong } from "@/lib/playlistSongs";
+import { withSong, withSongAt, type PlaylistSong } from "@/lib/playlistSongs";
 import { getUserId } from "@/lib/session";
 import { withTimeout } from "@/lib/timeout";
 
@@ -72,6 +72,10 @@ export const addSong = (id: string, song: PlaylistSong) => edit(id, (c) => ({ ..
 
 export const removeSong = (id: string, index: number) =>
   edit(id, (c) => ({ ...c, songs: c.songs.filter((_, i) => i !== index) }));
+
+/** Undo a remove: the song goes back where it was. */
+export const restoreSong = (id: string, index: number, song: PlaylistSong) =>
+  edit(id, (c) => ({ ...c, songs: withSongAt(c.songs, index, song) }));
 
 export const deletePlaylist = (id: string) =>
   queued(async () => {

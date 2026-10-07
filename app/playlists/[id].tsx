@@ -1,13 +1,17 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft, Pause, Pencil, Play } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
 import { composeWeek } from "@/engine";
 import { PlaylistSongRow } from "@/features/playlists/PlaylistSongRow";
 import { usePlaylistPlayer } from "@/features/playlists/usePlaylistPlayer";
-import { deletePlaylist, MAX_NAME_LENGTH, removeSong, renamePlaylist, usePlaylists } from "@/lib/playlists";
+import { deletePlaylist, MAX_NAME_LENGTH, removeSong, renamePlaylist, restoreSong, usePlaylists } from "@/lib/playlists";
+import type { PlaylistSong } from "@/lib/playlistSongs";
 import colours from "@/theme/colours";
+
+const UNDO_MS = 5000;
 
 /** One playlist: play it through, rename it, remove songs, or delete it. */
 export default function PlaylistScreen() {
@@ -32,18 +36,26 @@ export default function PlaylistScreen() {
     if (name.trim() && name.trim() !== playlist?.name) void renamePlaylist(id, name);
   };
 
-  const confirmRemove = (index: number) =>
-    Alert.alert("Remove this song?", "It's only taken out of this playlist.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Remove",
-        style: "destructive",
-        onPress: () => {
-          stop(); // the songs are about to move up one
-          void removeSong(id, index);
-        },
-      },
-    ]);
+  // Removing a song can be undone, so it happens straight away with an Undo rather than a question first
+  const insets = useSafeAreaInsets();
+  const [removed, setRemoved] = useState<{ index: number; song: PlaylistSong } | null>(null);
+  useEffect(() => {
+    if (!removed) return;
+    const timer = setTimeout(() => setRemoved(null), UNDO_MS);
+    return () => clearTimeout(timer);
+  }, [removed]);
+
+  const remove = (index: number) => {
+    stop(); // the songs are about to move up one
+    setRemoved({ index, song: songs[index] });
+    void removeSong(id, index);
+  };
+  const undo = () => {
+    if (!removed) return;
+    stop();
+    void restoreSong(id, removed.index, removed.song);
+    setRemoved(null);
+  };
 
   const confirmDelete = () =>
     Alert.alert("Delete this playlist?", "Your weeks and their songs aren't affected.", [
@@ -148,7 +160,7 @@ export default function PlaylistScreen() {
             playing={playing}
             loading={loading}
             onToggle={() => toggle(index)}
-            onRemove={() => confirmRemove(index)}
+            onRemove={() => remove(index)}
           />
         ))}
 
@@ -160,6 +172,19 @@ export default function PlaylistScreen() {
           <Text className="font-sans-medium text-body text-muted">Delete playlist</Text>
         </Pressable>
       </ScrollView>
+
+      {removed && (
+        <View
+          accessibilityLiveRegion="polite"
+          style={{ bottom: insets.bottom + 16 }}
+          className="absolute left-6 right-6 min-h-[52px] flex-row items-center justify-between rounded-pill border border-border bg-surface-raised pl-5 pr-2"
+        >
+          <Text className="font-sans text-body text-secondary">Song removed</Text>
+          <Pressable onPress={undo} accessibilityRole="button" className="min-h-[44px] justify-center px-4">
+            <Text className="font-sans-bold text-body text-violet-200">Undo</Text>
+          </Pressable>
+        </View>
+      )}
     </Screen>
   );
 }

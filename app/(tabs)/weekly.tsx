@@ -185,7 +185,7 @@ export default function Weekly() {
     <View className="flex-1">
       <Screen
         header={header}
-        background={<Sky glow={wash} animated={isFocused} pace={1.4} />}
+        background={<Sky glow={wash} animated={isFocused} pace={1.6} />}
       >
         {status === "loading" && (
           <ActivityIndicator color={colours.violet[200]} />

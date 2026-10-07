@@ -12,6 +12,7 @@ import {
 import { playChime } from "@/audio";
 import { BackHeader } from "@/components/BackHeader";
 import { Screen } from "@/components/Screen";
+import { Sky } from "@/components/Sky";
 import { BREATHING_SIZE, BreathingOrb } from "@/features/oasis/BreathingOrb";
 import { breathAt, CYCLES, EXHALE, INHALE, stepOf, type BreathPhase } from "@/features/oasis/breathing";
 
@@ -74,15 +75,10 @@ export default function Breathing() {
   };
 
   const label = session === "ready" ? "Breathe" : LABEL[breath.phase];
-  const caption =
-    session === "ready"
-      ? `${CYCLES} slow breaths: in for ${INHALE}, out for ${EXHALE}.`
-      : session === "done"
-        ? `${CYCLES} breaths, done.`
-        : `Breath ${breath.cycle} of ${CYCLES}${session === "paused" ? " · paused" : ""}`;
+
 
   return (
-    <Screen header={<BackHeader title="Breathing space" />}>
+    <Screen header={<BackHeader title="Breathing space" />} background={<Sky pace={1.6} />}>
       <View className="flex-1 items-center justify-between pb-20">
         <View className="flex-1 items-center justify-center ">
           <View style={{ width: BREATHING_SIZE, height: BREATHING_SIZE }}>
@@ -94,7 +90,6 @@ export default function Breathing() {
               </Text>
             </View>
           </View>
-          <Text className="font-mono text-body text-secondary">{caption}</Text>
         </View>
 
         <View className="w-full gap-3">
