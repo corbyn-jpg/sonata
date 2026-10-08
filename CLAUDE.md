@@ -230,7 +230,8 @@ silhouette inside the bloom. CTA "Get started". Background atmosphere crossfades
 
 ### 2. Home / Daily Canvas  ← core screen, build first
 - Header: time-aware greeting, streak pill, settings gear, composer entry
-- Bright/Dark **toggle** (sun / moon, §12). Bright = warmer washes, brighter cores, faster drift.
+- **Major | Minor** toggle (shown to users as "Major" and "Minor" with note icons, §12; still
+  called the Bright/Dark page in code). Bright = warmer washes, brighter cores, faster drift.
   Dark = cooler, dimmer, slower. Crossfades between them, never snaps.
 - **Carousel** (the only view; there is no grid view, §12): centred orb ~150pt at full glow, its
   note letter below. Adjacent orbs at the screen edges, ~60% scale, heavily blurred, ~35%
@@ -539,6 +540,11 @@ These override earlier sections. Don't "fix" them back.
 - **Bright/Dark is a toggle** (a Bright | Dark pill under the Home header), not two vertically
   swiped pages. Switching crossfades orbs, wash, staff and flats over ~600 ms; the Dark page
   has a dimmer wash and slower stars.
+- **The toggle says "Major | Minor", not "Bright | Dark"** (user testing, October 2026): testers
+  read Bright/Dark with a sun and moon as light/dark mode. Labels are Major and Minor with note
+  icons (`Music2`, `Music4`); never a sun, moon or other theme-like icon. "Bright/Dark page" stays
+  as the internal name in code and these notes.
+- **Settings has a back button** (`BackHeader`), like the Oasis screens.
 - **Every orb plays a chord**, not a single note: a major triad on Bright, a minor triad on
   Dark, so all seven Dark orbs sound minor (C, D, F, G included).
 - **Graphics: `@shopify/react-native-skia`** for every glow, orb, wash and starfield — one shared

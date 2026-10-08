@@ -51,6 +51,9 @@ export default function Settings() {
           Violin, harp, flute, glockenspiel and chimes: VSCO 2 Community Edition
           by Versilian Studios (CC0).
         </Text>
+        <Text className="font-sans text-caption text-secondary">
+          Calming sounds: Moodist (Pixabay Content License and CC0).
+        </Text>
       </View>
     </Screen>
   );
