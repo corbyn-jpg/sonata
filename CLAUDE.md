@@ -33,9 +33,9 @@ notes into a 7-bar melody with generated cover artwork. The user can play it, ar
 compare weeks over time.
 
 **The non-negotiable premise:** the user never sees note letters or emotion words while
-picking. They choose by colour and sound. Labels exist internally (for the harmony engine)
-and in the optional grid view, never on the primary carousel. Putting a word on the orb boxes
-the feeling in and defeats the product.
+picking. They choose by colour and sound. Emotion labels exist only internally (for the harmony
+engine), never in the UI. Putting a word on the orb boxes the feeling in and defeats the product.
+(§12: orbs now show their note letter, and there is no grid view.)
 
 ---
 
@@ -232,12 +232,10 @@ silhouette inside the bloom. CTA "Get started". Background atmosphere crossfades
 - Header: time-aware greeting, streak pill, settings gear, composer entry
 - Bright/Dark **toggle** (sun / moon, §12). Bright = warmer washes, brighter cores, faster drift.
   Dark = cooler, dimmer, slower. Crossfades between them, never snaps.
-- View toggle (circle / grid icons):
-  - **Carousel (default):** centred orb ~150pt at full glow, unlabelled. Adjacent orbs at the
-    screen edges, ~60% scale, heavily blurred, ~35% opacity. Horizontal swipe. Whole-screen
-    atmosphere follows the centred orb. Tap centre to select (pulse-and-bloom).
-  - **Grid:** current page's orbs in a scrollable grid at ~80pt, less blurred. **Labels appear
-    here only** — the precision affordance.
+- **Carousel** (the only view; there is no grid view, §12): centred orb ~150pt at full glow, its
+  note letter below. Adjacent orbs at the screen edges, ~60% scale, heavily blurred, ~35%
+  opacity. Horizontal swipe. Whole-screen atmosphere follows the centred orb. Tap centre to
+  select (pulse-and-bloom).
 - 7-day strip of glowing dots (today outlined if unlogged)
 - Optional one-line text input — must never block saving
 - "Save check-in" — violet-700 pill, muted until an orb is selected
@@ -420,7 +418,7 @@ Work in this sequence — each stage produces something runnable.
    wrapper. **Build and unit-test this before any real data flows through the app.**
 3. **Glow orb component** ✅ — the reusable two-tone orb (core + halo + aura). Everything visual
    depends on this. Get it right before building screens around it.
-4. **Home screen** ✅ — carousel, grid view, Bright/Dark toggle, responsive atmosphere, save flow
+4. **Home screen** ✅ — carousel, Bright/Dark toggle, responsive atmosphere, save flow
 5. **Audio engine** ✅ — pre-rendered chords played with `expo-audio`, preview on selection,
    **instrument picker on Home**, **per-note vibration patterns** (§11)
 6. **Harmony engine** ✅ — the AI (§7): rules + learned Markov chords + GRU melody, trained on
@@ -532,10 +530,12 @@ Features added after the original brief. Each is slotted into the build order in
 
 These override earlier sections. Don't "fix" them back.
 
-- **No emotion words in the UI, anywhere** — not on grid orbs, not on Weekly chips. Emotions
+- **No emotion words in the UI, anywhere** — not on orbs, not on Weekly chips. Emotions
   exist only in the encrypted database, derived from note + mode. Orbs are named by note:
-  visible letters under the carousel and grid orbs (`displayName`, "E♭"), screen readers get
+  visible letters under the carousel orbs (`displayName`, "E♭"), screen readers get
   `spokenName` ("E flat"). The centred orb also shows its note on a small **treble staff**.
+- **No grid view** (October 2026). The carousel is Home's only view; the circle/grid switch is
+  gone from the wireframes and the IA too. Don't add it back.
 - **Bright/Dark is a toggle** (a Bright | Dark pill under the Home header), not two vertically
   swiped pages. Switching crossfades orbs, wash, staff and flats over ~600 ms; the Dark page
   has a dimmer wash and slower stars.
