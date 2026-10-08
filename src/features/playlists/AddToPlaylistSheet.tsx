@@ -1,7 +1,21 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Modal, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { Check, Plus } from "lucide-react-native";
-import { addSong, createPlaylist, MAX_NAME_LENGTH, usePlaylists, type Playlist } from "@/lib/playlists";
+import {
+  addSong,
+  createPlaylist,
+  MAX_NAME_LENGTH,
+  usePlaylists,
+  type Playlist,
+} from "@/lib/playlists";
 import type { PlaylistSong } from "@/lib/playlistSongs";
 import colours from "@/theme/colours";
 
@@ -32,9 +46,17 @@ export function AddToPlaylistSheet({ visible, song, onDone, onClose }: Props) {
   // Already in this playlist? (Same week on the same instrument; adding it again updates it.)
   const holds = (playlist: Playlist) =>
     song !== null &&
-    playlist.songs.some((s) => s.kind === song.kind && s.week === song.week && s.instrument === song.instrument);
+    playlist.songs.some(
+      (s) =>
+        s.kind === song.kind &&
+        s.week === song.week &&
+        s.instrument === song.instrument,
+    );
 
-  const run = async (task: (song: PlaylistSong) => Promise<unknown>, message: string) => {
+  const run = async (
+    task: (song: PlaylistSong) => Promise<unknown>,
+    message: string,
+  ) => {
     if (!song || busy) return;
     setBusy(true);
     try {
@@ -52,18 +74,32 @@ export function AddToPlaylistSheet({ visible, song, onDone, onClose }: Props) {
   const trimmed = name.trim();
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={close}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={close}
+    >
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         {/* Tapping outside the sheet closes it */}
-        <Pressable className="flex-1 justify-end bg-canvas/50" onPress={close} accessibilityLabel="Close">
+        <Pressable
+          className="flex-1 justify-end bg-canvas/50"
+          onPress={close}
+          accessibilityLabel="Close"
+        >
           <Pressable
             onPress={() => {}}
             accessibilityViewIsModal
             className="gap-4 rounded-t-card border border-border bg-surface-raised px-6 pb-12 pt-6"
           >
-            <Text className="font-mono-medium text-h4 text-primary">Add to a playlist</Text>
+            <Text className="font-mono-medium text-h4 text-primary">
+              Add to a playlist
+            </Text>
 
-            <ScrollView className="max-h-[280px]" contentContainerClassName="gap-2">
+            <ScrollView
+              className="max-h-[280px]"
+              contentContainerClassName="gap-2"
+            >
               {playlists?.map((playlist) => {
                 const added = holds(playlist);
                 return (
@@ -72,7 +108,9 @@ export function AddToPlaylistSheet({ visible, song, onDone, onClose }: Props) {
                     onPress={() =>
                       run(
                         (s) => addSong(playlist.id, s),
-                        added ? `Updated in ${playlist.name}` : `Added to ${playlist.name}`,
+                        added
+                          ? `Updated in ${playlist.name}`
+                          : `Added to ${playlist.name}`,
                       )
                     }
                     disabled={busy}
@@ -81,7 +119,10 @@ export function AddToPlaylistSheet({ visible, song, onDone, onClose }: Props) {
                     className="min-h-[56px] flex-row items-center justify-between rounded-card border border-border bg-surface/60 px-4 py-2"
                   >
                     <View className="flex-1 gap-0.5">
-                      <Text numberOfLines={1} className="font-sans-medium text-body text-primary">
+                      <Text
+                        numberOfLines={1}
+                        className="font-sans-medium text-body text-primary"
+                      >
                         {playlist.name}
                       </Text>
                       <Text className="font-sans text-caption text-muted">
@@ -89,7 +130,13 @@ export function AddToPlaylistSheet({ visible, song, onDone, onClose }: Props) {
                         {added ? " · already added" : ""}
                       </Text>
                     </View>
-                    {added && <Check color={colours.violet[200]} size={18} strokeWidth={1.5} />}
+                    {added && (
+                      <Check
+                        color={colours.violet[200]}
+                        size={18}
+                        strokeWidth={1.5}
+                      />
+                    )}
                   </Pressable>
                 );
               })}
@@ -109,13 +156,20 @@ export function AddToPlaylistSheet({ visible, song, onDone, onClose }: Props) {
                   className="h-12 rounded-card border border-border bg-surface/60 px-4 font-sans text-body text-primary"
                 />
                 <Pressable
-                  onPress={() => run((s) => createPlaylist(trimmed, s), `Added to ${trimmed}`)}
+                  onPress={() =>
+                    run(
+                      (s) => createPlaylist(trimmed, s),
+                      `Added to ${trimmed}`,
+                    )
+                  }
                   disabled={!trimmed || busy}
                   accessibilityRole="button"
                   accessibilityState={{ disabled: !trimmed || busy }}
                   className={`min-h-[52px] items-center justify-center rounded-pill bg-violet-700 ${!trimmed || busy ? "opacity-50" : ""}`}
                 >
-                  <Text className="font-sans-bold text-body text-primary">Create and add</Text>
+                  <Text className="font-sans-bold text-body text-primary">
+                    Create and add
+                  </Text>
                 </Pressable>
               </View>
             ) : (
@@ -125,12 +179,20 @@ export function AddToPlaylistSheet({ visible, song, onDone, onClose }: Props) {
                 className="min-h-[52px] flex-row items-center justify-center gap-2 rounded-pill border border-violet-500"
               >
                 <Plus color={colours.violet[200]} size={18} strokeWidth={1.5} />
-                <Text className="font-sans-medium text-body text-primary">New playlist</Text>
+                <Text className="font-sans-medium text-body text-primary">
+                  New playlist
+                </Text>
               </Pressable>
             )}
 
-            <Pressable onPress={close} accessibilityRole="button" className="min-h-[44px] items-center justify-center">
-              <Text className="font-sans-medium text-body text-secondary">Cancel</Text>
+            <Pressable
+              onPress={close}
+              accessibilityRole="button"
+              className="min-h-[44px] items-center justify-center"
+            >
+              <Text className="font-sans-medium text-body text-secondary">
+                Cancel
+              </Text>
             </Pressable>
           </Pressable>
         </Pressable>

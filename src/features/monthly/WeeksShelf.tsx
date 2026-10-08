@@ -1,5 +1,12 @@
 import { useMemo } from "react";
-import { ActivityIndicator, PixelRatio, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  PixelRatio,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { Pause, Play } from "lucide-react-native";
 import { INSTRUMENT_LABELS } from "@/audio";
 import { composeWeek } from "@/engine";
@@ -27,12 +34,25 @@ export function WeeksShelf({ weeks, today }: Props) {
         if (week.mode === null) return { week, song: null };
         const key = dayKey(week.start);
         const composition = composeWeek(week.days, key);
-        const song: PlaylistSong = { kind: "week", week: key, instrument: week.instrument, days: [...week.days] };
-        return { week, song, composition, art: makeDiscArt(week.days, composition, ART_PX, key) };
+        const song: PlaylistSong = {
+          kind: "week",
+          week: key,
+          instrument: week.instrument,
+          days: [...week.days],
+        };
+        return {
+          week,
+          song,
+          composition,
+          art: makeDiscArt(week.days, composition, ART_PX, key),
+        };
       }),
     [weeks],
   );
-  const playable = useMemo(() => shelf.flatMap((s) => (s.song ? [s] : [])), [shelf]);
+  const playable = useMemo(
+    () => shelf.flatMap((s) => (s.song ? [s] : [])),
+    [shelf],
+  );
   const { current, playing, loading, toggle } = usePlaylistPlayer(
     useMemo(() => playable.map((s) => s.song), [playable]),
     useMemo(() => playable.map((s) => s.composition), [playable]),
@@ -44,18 +64,36 @@ export function WeeksShelf({ weeks, today }: Props) {
     <View className="gap-3">
       <View className="flex-row items-baseline justify-between">
         <Text className="font-mono-medium text-h4 text-primary">Weeks</Text>
-        {weeks.length > 3 && <Text className="font-sans text-caption text-muted">Swipe for more</Text>}
+        {weeks.length > 3 && (
+          <Text className="font-sans text-caption text-muted">
+            Swipe for more
+          </Text>
+        )}
       </View>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerClassName="gap-4">
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerClassName="gap-4"
+      >
         {shelf.map(({ week, song, art }) => {
           const key = dayKey(week.start);
           const label = key === thisWeek ? "This week" : shortDate(week.start);
           if (!song) {
             const future = week.start > today;
             return (
-              <View key={key} className="items-center gap-2" accessible accessibilityLabel={`Week of ${shortDate(week.start)}, ${future ? "still to come" : "no check-ins"}`}>
-                <View style={{ width: DISC, height: DISC }} className="rounded-full border border-dashed border-border" />
-                <Text className="font-sans text-caption text-muted">{label}</Text>
+              <View
+                key={key}
+                className="items-center gap-2"
+                accessible
+                accessibilityLabel={`Week of ${shortDate(week.start)}, ${future ? "still to come" : "no check-ins"}`}
+              >
+                <View
+                  style={{ width: DISC, height: DISC }}
+                  className="rounded-full border border-dashed border-border"
+                />
+                <Text className="font-sans text-caption text-muted">
+                  {label}
+                </Text>
               </View>
             );
           }
@@ -70,22 +108,42 @@ export function WeeksShelf({ weeks, today }: Props) {
               className="items-center gap-2"
             >
               <View style={{ width: DISC, height: DISC }}>
-                <SmallDisc art={art ?? null} size={DISC} active={active} spinning={active && playing} />
+                <SmallDisc
+                  art={art ?? null}
+                  size={DISC}
+                  active={active}
+                  spinning={active && playing}
+                />
                 {active && (
                   <View className="absolute inset-0 items-center justify-center">
                     <View className="h-9 w-9 items-center justify-center rounded-full bg-canvas/70">
                       {loading ? (
-                        <ActivityIndicator size="small" color={colours.violet[200]} />
+                        <ActivityIndicator
+                          size="small"
+                          color={colours.violet[200]}
+                        />
                       ) : playing ? (
-                        <Pause color={colours.textPrimary} fill={colours.textPrimary} size={14} />
+                        <Pause
+                          color={colours.textPrimary}
+                          fill={colours.textPrimary}
+                          size={14}
+                        />
                       ) : (
-                        <Play color={colours.textPrimary} fill={colours.textPrimary} size={14} />
+                        <Play
+                          color={colours.textPrimary}
+                          fill={colours.textPrimary}
+                          size={14}
+                        />
                       )}
                     </View>
                   </View>
                 )}
               </View>
-              <Text className={`font-sans text-caption ${active ? "text-primary" : "text-muted"}`}>{label}</Text>
+              <Text
+                className={`font-sans text-caption ${active ? "text-primary" : "text-muted"}`}
+              >
+                {label}
+              </Text>
             </Pressable>
           );
         })}

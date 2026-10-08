@@ -1,17 +1,43 @@
-import { canSave, cleanRecord, headline, MAX_FIELD_LENGTH, PATTERNS, patternOf, recordDate, type ThoughtRecord } from "./thoughts";
+import {
+  canSave,
+  cleanRecord,
+  headline,
+  MAX_FIELD_LENGTH,
+  PATTERNS,
+  patternOf,
+  recordDate,
+  type ThoughtRecord,
+} from "./thoughts";
 
-const blank: ThoughtRecord = { situation: "", thought: "", pattern: null, balanced: "" };
+const blank: ThoughtRecord = {
+  situation: "",
+  thought: "",
+  pattern: null,
+  balanced: "",
+};
 
 describe("thought records", () => {
   it("needs only the thought itself", () => {
     expect(canSave(blank)).toBe(false);
     expect(canSave({ ...blank, thought: "   " })).toBe(false);
-    expect(canSave({ ...blank, thought: "I'll never get this done" })).toBe(true);
+    expect(canSave({ ...blank, thought: "I'll never get this done" })).toBe(
+      true,
+    );
   });
 
   it("trims every field and keeps it within length", () => {
-    const record = cleanRecord({ situation: "  studio  ", thought: "x".repeat(900), pattern: "labelling", balanced: " ok " });
-    expect(record).toEqual({ situation: "studio", thought: "x".repeat(MAX_FIELD_LENGTH), pattern: "labelling", balanced: "ok" });
+    const record = cleanRecord({
+      situation: "  studio  ",
+      thought: "x".repeat(900),
+      pattern: "labelling",
+      balanced: " ok ",
+    });
+    expect(record).toEqual({
+      situation: "studio",
+      thought: "x".repeat(MAX_FIELD_LENGTH),
+      pattern: "labelling",
+      balanced: "ok",
+    });
   });
 
   it("shows the balanced thought in the list, or the thought if there isn't one", () => {

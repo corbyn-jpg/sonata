@@ -4,7 +4,20 @@ import { addDays } from "@/lib/dates";
 // The song has one bar per day, so moving through it day by day is just bar arithmetic.
 
 const LAST_BAR = 6;
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 /** How long one bar (one day) lasts, in seconds. */
 export const barSeconds = (tempo: number) => (BEATS_PER_BAR * 60) / tempo;
@@ -14,7 +27,10 @@ const BAR_LINE_TOLERANCE = 0.05; // seconds
 
 /** Which day's bar is playing at `seconds` (0 = Monday). */
 export const barAt = (seconds: number, tempo: number) =>
-  Math.min(LAST_BAR, Math.max(0, Math.floor((seconds + BAR_LINE_TOLERANCE) / barSeconds(tempo))));
+  Math.min(
+    LAST_BAR,
+    Math.max(0, Math.floor((seconds + BAR_LINE_TOLERANCE) / barSeconds(tempo))),
+  );
 
 export const barStart = (bar: number, tempo: number) => bar * barSeconds(tempo);
 
@@ -52,4 +68,5 @@ export function songFileName(weekStart: Date, instrument: string) {
 }
 
 /** e.g. "28 Sep 2026". */
-export const longDate = (date: Date) => `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+export const longDate = (date: Date) =>
+  `${date.getDate()} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;

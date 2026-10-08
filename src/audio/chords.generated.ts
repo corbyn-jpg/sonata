@@ -2,42 +2,129 @@
 import type { Letter, Mode } from "@/data/notes";
 import type { Instrument } from "./instruments";
 
-export const CHORDS: Record<Instrument, Record<Letter, Record<Mode, number>>> = {
+export const CHORDS: Record<
+  Instrument,
+  Record<Letter, Record<Mode, number>>
+> = {
   piano: {
-    C: { major: require("../../assets/sounds/piano/c-major.wav"), minor: require("../../assets/sounds/piano/c-minor.wav") },
-    D: { major: require("../../assets/sounds/piano/d-major.wav"), minor: require("../../assets/sounds/piano/d-minor.wav") },
-    E: { major: require("../../assets/sounds/piano/e-major.wav"), minor: require("../../assets/sounds/piano/e-minor.wav") },
-    F: { major: require("../../assets/sounds/piano/f-major.wav"), minor: require("../../assets/sounds/piano/f-minor.wav") },
-    G: { major: require("../../assets/sounds/piano/g-major.wav"), minor: require("../../assets/sounds/piano/g-minor.wav") },
-    A: { major: require("../../assets/sounds/piano/a-major.wav"), minor: require("../../assets/sounds/piano/a-minor.wav") },
-    B: { major: require("../../assets/sounds/piano/b-major.wav"), minor: require("../../assets/sounds/piano/b-minor.wav") },
+    C: {
+      major: require("../../assets/sounds/piano/c-major.wav"),
+      minor: require("../../assets/sounds/piano/c-minor.wav"),
+    },
+    D: {
+      major: require("../../assets/sounds/piano/d-major.wav"),
+      minor: require("../../assets/sounds/piano/d-minor.wav"),
+    },
+    E: {
+      major: require("../../assets/sounds/piano/e-major.wav"),
+      minor: require("../../assets/sounds/piano/e-minor.wav"),
+    },
+    F: {
+      major: require("../../assets/sounds/piano/f-major.wav"),
+      minor: require("../../assets/sounds/piano/f-minor.wav"),
+    },
+    G: {
+      major: require("../../assets/sounds/piano/g-major.wav"),
+      minor: require("../../assets/sounds/piano/g-minor.wav"),
+    },
+    A: {
+      major: require("../../assets/sounds/piano/a-major.wav"),
+      minor: require("../../assets/sounds/piano/a-minor.wav"),
+    },
+    B: {
+      major: require("../../assets/sounds/piano/b-major.wav"),
+      minor: require("../../assets/sounds/piano/b-minor.wav"),
+    },
   },
   violin: {
-    C: { major: require("../../assets/sounds/violin/c-major.wav"), minor: require("../../assets/sounds/violin/c-minor.wav") },
-    D: { major: require("../../assets/sounds/violin/d-major.wav"), minor: require("../../assets/sounds/violin/d-minor.wav") },
-    E: { major: require("../../assets/sounds/violin/e-major.wav"), minor: require("../../assets/sounds/violin/e-minor.wav") },
-    F: { major: require("../../assets/sounds/violin/f-major.wav"), minor: require("../../assets/sounds/violin/f-minor.wav") },
-    G: { major: require("../../assets/sounds/violin/g-major.wav"), minor: require("../../assets/sounds/violin/g-minor.wav") },
-    A: { major: require("../../assets/sounds/violin/a-major.wav"), minor: require("../../assets/sounds/violin/a-minor.wav") },
-    B: { major: require("../../assets/sounds/violin/b-major.wav"), minor: require("../../assets/sounds/violin/b-minor.wav") },
+    C: {
+      major: require("../../assets/sounds/violin/c-major.wav"),
+      minor: require("../../assets/sounds/violin/c-minor.wav"),
+    },
+    D: {
+      major: require("../../assets/sounds/violin/d-major.wav"),
+      minor: require("../../assets/sounds/violin/d-minor.wav"),
+    },
+    E: {
+      major: require("../../assets/sounds/violin/e-major.wav"),
+      minor: require("../../assets/sounds/violin/e-minor.wav"),
+    },
+    F: {
+      major: require("../../assets/sounds/violin/f-major.wav"),
+      minor: require("../../assets/sounds/violin/f-minor.wav"),
+    },
+    G: {
+      major: require("../../assets/sounds/violin/g-major.wav"),
+      minor: require("../../assets/sounds/violin/g-minor.wav"),
+    },
+    A: {
+      major: require("../../assets/sounds/violin/a-major.wav"),
+      minor: require("../../assets/sounds/violin/a-minor.wav"),
+    },
+    B: {
+      major: require("../../assets/sounds/violin/b-major.wav"),
+      minor: require("../../assets/sounds/violin/b-minor.wav"),
+    },
   },
   harp: {
-    C: { major: require("../../assets/sounds/harp/c-major.wav"), minor: require("../../assets/sounds/harp/c-minor.wav") },
-    D: { major: require("../../assets/sounds/harp/d-major.wav"), minor: require("../../assets/sounds/harp/d-minor.wav") },
-    E: { major: require("../../assets/sounds/harp/e-major.wav"), minor: require("../../assets/sounds/harp/e-minor.wav") },
-    F: { major: require("../../assets/sounds/harp/f-major.wav"), minor: require("../../assets/sounds/harp/f-minor.wav") },
-    G: { major: require("../../assets/sounds/harp/g-major.wav"), minor: require("../../assets/sounds/harp/g-minor.wav") },
-    A: { major: require("../../assets/sounds/harp/a-major.wav"), minor: require("../../assets/sounds/harp/a-minor.wav") },
-    B: { major: require("../../assets/sounds/harp/b-major.wav"), minor: require("../../assets/sounds/harp/b-minor.wav") },
+    C: {
+      major: require("../../assets/sounds/harp/c-major.wav"),
+      minor: require("../../assets/sounds/harp/c-minor.wav"),
+    },
+    D: {
+      major: require("../../assets/sounds/harp/d-major.wav"),
+      minor: require("../../assets/sounds/harp/d-minor.wav"),
+    },
+    E: {
+      major: require("../../assets/sounds/harp/e-major.wav"),
+      minor: require("../../assets/sounds/harp/e-minor.wav"),
+    },
+    F: {
+      major: require("../../assets/sounds/harp/f-major.wav"),
+      minor: require("../../assets/sounds/harp/f-minor.wav"),
+    },
+    G: {
+      major: require("../../assets/sounds/harp/g-major.wav"),
+      minor: require("../../assets/sounds/harp/g-minor.wav"),
+    },
+    A: {
+      major: require("../../assets/sounds/harp/a-major.wav"),
+      minor: require("../../assets/sounds/harp/a-minor.wav"),
+    },
+    B: {
+      major: require("../../assets/sounds/harp/b-major.wav"),
+      minor: require("../../assets/sounds/harp/b-minor.wav"),
+    },
   },
   flute: {
-    C: { major: require("../../assets/sounds/flute/c-major.wav"), minor: require("../../assets/sounds/flute/c-minor.wav") },
-    D: { major: require("../../assets/sounds/flute/d-major.wav"), minor: require("../../assets/sounds/flute/d-minor.wav") },
-    E: { major: require("../../assets/sounds/flute/e-major.wav"), minor: require("../../assets/sounds/flute/e-minor.wav") },
-    F: { major: require("../../assets/sounds/flute/f-major.wav"), minor: require("../../assets/sounds/flute/f-minor.wav") },
-    G: { major: require("../../assets/sounds/flute/g-major.wav"), minor: require("../../assets/sounds/flute/g-minor.wav") },
-    A: { major: require("../../assets/sounds/flute/a-major.wav"), minor: require("../../assets/sounds/flute/a-minor.wav") },
-    B: { major: require("../../assets/sounds/flute/b-major.wav"), minor: require("../../assets/sounds/flute/b-minor.wav") },
+    C: {
+      major: require("../../assets/sounds/flute/c-major.wav"),
+      minor: require("../../assets/sounds/flute/c-minor.wav"),
+    },
+    D: {
+      major: require("../../assets/sounds/flute/d-major.wav"),
+      minor: require("../../assets/sounds/flute/d-minor.wav"),
+    },
+    E: {
+      major: require("../../assets/sounds/flute/e-major.wav"),
+      minor: require("../../assets/sounds/flute/e-minor.wav"),
+    },
+    F: {
+      major: require("../../assets/sounds/flute/f-major.wav"),
+      minor: require("../../assets/sounds/flute/f-minor.wav"),
+    },
+    G: {
+      major: require("../../assets/sounds/flute/g-major.wav"),
+      minor: require("../../assets/sounds/flute/g-minor.wav"),
+    },
+    A: {
+      major: require("../../assets/sounds/flute/a-major.wav"),
+      minor: require("../../assets/sounds/flute/a-minor.wav"),
+    },
+    B: {
+      major: require("../../assets/sounds/flute/b-major.wav"),
+      minor: require("../../assets/sounds/flute/b-minor.wav"),
+    },
   },
 };
 
@@ -54,9 +141,66 @@ export type Chime = keyof typeof CHIMES;
 export const NOTE_RATE = 32000;
 
 /** Single notes for the weekly songs: [MIDI note, sound] pairs, low to high. */
-export const NOTES: Record<Instrument, readonly (readonly [number, number])[]> = {
-  piano: [[40, require("../../assets/sounds/notes/piano/40.wav")], [43, require("../../assets/sounds/notes/piano/43.wav")], [46, require("../../assets/sounds/notes/piano/46.wav")], [49, require("../../assets/sounds/notes/piano/49.wav")], [52, require("../../assets/sounds/notes/piano/52.wav")], [55, require("../../assets/sounds/notes/piano/55.wav")], [58, require("../../assets/sounds/notes/piano/58.wav")], [61, require("../../assets/sounds/notes/piano/61.wav")], [64, require("../../assets/sounds/notes/piano/64.wav")], [67, require("../../assets/sounds/notes/piano/67.wav")], [70, require("../../assets/sounds/notes/piano/70.wav")], [73, require("../../assets/sounds/notes/piano/73.wav")], [76, require("../../assets/sounds/notes/piano/76.wav")], [79, require("../../assets/sounds/notes/piano/79.wav")], [82, require("../../assets/sounds/notes/piano/82.wav")], [85, require("../../assets/sounds/notes/piano/85.wav")], [88, require("../../assets/sounds/notes/piano/88.wav")]],
-  violin: [[64, require("../../assets/sounds/notes/violin/64.wav")], [67, require("../../assets/sounds/notes/violin/67.wav")], [70, require("../../assets/sounds/notes/violin/70.wav")], [73, require("../../assets/sounds/notes/violin/73.wav")], [76, require("../../assets/sounds/notes/violin/76.wav")], [79, require("../../assets/sounds/notes/violin/79.wav")], [82, require("../../assets/sounds/notes/violin/82.wav")], [85, require("../../assets/sounds/notes/violin/85.wav")], [88, require("../../assets/sounds/notes/violin/88.wav")]],
-  harp: [[40, require("../../assets/sounds/notes/harp/40.wav")], [43, require("../../assets/sounds/notes/harp/43.wav")], [46, require("../../assets/sounds/notes/harp/46.wav")], [49, require("../../assets/sounds/notes/harp/49.wav")], [52, require("../../assets/sounds/notes/harp/52.wav")], [55, require("../../assets/sounds/notes/harp/55.wav")], [58, require("../../assets/sounds/notes/harp/58.wav")], [61, require("../../assets/sounds/notes/harp/61.wav")], [64, require("../../assets/sounds/notes/harp/64.wav")], [67, require("../../assets/sounds/notes/harp/67.wav")], [70, require("../../assets/sounds/notes/harp/70.wav")], [73, require("../../assets/sounds/notes/harp/73.wav")], [76, require("../../assets/sounds/notes/harp/76.wav")], [79, require("../../assets/sounds/notes/harp/79.wav")], [82, require("../../assets/sounds/notes/harp/82.wav")], [85, require("../../assets/sounds/notes/harp/85.wav")], [88, require("../../assets/sounds/notes/harp/88.wav")]],
-  flute: [[64, require("../../assets/sounds/notes/flute/64.wav")], [67, require("../../assets/sounds/notes/flute/67.wav")], [70, require("../../assets/sounds/notes/flute/70.wav")], [73, require("../../assets/sounds/notes/flute/73.wav")], [76, require("../../assets/sounds/notes/flute/76.wav")], [79, require("../../assets/sounds/notes/flute/79.wav")], [82, require("../../assets/sounds/notes/flute/82.wav")], [85, require("../../assets/sounds/notes/flute/85.wav")], [88, require("../../assets/sounds/notes/flute/88.wav")]],
-};
+export const NOTES: Record<Instrument, readonly (readonly [number, number])[]> =
+  {
+    piano: [
+      [40, require("../../assets/sounds/notes/piano/40.wav")],
+      [43, require("../../assets/sounds/notes/piano/43.wav")],
+      [46, require("../../assets/sounds/notes/piano/46.wav")],
+      [49, require("../../assets/sounds/notes/piano/49.wav")],
+      [52, require("../../assets/sounds/notes/piano/52.wav")],
+      [55, require("../../assets/sounds/notes/piano/55.wav")],
+      [58, require("../../assets/sounds/notes/piano/58.wav")],
+      [61, require("../../assets/sounds/notes/piano/61.wav")],
+      [64, require("../../assets/sounds/notes/piano/64.wav")],
+      [67, require("../../assets/sounds/notes/piano/67.wav")],
+      [70, require("../../assets/sounds/notes/piano/70.wav")],
+      [73, require("../../assets/sounds/notes/piano/73.wav")],
+      [76, require("../../assets/sounds/notes/piano/76.wav")],
+      [79, require("../../assets/sounds/notes/piano/79.wav")],
+      [82, require("../../assets/sounds/notes/piano/82.wav")],
+      [85, require("../../assets/sounds/notes/piano/85.wav")],
+      [88, require("../../assets/sounds/notes/piano/88.wav")],
+    ],
+    violin: [
+      [64, require("../../assets/sounds/notes/violin/64.wav")],
+      [67, require("../../assets/sounds/notes/violin/67.wav")],
+      [70, require("../../assets/sounds/notes/violin/70.wav")],
+      [73, require("../../assets/sounds/notes/violin/73.wav")],
+      [76, require("../../assets/sounds/notes/violin/76.wav")],
+      [79, require("../../assets/sounds/notes/violin/79.wav")],
+      [82, require("../../assets/sounds/notes/violin/82.wav")],
+      [85, require("../../assets/sounds/notes/violin/85.wav")],
+      [88, require("../../assets/sounds/notes/violin/88.wav")],
+    ],
+    harp: [
+      [40, require("../../assets/sounds/notes/harp/40.wav")],
+      [43, require("../../assets/sounds/notes/harp/43.wav")],
+      [46, require("../../assets/sounds/notes/harp/46.wav")],
+      [49, require("../../assets/sounds/notes/harp/49.wav")],
+      [52, require("../../assets/sounds/notes/harp/52.wav")],
+      [55, require("../../assets/sounds/notes/harp/55.wav")],
+      [58, require("../../assets/sounds/notes/harp/58.wav")],
+      [61, require("../../assets/sounds/notes/harp/61.wav")],
+      [64, require("../../assets/sounds/notes/harp/64.wav")],
+      [67, require("../../assets/sounds/notes/harp/67.wav")],
+      [70, require("../../assets/sounds/notes/harp/70.wav")],
+      [73, require("../../assets/sounds/notes/harp/73.wav")],
+      [76, require("../../assets/sounds/notes/harp/76.wav")],
+      [79, require("../../assets/sounds/notes/harp/79.wav")],
+      [82, require("../../assets/sounds/notes/harp/82.wav")],
+      [85, require("../../assets/sounds/notes/harp/85.wav")],
+      [88, require("../../assets/sounds/notes/harp/88.wav")],
+    ],
+    flute: [
+      [64, require("../../assets/sounds/notes/flute/64.wav")],
+      [67, require("../../assets/sounds/notes/flute/67.wav")],
+      [70, require("../../assets/sounds/notes/flute/70.wav")],
+      [73, require("../../assets/sounds/notes/flute/73.wav")],
+      [76, require("../../assets/sounds/notes/flute/76.wav")],
+      [79, require("../../assets/sounds/notes/flute/79.wav")],
+      [82, require("../../assets/sounds/notes/flute/82.wav")],
+      [85, require("../../assets/sounds/notes/flute/85.wav")],
+      [88, require("../../assets/sounds/notes/flute/88.wav")],
+    ],
+  };

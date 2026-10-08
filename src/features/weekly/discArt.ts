@@ -15,7 +15,14 @@ export function makeDiscArt(
 ): SkImage | null {
   const surface = Skia.Surface.Make(size, size);
   if (!surface) return null;
-  drawDisc(skiaPainter(surface.getCanvas()), size, days, song.palette, song.mode, seed);
+  drawDisc(
+    skiaPainter(surface.getCanvas()),
+    size,
+    days,
+    song.palette,
+    song.mode,
+    seed,
+  );
   surface.flush();
   return surface.makeImageSnapshot();
 }

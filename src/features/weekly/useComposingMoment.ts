@@ -11,7 +11,9 @@ const MIN_SECONDS = 3.2; // long enough to feel like a moment, even when the son
  */
 export function useComposingMoment(weekKey: string | null, songReady: boolean) {
   // The version of the week being revealed, and whether it has had its minimum time on screen
-  const [moment, setMoment] = useState<{ key: string; waited: boolean } | null>(null);
+  const [moment, setMoment] = useState<{ key: string; waited: boolean } | null>(
+    null,
+  );
 
   // Start: a version of the week we haven't revealed yet
   useEffect(() => {
@@ -24,7 +26,8 @@ export function useComposingMoment(weekKey: string | null, songReady: boolean) {
         if (cancelled || revealed === weekKey) return;
         setMoment({ key: weekKey, waited: false });
         timer = setTimeout(
-          () => setMoment((m) => (m?.key === weekKey ? { ...m, waited: true } : m)),
+          () =>
+            setMoment((m) => (m?.key === weekKey ? { ...m, waited: true } : m)),
           MIN_SECONDS * 1000,
         );
       });

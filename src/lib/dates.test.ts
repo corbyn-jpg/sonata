@@ -1,4 +1,10 @@
-import { addDays, dayKey, startOfWeek, streakLength, fromDayKey } from "./dates";
+import {
+  addDays,
+  dayKey,
+  startOfWeek,
+  streakLength,
+  fromDayKey,
+} from "./dates";
 
 // Month is 0-based: new Date(2026, 8, 30) is Wednesday 30 September 2026
 const wed = new Date(2026, 8, 30, 15, 30);

@@ -1,9 +1,9 @@
-import { getRandomBytes } from 'expo-crypto';
-import * as SecureStore from 'expo-secure-store';
-import { bytesToHex, hexToBytes } from '@noble/ciphers/utils.js';
-import { KEY_BYTES } from './aes';
+import { getRandomBytes } from "expo-crypto";
+import * as SecureStore from "expo-secure-store";
+import { bytesToHex, hexToBytes } from "@noble/ciphers/utils.js";
+import { KEY_BYTES } from "./aes";
 
-const STORE_KEY = 'sonata.payloadKey';
+const STORE_KEY = "sonata.payloadKey";
 
 let pending: Promise<Uint8Array> | null = null;
 

@@ -16,12 +16,16 @@ export type SealedRecord = {
 };
 
 /** One record per id: the newest version wins (on a tie, a confirmed copy stays confirmed). */
-export function mergeRecords(existing: readonly SealedRecord[], incoming: readonly SealedRecord[]) {
+export function mergeRecords(
+  existing: readonly SealedRecord[],
+  incoming: readonly SealedRecord[],
+) {
   const byId = new Map(existing.map((record) => [record.id, record]));
   for (const record of incoming) {
     const old = byId.get(record.id);
     if (!old || record.updated_at > old.updated_at) byId.set(record.id, record);
-    else if (record.updated_at === old.updated_at && record.synced) byId.set(record.id, { ...old, synced: true });
+    else if (record.updated_at === old.updated_at && record.synced)
+      byId.set(record.id, { ...old, synced: true });
   }
   return [...byId.values()];
 }
@@ -32,7 +36,12 @@ export function confirmRecords(
   sent: readonly Pick<SealedRecord, "id" | "updated_at">[],
 ) {
   return records.flatMap((record) => {
-    if (!sent.some((s) => s.id === record.id && s.updated_at === record.updated_at)) return [record];
+    if (
+      !sent.some(
+        (s) => s.id === record.id && s.updated_at === record.updated_at,
+      )
+    )
+      return [record];
     return record.deleted ? [] : [{ ...record, synced: true }];
   });
 }
@@ -63,7 +72,8 @@ export function localStore(storageKey: string) {
   return {
     all,
     /** Add or update records (by id). */
-    store: (incoming: readonly SealedRecord[]) => update((current) => mergeRecords(current, incoming)),
+    store: (incoming: readonly SealedRecord[]) =>
+      update((current) => mergeRecords(current, incoming)),
     /** Note that Firestore has these versions. */
     markSynced: (sent: readonly Pick<SealedRecord, "id" | "updated_at">[]) =>
       update((current) => confirmRecords(current, sent)),

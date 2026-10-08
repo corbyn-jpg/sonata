@@ -1,5 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, PixelRatio, Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  PixelRatio,
+  Pressable,
+  Text,
+  View,
+} from "react-native";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { useIsFocused } from "expo-router";
 import { Pause, Play } from "lucide-react-native";
@@ -31,17 +37,31 @@ type Props = {
  The month's song: every week with a song, joined into one piece (composeMonth). It's made the first time it's played (a few seconds, as it's several weeks long), then kept, so it plays straight away after that.
  */
 export function MonthSongCard({ month, days, weeks }: Props) {
-  const withSongs = useMemo(() => weeks.filter((w) => w.mode !== null), [weeks]);
+  const withSongs = useMemo(
+    () => weeks.filter((w) => w.mode !== null),
+    [weeks],
+  );
   const song = useMemo(
-    () => composeMonth(withSongs.map((w) => ({ week: w.days, seed: dayKey(w.start) })), dayKey(month)),
+    () =>
+      composeMonth(
+        withSongs.map((w) => ({ week: w.days, seed: dayKey(w.start) })),
+        dayKey(month),
+      ),
     [withSongs, month],
   );
   // Its own record: the month's moon phases, one moon per week
   const art = useMemo(
-    () => makeMonthArt(daysOfMonth(days, month), weeks.map((w) => w.days), ART_PX, dayKey(month)),
+    () =>
+      makeMonthArt(
+        daysOfMonth(days, month),
+        weeks.map((w) => w.days),
+        ART_PX,
+        dayKey(month),
+      ),
     [days, weeks, month],
   );
-  const instrument = mostUsedInstrument(withSongs.map((w) => w.instrument)) ?? "piano";
+  const instrument =
+    mostUsedInstrument(withSongs.map((w) => w.instrument)) ?? "piano";
   // The file name changes whenever the month's notes do, so a new check-in makes a new song
   const name = `month-${dayKey(month)}-${hashString(JSON.stringify(withSongs.map((w) => w.days))).toString(36)}`;
 
@@ -60,7 +80,8 @@ export function MonthSongCard({ month, days, weeks }: Props) {
     if (status.playing) return player.pause();
     takeTurn(player, () => player.pause());
     if (loaded === `${name}-${instrument}`) {
-      if (status.duration > 0 && status.currentTime >= status.duration - 0.05) player.seekTo(0); // finished: start again
+      if (status.duration > 0 && status.currentTime >= status.duration - 0.05)
+        player.seekTo(0); // finished: start again
       return player.play();
     }
     setMaking(true);
@@ -80,12 +101,23 @@ export function MonthSongCard({ month, days, weeks }: Props) {
 
   const [main, second] = song.palette; // the card's corner glow
   const title = `${monthName(month)}'s song`;
-  const weeksText = withSongs.length === 1 ? "1 week" : `${withSongs.length} weeks`;
+  const weeksText =
+    withSongs.length === 1 ? "1 week" : `${withSongs.length} weeks`;
 
   return (
-    <BentoCard glow={[colours.orb[main.note][main.mode].core, colours.orb[second.note][second.mode].core]}>
+    <BentoCard
+      glow={[
+        colours.orb[main.note][main.mode].core,
+        colours.orb[second.note][second.mode].core,
+      ]}
+    >
       <View className="flex-row items-center gap-4">
-        <SmallDisc art={art} size={DISC} active={loaded !== null} spinning={status.playing} />
+        <SmallDisc
+          art={art}
+          size={DISC}
+          active={loaded !== null}
+          spinning={status.playing}
+        />
         <View className="flex-1 gap-0.5">
           <Text className="font-mono-medium text-h4 text-primary">{title}</Text>
           <Text className="font-sans text-caption text-muted">
@@ -105,9 +137,17 @@ export function MonthSongCard({ month, days, weeks }: Props) {
           {making ? (
             <ActivityIndicator color={colours.textPrimary} />
           ) : status.playing ? (
-            <Pause color={colours.textPrimary} fill={colours.textPrimary} size={18} />
+            <Pause
+              color={colours.textPrimary}
+              fill={colours.textPrimary}
+              size={18}
+            />
           ) : (
-            <Play color={colours.textPrimary} fill={colours.textPrimary} size={18} />
+            <Play
+              color={colours.textPrimary}
+              fill={colours.textPrimary}
+              size={18}
+            />
           )}
         </Pressable>
       </View>

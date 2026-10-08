@@ -11,18 +11,26 @@ export type Helpline = {
   /** As the organisation writes it, for reading. */
   number: string;
   /** A text line, where there is one. */
-  sms?: { number: string; /** What to send, if the line asks for a word. */ body?: string; note: string };
+  sms?: {
+    number: string;
+    /** What to send, if the line asks for a word. */ body?: string;
+    note: string;
+  };
 };
 
 /** For someone in danger right now. 112 works from any mobile phone in South Africa. */
-export const EMERGENCY = { number: "112", note: "Call 112 from any mobile phone." } as const;
+export const EMERGENCY = {
+  number: "112",
+  note: "Call 112 from any mobile phone.",
+} as const;
 
 /** Crisis lines first, then the rest. */
 export const HELPLINES: readonly Helpline[] = [
   {
     id: "sadag-suicide",
     name: "Suicide Crisis Line",
-    about: "For anyone having thoughts of suicide, or worried about someone who is. Run by SADAG.",
+    about:
+      "For anyone having thoughts of suicide, or worried about someone who is. Run by SADAG.",
     audience: "Everyone",
     hours: "24 hours",
     number: "0800 567 567",
@@ -38,11 +46,16 @@ export const HELPLINES: readonly Helpline[] = [
   {
     id: "gbv",
     name: "GBV Command Centre",
-    about: "For anyone affected by gender-based violence. Social workers can send help.",
+    about:
+      "For anyone affected by gender-based violence. Social workers can send help.",
     audience: "Everyone",
     hours: "24 hours",
     number: "0800 428 428",
-    sms: { number: "31531", body: "help", note: "Deaf, hard of hearing or with a disability: SMS “help” to 31531." },
+    sms: {
+      number: "31531",
+      body: "help",
+      note: "Deaf, hard of hearing or with a disability: SMS “help” to 31531.",
+    },
   },
   {
     id: "childline",
@@ -55,16 +68,21 @@ export const HELPLINES: readonly Helpline[] = [
   {
     id: "substance",
     name: "Substance Abuse Line",
-    about: "For worries about drugs or alcohol, yours or someone else's. Department of Social Development and SADAG.",
+    about:
+      "For worries about drugs or alcohol, yours or someone else's. Department of Social Development and SADAG.",
     audience: "Everyone",
     hours: "24 hours",
     number: "0800 12 13 14",
-    sms: { number: "32312", note: "Or SMS 32312 and a counsellor will call you back." },
+    sms: {
+      number: "32312",
+      note: "Or SMS 32312 and a counsellor will call you back.",
+    },
   },
   {
     id: "aa",
     name: "Alcoholics Anonymous SA",
-    about: "Volunteers who've been there, for anyone who wants help with their drinking.",
+    about:
+      "Volunteers who've been there, for anyone who wants help with their drinking.",
     audience: "Everyone",
     hours: "24 hours",
     number: "0861 435 722",

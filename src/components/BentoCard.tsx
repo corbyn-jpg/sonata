@@ -1,6 +1,11 @@
 import { useState, type ReactNode } from "react";
 import { View, type ViewProps } from "react-native";
-import { Canvas, Circle, RadialGradient, vec } from "@shopify/react-native-skia";
+import {
+  Canvas,
+  Circle,
+  RadialGradient,
+  vec,
+} from "@shopify/react-native-skia";
 
 type Props = ViewProps & {
   /**
@@ -25,7 +30,14 @@ export function BentoCard({ glow, className = "", children, ...rest }: Props) {
       className={`overflow-hidden rounded-card border border-border bg-surface/70 p-4 ${className}`}
     >
       {glow && size.width > 0 && (
-        <Canvas style={{ position: "absolute", width: size.width, height: size.height }} pointerEvents="none">
+        <Canvas
+          style={{
+            position: "absolute",
+            width: size.width,
+            height: size.height,
+          }}
+          pointerEvents="none"
+        >
           <Circle cx={size.width} cy={0} r={GLOW}>
             <RadialGradient
               c={vec(size.width, 0)}

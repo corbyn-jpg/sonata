@@ -37,7 +37,8 @@ const draw = (days = DAYS, weeks = WEEKS, seed = "2026-10-01") => {
   drawMonthDisc(painter, 600, days, weeks, seed);
   return calls;
 };
-const count = (calls: string[], name: string) => calls.filter((c) => c.startsWith(`${name}(`)).length;
+const count = (calls: string[], name: string) =>
+  calls.filter((c) => c.startsWith(`${name}(`)).length;
 
 describe("moonLight", () => {
   it("makes a brighter week a fuller moon", () => {

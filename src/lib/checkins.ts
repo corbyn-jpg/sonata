@@ -1,5 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { collection, doc, getDoc, getDocsFromServer, query, setDoc, Timestamp, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocsFromServer,
+  query,
+  setDoc,
+  Timestamp,
+  where,
+} from "firebase/firestore";
 import {
   emotionOf,
   pitchOf,
@@ -12,7 +21,12 @@ import {
 import type { Instrument } from "@/audio/instruments";
 import { decryptPayload, encryptPayload } from "@/lib/crypto";
 import { db } from "@/lib/firebase";
-import { localCheckins, markSynced, storeCheckins, type StoredCheckin } from "@/lib/localCheckins";
+import {
+  localCheckins,
+  markSynced,
+  storeCheckins,
+  type StoredCheckin,
+} from "@/lib/localCheckins";
 import { getUserId } from "@/lib/session";
 import { withTimeout } from "@/lib/timeout";
 
@@ -37,8 +51,19 @@ export type Checkin = Payload & {
 const checkins = collection(db, "daily_checkins");
 const IMPORTED_KEY = "sonata.checkins.imported";
 
-export async function saveCheckin(note: Letter, mode: Mode, instrument: Instrument, reflection?: string) {
-  const payload: Payload = { note, pitch: pitchOf(note, mode), mode, emotion: emotionOf(note, mode), instrument };
+export async function saveCheckin(
+  note: Letter,
+  mode: Mode,
+  instrument: Instrument,
+  reflection?: string,
+) {
+  const payload: Payload = {
+    note,
+    pitch: pitchOf(note, mode),
+    mode,
+    emotion: emotionOf(note, mode),
+    instrument,
+  };
   const text = reflection?.trim();
   if (text) payload.reflection = text;
 
@@ -80,7 +105,8 @@ export function uploadPending(): Promise<void> {
           sent.push(record.id);
         } catch {
           // Refused because it's already there (an earlier upload got through)? Then it's done.
-          if ((await getDoc(ref).catch(() => null))?.exists()) sent.push(record.id);
+          if ((await getDoc(ref).catch(() => null))?.exists())
+            sent.push(record.id);
         }
       }),
     );
@@ -99,7 +125,9 @@ export function uploadPending(): Promise<void> {
 async function importFromServer() {
   if ((await AsyncStorage.getItem(IMPORTED_KEY)) === "yes") return;
   const user_id = await withTimeout(getUserId());
-  const snapshot = await withTimeout(getDocsFromServer(query(checkins, where("user_id", "==", user_id))));
+  const snapshot = await withTimeout(
+    getDocsFromServer(query(checkins, where("user_id", "==", user_id))),
+  );
   await storeCheckins(
     snapshot.docs.map((d): StoredCheckin => {
       const data = d.data();
@@ -126,17 +154,25 @@ async function allCheckins() {
 /** Check-ins from `from` (inclusive) to `to` (exclusive), oldest first. */
 export async function getCheckins(from: Date, to: Date): Promise<Checkin[]> {
   const inRange = (await allCheckins()).filter(
-    (record) => record.timestamp >= from.getTime() && record.timestamp < to.getTime(),
+    (record) =>
+      record.timestamp >= from.getTime() && record.timestamp < to.getTime(),
   );
   const results = await Promise.all(
     inRange.map(async (record): Promise<Checkin | null> => {
       try {
         const payload = await decryptPayload<Payload>(record);
-        return { ...payload, id: record.id, valence: record.valence_score, timestamp: new Date(record.timestamp) };
+        return {
+          ...payload,
+          id: record.id,
+          valence: record.valence_score,
+          timestamp: new Date(record.timestamp),
+        };
       } catch {
         // Saved with a key this phone no longer has (e.g. after a reinstall). Skip it rather than
         // losing the whole week; never log the payload itself.
-        console.warn(`Skipped check-in ${record.id}: it can't be decrypted on this device`);
+        console.warn(
+          `Skipped check-in ${record.id}: it can't be decrypted on this device`,
+        );
         return null;
       }
     }),

@@ -68,7 +68,10 @@ describe("addMonths and monthTitle", () => {
 
 describe("daysOfMonth", () => {
   it("lists every day of the month, with null for days without a check-in", () => {
-    const days = daysOfMonth(summariseMonth([at(1, "C", "major"), at(31, "G", "minor")], october).days, october);
+    const days = daysOfMonth(
+      summariseMonth([at(1, "C", "major"), at(31, "G", "minor")], october).days,
+      october,
+    );
     expect(days).toHaveLength(31);
     expect(days[0]).toEqual({ note: "C", mode: "major" });
     expect(days[1]).toBeNull();

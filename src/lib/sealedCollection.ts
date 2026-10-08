@@ -1,5 +1,11 @@
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { collection, deleteDoc, doc, setDoc, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  deleteDoc,
+  doc,
+  setDoc,
+  Timestamp,
+} from "firebase/firestore";
 import { decryptPayload, encryptPayload } from "@/lib/crypto";
 import { db } from "@/lib/firebase";
 import { localStore, type SealedRecord } from "@/lib/sealedStore";
@@ -26,7 +32,7 @@ export function sealedCollection<Content extends object>(name: string) {
 
   // Changes run one after another, so two quick taps can't each change the same old copy
   let queue: Promise<unknown> = Promise.resolve();
-  const queued = <T,>(task: () => Promise<T>): Promise<T> => {
+  const queued = <T>(task: () => Promise<T>): Promise<T> => {
     const next = queue.then(task);
     queue = next.catch(() => {});
     return next;
@@ -72,7 +78,9 @@ export function sealedCollection<Content extends object>(name: string) {
 
   /** Seal and store a new version (`content` null = deleted), then upload it in the background. */
   const save = async (id: string, content: Content | null, previous = 0) => {
-    const sealed = content ? await encryptPayload(content) : { encrypted_payload: "", initialization_vector_iv: "" };
+    const sealed = content
+      ? await encryptPayload(content)
+      : { encrypted_payload: "", initialization_vector_iv: "" };
     await local.store([
       {
         id,
@@ -94,9 +102,15 @@ export function sealedCollection<Content extends object>(name: string) {
     await Promise.all(
       records.map(async (record) => {
         try {
-          opened.push({ ...(await decryptPayload<Content>(record)), id: record.id, updatedAt: record.updated_at });
+          opened.push({
+            ...(await decryptPayload<Content>(record)),
+            id: record.id,
+            updatedAt: record.updated_at,
+          });
         } catch {
-          console.warn(`Skipped ${name} record ${record.id}: it can't be decrypted on this device`); // never log its contents
+          console.warn(
+            `Skipped ${name} record ${record.id}: it can't be decrypted on this device`,
+          ); // never log its contents
         }
       }),
     );
@@ -122,9 +136,15 @@ export function sealedCollection<Content extends object>(name: string) {
     /** Change a record's content. */
     edit: (id: string, change: (content: Content) => Content) =>
       queued(async () => {
-        const record = (await local.all()).find((r) => r.id === id && !r.deleted);
+        const record = (await local.all()).find(
+          (r) => r.id === id && !r.deleted,
+        );
         if (!record) throw new Error(`That ${name} record no longer exists`);
-        await save(id, change(await decryptPayload<Content>(record)), record.updated_at);
+        await save(
+          id,
+          change(await decryptPayload<Content>(record)),
+          record.updated_at,
+        );
       }),
 
     remove: (id: string) =>

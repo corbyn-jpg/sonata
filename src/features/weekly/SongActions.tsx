@@ -117,7 +117,7 @@ export function SongActions({ uri, fileName, playlistSong }: Props) {
         onShare={share}
         onClose={() => setWriting(false)}
       />
-            <AddToPlaylistSheet
+      <AddToPlaylistSheet
         visible={choosing}
         song={playlistSong}
         onDone={setMessage}

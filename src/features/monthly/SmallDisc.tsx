@@ -1,6 +1,19 @@
 import { useEffect, useMemo } from "react";
-import { Canvas, Circle, Group, Image, Skia, vec, type SkImage } from "@shopify/react-native-skia";
-import { useDerivedValue, useFrameCallback, useReducedMotion, useSharedValue } from "react-native-reanimated";
+import {
+  Canvas,
+  Circle,
+  Group,
+  Image,
+  Skia,
+  vec,
+  type SkImage,
+} from "@shopify/react-native-skia";
+import {
+  useDerivedValue,
+  useFrameCallback,
+  useReducedMotion,
+  useSharedValue,
+} from "react-native-reanimated";
 import colours from "@/theme/colours";
 
 const SPIN = (2 * Math.PI) / 40; // the same speed as the Weekly disc: one turn every 40 s
@@ -32,9 +45,27 @@ export function SmallDisc({ art, size, active, spinning }: Props) {
   return (
     <Canvas style={{ width: size, height: size }}>
       <Group clip={clip} origin={vec(c, c)} transform={rotation}>
-        {art && <Image image={art} x={0} y={0} width={size} height={size} fit="cover" />}
+        {art && (
+          <Image
+            image={art}
+            x={0}
+            y={0}
+            width={size}
+            height={size}
+            fit="cover"
+          />
+        )}
       </Group>
-      {active && <Circle cx={c} cy={c} r={c - 1} style="stroke" strokeWidth={2} color={colours.violet[200]} />}
+      {active && (
+        <Circle
+          cx={c}
+          cy={c}
+          r={c - 1}
+          style="stroke"
+          strokeWidth={2}
+          color={colours.violet[200]}
+        />
+      )}
     </Canvas>
   );
 }

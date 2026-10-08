@@ -20,19 +20,33 @@ export type Breath = {
 /** Where the session is `seconds` after it started. */
 export function breathAt(seconds: number): Breath {
   "worklet";
-  if (seconds >= SESSION) return { cycle: CYCLES, phase: "done", fullness: 0, progress: 1 };
+  if (seconds >= SESSION)
+    return { cycle: CYCLES, phase: "done", fullness: 0, progress: 1 };
   const t = Math.max(0, seconds);
   const length = INHALE + EXHALE;
   const index = Math.floor(t / length);
   const within = t - index * length;
   const ease = (p: number) => (1 - Math.cos(Math.PI * p)) / 2;
   const progress = t / SESSION;
-  if (within < INHALE) return { cycle: index + 1, phase: "in", fullness: ease(within / INHALE), progress };
-  return { cycle: index + 1, phase: "out", fullness: 1 - ease((within - INHALE) / EXHALE), progress };
+  if (within < INHALE)
+    return {
+      cycle: index + 1,
+      phase: "in",
+      fullness: ease(within / INHALE),
+      progress,
+    };
+  return {
+    cycle: index + 1,
+    phase: "out",
+    fullness: 1 - ease((within - INHALE) / EXHALE),
+    progress,
+  };
 }
 
 /** One number per change of phase, so the screen can react to each change once (-1 when finished). */
 export function stepOf(breath: Breath): number {
   "worklet";
-  return breath.phase === "done" ? -1 : breath.cycle * 2 + (breath.phase === "in" ? 0 : 1);
+  return breath.phase === "done"
+    ? -1
+    : breath.cycle * 2 + (breath.phase === "in" ? 0 : 1);
 }

@@ -1,4 +1,10 @@
-import { dialable, EMERGENCY, HELPLINES, isFree, spokenNumber } from "./helplines";
+import {
+  dialable,
+  EMERGENCY,
+  HELPLINES,
+  isFree,
+  spokenNumber,
+} from "./helplines";
 
 describe("helplines", () => {
   it("has a dialable South African number for every line", () => {

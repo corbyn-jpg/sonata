@@ -6,8 +6,18 @@ import colours from "@/theme/colours";
 // Named for what they are musically. "Bright" and "Dark" with a sun and moon read as light/dark
 // mode in user testing, so the labels say Major and Minor and the icons are notes, not a theme.
 const OPTIONS = [
-  { mode: "major", label: "Major", hint: "Orbs play major chords", Icon: Music2 },
-  { mode: "minor", label: "Minor", hint: "Orbs play minor chords", Icon: Music4 },
+  {
+    mode: "major",
+    label: "Major",
+    hint: "Orbs play major chords",
+    Icon: Music2,
+  },
+  {
+    mode: "minor",
+    label: "Minor",
+    hint: "Orbs play minor chords",
+    Icon: Music4,
+  },
 ] as const;
 
 type Props = { mode: Mode; onChange: (mode: Mode) => void };

@@ -20,7 +20,10 @@ const ICONS: Record<Instrument, LucideIcon> = {
   flute: Wind,
 };
 
-type Props = { instrument: Instrument; onChange: (instrument: Instrument) => void };
+type Props = {
+  instrument: Instrument;
+  onChange: (instrument: Instrument) => void;
+};
 
 /** Pill showing the current instrument; opens a small sheet to choose another. */
 export function InstrumentPicker({ instrument, onChange }: Props) {
@@ -91,7 +94,11 @@ export function InstrumentPicker({ instrument, onChange }: Props) {
                     {INSTRUMENT_LABELS[option]}
                   </Text>
                   {active && (
-                    <Check color={colours.violet[200]} size={20} strokeWidth={1.5} />
+                    <Check
+                      color={colours.violet[200]}
+                      size={20}
+                      strokeWidth={1.5}
+                    />
                   )}
                 </Pressable>
               );

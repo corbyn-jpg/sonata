@@ -57,7 +57,15 @@ type Props = {
 /**
  The week's record. Spins while playing and eases to a stop on pause. The ring round it shows how far through the song you are; drag along it (or tap it) to jump.
  */
-export function SongDisc({ art, glow, playing, currentTime, duration, active, onSeek }: Props) {
+export function SongDisc({
+  art,
+  glow,
+  playing,
+  currentTime,
+  duration,
+  active,
+  onSeek,
+}: Props) {
   const reduceMotion = useReducedMotion();
   const angle = useSharedValue(0);
   const speed = useSharedValue(0);
@@ -67,7 +75,7 @@ export function SongDisc({ art, glow, playing, currentTime, duration, active, on
   const total = useSharedValue(0);
   const scrubbing = useSharedValue(false);
 
-    useEffect(() => {
+  useEffect(() => {
     advancing.set(playing);
     spinning.set(playing && !reduceMotion); // with Reduce Motion on, the disc stays still
   }, [playing, reduceMotion, advancing, spinning]);
@@ -80,7 +88,8 @@ export function SongDisc({ art, glow, playing, currentTime, duration, active, on
   useEffect(() => {
     if (scrubbing.get() || duration <= 0) return;
     const reported = Math.min(1, currentTime / duration);
-    if (!playing || Math.abs(reported - progress.get()) > 0.015) progress.set(reported);
+    if (!playing || Math.abs(reported - progress.get()) > 0.015)
+      progress.set(reported);
   }, [currentTime, duration, playing, progress, scrubbing]);
 
   const frame = useFrameCallback((info) => {
@@ -104,7 +113,7 @@ export function SongDisc({ art, glow, playing, currentTime, duration, active, on
     return vec(C + Math.cos(a) * RING, C + Math.sin(a) * RING);
   });
 
-    // Rebuilt on each render, so it always seeks with the latest callback and duration
+  // Rebuilt on each render, so it always seeks with the latest callback and duration
   const seek = (fraction: number) => onSeek(fraction * duration);
   const gesture = Gesture.Pan()
     .minDistance(0)
@@ -135,7 +144,9 @@ export function SongDisc({ art, glow, playing, currentTime, duration, active, on
         accessible
         accessibilityRole="adjustable"
         accessibilityLabel="Song position"
-        accessibilityValue={{ text: `${clock(currentTime)} of ${clock(duration)}` }}
+        accessibilityValue={{
+          text: `${clock(currentTime)} of ${clock(duration)}`,
+        }}
         accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
         onAccessibilityAction={onAccessibilityAction}
       >
@@ -147,7 +158,14 @@ export function SongDisc({ art, glow, playing, currentTime, duration, active, on
 
           {art && (
             <Group origin={vec(C, C)} transform={rotation}>
-              <Image image={art} x={C - DISC / 2} y={C - DISC / 2} width={DISC} height={DISC} fit="cover" />
+              <Image
+                image={art}
+                x={C - DISC / 2}
+                y={C - DISC / 2}
+                width={DISC}
+                height={DISC}
+                fit="cover"
+              />
             </Group>
           )}
 
@@ -156,17 +174,45 @@ export function SongDisc({ art, glow, playing, currentTime, duration, active, on
             <LinearGradient
               start={vec(C - DISC / 2, C - DISC / 2)}
               end={vec(C + DISC / 2, C + DISC / 2)}
-              colors={["rgba(255,255,255,0.14)", "rgba(255,255,255,0)", "rgba(255,255,255,0.06)"]}
+              colors={[
+                "rgba(255,255,255,0.14)",
+                "rgba(255,255,255,0)",
+                "rgba(255,255,255,0.06)",
+              ]}
               positions={[0, 0.5, 1]}
             />
           </Circle>
 
           {/* Progress ring: faint track, glowing arc, and a knob to grab */}
-          <Circle cx={C} cy={C} r={RING} style="stroke" strokeWidth={3} color={colours.teal[700]} />
-          <Path path={RING_PATH} start={0} end={progress} style="stroke" strokeWidth={8} strokeCap="round" color={colours.violet[500]} opacity={0.6}>
+          <Circle
+            cx={C}
+            cy={C}
+            r={RING}
+            style="stroke"
+            strokeWidth={3}
+            color={colours.teal[700]}
+          />
+          <Path
+            path={RING_PATH}
+            start={0}
+            end={progress}
+            style="stroke"
+            strokeWidth={8}
+            strokeCap="round"
+            color={colours.violet[500]}
+            opacity={0.6}
+          >
             <BlurMask blur={6} style="normal" />
           </Path>
-          <Path path={RING_PATH} start={0} end={progress} style="stroke" strokeWidth={3} strokeCap="round" color={colours.violet[200]} />
+          <Path
+            path={RING_PATH}
+            start={0}
+            end={progress}
+            style="stroke"
+            strokeWidth={3}
+            strokeCap="round"
+            color={colours.violet[200]}
+          />
           <Circle c={knob} r={7} color={colours.textPrimary} />
         </Canvas>
       </View>

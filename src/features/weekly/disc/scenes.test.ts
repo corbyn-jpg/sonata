@@ -44,7 +44,8 @@ describe("disc scenes", () => {
     for (const mode of MODES) {
       const calls = draw(mode);
       expect(calls[1]).toBe(`clipCircle([300,300,300])`);
-      const count = (name: string) => calls.filter((c) => c.startsWith(`${name}(`)).length;
+      const count = (name: string) =>
+        calls.filter((c) => c.startsWith(`${name}(`)).length;
       expect(count("save")).toBe(count("restore"));
     }
   });
@@ -54,11 +55,15 @@ describe("disc scenes", () => {
   });
 
   it("gives a different picture to a different week", () => {
-    for (const mode of MODES) expect(draw(mode, "2026-10-05")).not.toEqual(draw(mode));
+    for (const mode of MODES)
+      expect(draw(mode, "2026-10-05")).not.toEqual(draw(mode));
   });
 
   it("draws something for each logged day (fewer days, fewer marks)", () => {
     const fewer = [B("C"), null, null, null, null, null, B("B")];
-    for (const mode of MODES) expect(draw(mode, "x", fewer).length).toBeLessThan(draw(mode, "x").length);
+    for (const mode of MODES)
+      expect(draw(mode, "x", fewer).length).toBeLessThan(
+        draw(mode, "x").length,
+      );
   });
 });

@@ -12,4 +12,6 @@ export const RULE_TRANSITIONS: readonly (readonly number[])[] = [
 ];
 
 /** The first chord leans towards home (I). */
-export const RULE_OPENING: readonly number[] = [0.5, 0.05, 0.05, 0.15, 0.1, 0.15, 0];
+export const RULE_OPENING: readonly number[] = [
+  0.5, 0.05, 0.05, 0.15, 0.1, 0.15, 0,
+];

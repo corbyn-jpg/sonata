@@ -1,6 +1,6 @@
-import { getRandomBytes } from 'expo-crypto';
-import { IV_BYTES, open, seal, type Sealed } from './aes';
-import { getKey } from './key';
+import { getRandomBytes } from "expo-crypto";
+import { IV_BYTES, open, seal, type Sealed } from "./aes";
+import { getKey } from "./key";
 
 export type { Sealed };
 

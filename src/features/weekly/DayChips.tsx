@@ -4,7 +4,15 @@ import colours from "@/theme/colours";
 import type { WeekDay } from "./useWeekSong";
 
 const LETTERS = ["M", "T", "W", "T", "F", "S", "S"];
-const NAMES = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const NAMES = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 
 type Props = {
   days: readonly WeekDay[];
@@ -30,14 +38,22 @@ export function DayChips({ days, current, onSelect }: Props) {
             accessibilityState={{ selected: active }}
             className={`min-h-[64px] w-11 items-center justify-center gap-1.5 rounded-card border ${active ? "border-violet-500 bg-violet-700/40" : "border-transparent"}`}
           >
-            <Text className={`font-sans-medium text-caption ${active ? "text-primary" : "text-muted"}`}>
+            <Text
+              className={`font-sans-medium text-caption ${active ? "text-primary" : "text-muted"}`}
+            >
               {LETTERS[i]}
             </Text>
             <View
               className="h-3.5 w-3.5 rounded-pill"
               style={
                 colour
-                  ? { backgroundColor: colour, shadowColor: colour, shadowOpacity: 0.9, shadowRadius: 6, elevation: 0 }
+                  ? {
+                      backgroundColor: colour,
+                      shadowColor: colour,
+                      shadowOpacity: 0.9,
+                      shadowRadius: 6,
+                      elevation: 0,
+                    }
                   : { borderWidth: 1, borderColor: colours.textMuted }
               }
             />

@@ -13,9 +13,19 @@ type Props = {
 };
 
 /** One figure in the line under the chart: the value, and a few words on what it counts. */
-function Figure({ value, label, first = false }: { value: string | number; label: string; first?: boolean }) {
+function Figure({
+  value,
+  label,
+  first = false,
+}: {
+  value: string | number;
+  label: string;
+  first?: boolean;
+}) {
   return (
-    <View className={`flex-1 gap-0.5 ${first ? "" : "border-l border-border pl-3"}`}>
+    <View
+      className={`flex-1 gap-0.5 ${first ? "" : "border-l border-border pl-3"}`}
+    >
       <Text numberOfLines={1} className="font-mono-medium text-h4 text-primary">
         {value}
       </Text>
@@ -32,16 +42,24 @@ export function MonthBento({ summary, streak, isCurrentMonth }: Props) {
   const { mostUsedMode, melodies, weeks } = summary;
   // A streak only means something now; an earlier month shows how many days were logged
   const days = isCurrentMonth ? streak : summary.loggedDays;
-  const daysLabel = isCurrentMonth ? (streak === 1 ? "day in a row" : "days in a row") : "days logged";
+  const daysLabel = isCurrentMonth
+    ? streak === 1
+      ? "day in a row"
+      : "days in a row"
+    : "days logged";
 
   return (
     <BentoCard className="gap-4">
       <View className="gap-3">
-        <Text className="font-sans-medium text-caption text-secondary">Week by week</Text>
+        <Text className="font-sans-medium text-caption text-secondary">
+          Week by week
+        </Text>
         {weeks.length > 0 ? (
           <ValenceChart weeks={weeks} />
         ) : (
-          <Text className="font-sans text-caption text-muted">No weeks start in this month.</Text>
+          <Text className="font-sans text-caption text-muted">
+            No weeks start in this month.
+          </Text>
         )}
       </View>
 
@@ -49,10 +67,17 @@ export function MonthBento({ summary, streak, isCurrentMonth }: Props) {
         <Figure
           first
           value={mostUsedMode ? MODE_NAMES[mostUsedMode.mode] : "–"}
-          label={mostUsedMode ? `mode in ${mostUsedMode.weeks} of ${melodies} weeks` : "mode"}
+          label={
+            mostUsedMode
+              ? `mode in ${mostUsedMode.weeks} of ${melodies} weeks`
+              : "mode"
+          }
         />
         <Figure value={days} label={daysLabel} />
-        <Figure value={melodies} label={melodies === 1 ? "melody" : "melodies"} />
+        <Figure
+          value={melodies}
+          label={melodies === 1 ? "melody" : "melodies"}
+        />
       </View>
     </BentoCard>
   );

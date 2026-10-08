@@ -23,7 +23,11 @@ export function seededRandom(seed: number): () => number {
 }
 
 /** One item, chosen with the given relative weights. If every weight is 0, any item is equally likely. */
-export function pickWeighted<T>(items: readonly T[], weights: readonly number[], random: () => number): T {
+export function pickWeighted<T>(
+  items: readonly T[],
+  weights: readonly number[],
+  random: () => number,
+): T {
   const total = weights.reduce((sum, w) => sum + w, 0);
   if (total <= 0) return items[Math.floor(random() * items.length)];
   let r = random() * total;

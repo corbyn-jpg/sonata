@@ -6,7 +6,7 @@ import { isInstrument, type Instrument } from "@/audio/instruments";
 type Preferences = {
   /** Play each note's vibration pattern (for deaf and hard-of-hearing users).*/
   feelNotes: boolean;
-    /** What check-ins sound like. The last choice is remembered. */
+  /** What check-ins sound like. The last choice is remembered. */
   instrument: Instrument;
 };
 
@@ -23,7 +23,8 @@ AsyncStorage.getItem(STORAGE_KEY)
     if (!saved) return;
     current = { ...DEFAULTS, ...JSON.parse(saved) };
     // An instrument that's since been removed (e.g. "ambient") falls back to the default
-    if (!isInstrument(current.instrument)) current.instrument = DEFAULTS.instrument;
+    if (!isInstrument(current.instrument))
+      current.instrument = DEFAULTS.instrument;
     notify();
   })
   .catch(() => {});

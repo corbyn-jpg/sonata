@@ -13,14 +13,34 @@ export type PlaylistSong = {
 };
 
 /** The songs with `song` added at the end, or, if that week on that instrument is already there, updated where it is (the week has had more check-ins since). */
-export function withSong(songs: readonly PlaylistSong[], song: PlaylistSong): PlaylistSong[] {
-  const i = songs.findIndex((s) => s.kind === song.kind && s.week === song.week && s.instrument === song.instrument);
+export function withSong(
+  songs: readonly PlaylistSong[],
+  song: PlaylistSong,
+): PlaylistSong[] {
+  const i = songs.findIndex(
+    (s) =>
+      s.kind === song.kind &&
+      s.week === song.week &&
+      s.instrument === song.instrument,
+  );
   return i < 0 ? [...songs, song] : songs.map((s, j) => (j === i ? song : s));
 }
 
 /** The songs with `song` put back at `index` (an undone remove). If it was added again in the meantime, nothing changes. */
-export function withSongAt(songs: readonly PlaylistSong[], index: number, song: PlaylistSong): PlaylistSong[] {
-  if (songs.some((s) => s.kind === song.kind && s.week === song.week && s.instrument === song.instrument)) return [...songs];
+export function withSongAt(
+  songs: readonly PlaylistSong[],
+  index: number,
+  song: PlaylistSong,
+): PlaylistSong[] {
+  if (
+    songs.some(
+      (s) =>
+        s.kind === song.kind &&
+        s.week === song.week &&
+        s.instrument === song.instrument,
+    )
+  )
+    return [...songs];
   return [...songs.slice(0, index), song, ...songs.slice(index)];
 }
 

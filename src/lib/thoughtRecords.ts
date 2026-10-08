@@ -7,7 +7,8 @@ export type SavedThoughtRecord = Opened<ThoughtRecord>;
 
 const records = sealedCollection<ThoughtRecord>("cbt_thought_records");
 
-export const saveThoughtRecord = (record: ThoughtRecord) => records.create(cleanRecord(record));
+export const saveThoughtRecord = (record: ThoughtRecord) =>
+  records.create(cleanRecord(record));
 export const deleteThoughtRecord = records.remove;
 
 /** Every thought record, newest first, kept up to date on any screen. Null until first loaded. */

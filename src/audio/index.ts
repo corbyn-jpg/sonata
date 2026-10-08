@@ -43,7 +43,10 @@ function voicesFor(instrument: Instrument, letter: Letter, mode: Mode) {
   const key = keyOf(instrument, letter, mode);
   let entry = pool.get(key);
   if (!entry) {
-    entry = { players: [createAudioPlayer(CHORDS[instrument][letter][mode])], next: 0 };
+    entry = {
+      players: [createAudioPlayer(CHORDS[instrument][letter][mode])],
+      next: 0,
+    };
     pool.set(key, entry);
   }
   return entry;

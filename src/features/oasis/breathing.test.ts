@@ -4,7 +4,11 @@ describe("breathAt", () => {
   it("breathes in for 4 seconds, then out for 6", () => {
     expect(breathAt(0)).toMatchObject({ cycle: 1, phase: "in", fullness: 0 });
     expect(breathAt(INHALE - 0.01).phase).toBe("in");
-    expect(breathAt(INHALE)).toMatchObject({ cycle: 1, phase: "out", fullness: 1 });
+    expect(breathAt(INHALE)).toMatchObject({
+      cycle: 1,
+      phase: "out",
+      fullness: 1,
+    });
     expect(breathAt(INHALE + EXHALE)).toMatchObject({ cycle: 2, phase: "in" });
   });
 

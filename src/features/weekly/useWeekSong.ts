@@ -18,7 +18,9 @@ function useThisWeek() {
   useFocusEffect(
     useCallback(() => {
       let cancelled = false;
-      const keys = Array.from({ length: 7 }, (_, i) => dayKey(addDays(weekStart, i)));
+      const keys = Array.from({ length: 7 }, (_, i) =>
+        dayKey(addDays(weekStart, i)),
+      );
       getCheckins(weekStart, addDays(weekStart, 7))
         .then((checkins) => {
           if (cancelled) return;
@@ -54,19 +56,26 @@ export function useWeekSong() {
   const { weekStart, days, loadFailed } = useThisWeek();
   const [chosen, setInstrument] = useState<Instrument | null>(null);
   // By default, the instrument used most this week, so the song sounds like the days did
-  const instrument = chosen ?? mostUsedInstrument((days ?? []).map((d) => d?.instrument)) ?? "piano";
+  const instrument =
+    chosen ??
+    mostUsedInstrument((days ?? []).map((d) => d?.instrument)) ??
+    "piano";
 
   // Only the notes matter to the song, so the song (and its file) are keyed by them
   const notes = days?.map((d) => d && { note: d.note, mode: d.mode }) ?? null;
-  const weekKey = notes ? `${dayKey(weekStart)}-${hashString(JSON.stringify(notes)).toString(36)}` : null;
+  const weekKey = notes
+    ? `${dayKey(weekStart)}-${hashString(JSON.stringify(notes)).toString(36)}`
+    : null;
   const song = useMemo(
     () => (notes?.some(Boolean) ? composeWeek(notes, dayKey(weekStart)) : null),
     // eslint-disable-next-line react-hooks/exhaustive-deps -- weekKey changes exactly when notes do
     [weekKey],
   );
 
-  const [rendered, setRendered] = useState<{ key: string; uri: string } | null>(null);
-    // Which song and instrument last failed to render, so a new one starts fresh without resetting state in the effect
+  const [rendered, setRendered] = useState<{ key: string; uri: string } | null>(
+    null,
+  );
+  // Which song and instrument last failed to render, so a new one starts fresh without resetting state in the effect
   const [failedKey, setFailedKey] = useState<string | null>(null);
   const fileKey = `${weekKey}-${instrument}`;
   const failed = failedKey === fileKey;
@@ -77,7 +86,9 @@ export function useWeekSong() {
     // Mixing blocks JavaScript for about a second, so let the "composing" state draw first
     const timer = setTimeout(() => {
       renderSong(song, instrument, `song-${weekKey}`)
-        .then((file) => !cancelled && setRendered({ key: fileKey, uri: file.uri }))
+        .then(
+          (file) => !cancelled && setRendered({ key: fileKey, uri: file.uri }),
+        )
         .catch((error) => {
           if (cancelled) return;
           console.warn("Couldn't render the week's song:", error);
@@ -91,12 +102,17 @@ export function useWeekSong() {
   }, [song, instrument, weekKey, fileKey]);
 
   const status =
-    days === null ? "loading"
-    : loadFailed ? "offline"
-    : !song ? "empty"
-    : failed ? "error"
-    : rendered?.key === fileKey ? "ready"
-    : "composing";
+    days === null
+      ? "loading"
+      : loadFailed
+        ? "offline"
+        : !song
+          ? "empty"
+          : failed
+            ? "error"
+            : rendered?.key === fileKey
+              ? "ready"
+              : "composing";
 
   return {
     status,

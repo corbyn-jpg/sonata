@@ -19,7 +19,15 @@ type Props = {
 };
 
 /** One song in a playlist: a small record in the week's colours, its week and instrument, play and remove. */
-export function PlaylistSongRow({ song, composition, active, playing, loading, onToggle, onRemove }: Props) {
+export function PlaylistSongRow({
+  song,
+  composition,
+  active,
+  playing,
+  loading,
+  onToggle,
+  onRemove,
+}: Props) {
   const [main, second] = composition.palette;
   const label = `Week of ${longDate(fromDayKey(song.week))}`;
   const days = song.days.filter(Boolean).length;
@@ -48,20 +56,36 @@ export function PlaylistSongRow({ song, composition, active, playing, loading, o
             justifyContent: "center",
           }}
         >
-          <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: colours.canvas }} />
+          <View
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 4,
+              backgroundColor: colours.canvas,
+            }}
+          />
         </View>
         <View className="flex-1 gap-0.5">
-          <Text numberOfLines={1} className="font-sans-medium text-body text-primary">
+          <Text
+            numberOfLines={1}
+            className="font-sans-medium text-body text-primary"
+          >
             {label}
           </Text>
           <Text className="font-sans text-caption text-muted">
-            {INSTRUMENT_LABELS[song.instrument]} · {days === 1 ? "1 day" : `${days} days`}
+            {INSTRUMENT_LABELS[song.instrument]} ·{" "}
+            {days === 1 ? "1 day" : `${days} days`}
           </Text>
         </View>
         {active && loading ? (
           <ActivityIndicator color={colours.violet[200]} />
         ) : (
-          <Icon color={colours.textSecondary} fill={colours.textSecondary} size={18} strokeWidth={1.5} />
+          <Icon
+            color={colours.textSecondary}
+            fill={colours.textSecondary}
+            size={18}
+            strokeWidth={1.5}
+          />
         )}
       </Pressable>
       <Pressable

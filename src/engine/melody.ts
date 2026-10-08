@@ -1,9 +1,9 @@
 // Step 3: voice leading. The day's notes are the melody's anchors; the passing notes between them are chosen by the GRU neural network trained on Bach's melodies. Music rules decide which notes are allowed (in the scale, in range, able to reach the next day's note), and the network decides which of those is most musical given everything it has heard so far.
-import { encodeStep, intervalIndex, MAX_INTERVAL } from './features';
-import { gruStep, predict } from './gru';
-import { MELODY_NETWORK } from './model';
-import { pickWeighted } from './random';
-import { pitchClass, scaleDistance, stepFrom } from './theory';
+import { encodeStep, intervalIndex, MAX_INTERVAL } from "./features";
+import { gruStep, predict } from "./gru";
+import { MELODY_NETWORK } from "./model";
+import { pickWeighted } from "./random";
+import { pitchClass, scaleDistance, stepFrom } from "./theory";
 
 export const MELODY_LOW = 67; // G4
 export const MELODY_HIGH = 86; // D6
@@ -12,13 +12,16 @@ export const MELODY_HIGH = 86; // D6
 export function placeNote(pc: number, near: number): number {
   let best = -1;
   for (let n = MELODY_LOW; n <= MELODY_HIGH; n++)
-    if (pitchClass(n) === pc && (best < 0 || Math.abs(n - near) < Math.abs(best - near))) best = n;
+    if (
+      pitchClass(n) === pc &&
+      (best < 0 || Math.abs(n - near) < Math.abs(best - near))
+    )
+      best = n;
   return best;
 }
 
 /**
- * How long each note in a bar lasts, in beats: the day's note first, then its passing notes.
- * Brighter days move more; heavier days linger on their note.
+ How long each note in a bar lasts, in beats: the day's note first, then its passing notes. Brighter days move more; heavier days linger on their note.
  */
 export function rhythmFor(valence: number): number[] {
   if (valence >= 8) return [2, 1, 0.5, 0.5];
@@ -26,7 +29,12 @@ export function rhythmFor(valence: number): number[] {
   return [3, 1];
 }
 
-export type MelodyNote = { midi: number; start: number; duration: number; velocity: number };
+export type MelodyNote = {
+  midi: number;
+  start: number;
+  duration: number;
+  velocity: number;
+};
 
 /** The melody as it's written, with the network listening along (its memory is `state`). */
 export class MelodyLine {
@@ -46,26 +54,49 @@ export class MelodyLine {
 
   /** Show the network the latest note and the chord to come; returns its odds for each interval. */
   private listen(start: number, chord: readonly number[]): Float64Array | null {
-    const [before, last] = [this.notes[this.notes.length - 2], this.notes[this.notes.length - 1]];
+    const [before, last] = [
+      this.notes[this.notes.length - 2],
+      this.notes[this.notes.length - 1],
+    ];
     if (!last) return null;
     const intervalIn = before ? last.midi - before.midi : null;
-    const x = encodeStep(pitchClass(last.midi), intervalIn, chord, this.minor, Number.isInteger(start));
+    const x = encodeStep(
+      pitchClass(last.midi),
+      intervalIn,
+      chord,
+      this.minor,
+      Number.isInteger(start),
+    );
     this.state = gruStep(MELODY_NETWORK, x, this.state);
     return predict(MELODY_NETWORK, this.state);
   }
 
   /** Add a note that's already decided (a day's note, the final C). */
-  place(midi: number, start: number, duration: number, chord: readonly number[], velocity: number) {
+  place(
+    midi: number,
+    start: number,
+    duration: number,
+    chord: readonly number[],
+    velocity: number,
+  ) {
     this.listen(start, chord);
     this.notes.push({ midi, start, duration, velocity });
   }
 
   /** Add whichever of `allowed` the network thinks is likeliest to come next (sampled, not always the top). */
-  choose(allowed: readonly number[], start: number, duration: number, chord: readonly number[], velocity: number) {
+  choose(
+    allowed: readonly number[],
+    start: number,
+    duration: number,
+    chord: readonly number[],
+    velocity: number,
+  ) {
     const odds = this.listen(start, chord);
     const last = this.last;
     const weights = allowed.map((n) =>
-      odds && last !== undefined && Math.abs(n - last) <= MAX_INTERVAL ? odds[intervalIndex(n - last)] : 1,
+      odds && last !== undefined && Math.abs(n - last) <= MAX_INTERVAL
+        ? odds[intervalIndex(n - last)]
+        : 1,
     );
     const midi = pickWeighted(allowed, weights, this.random);
     this.notes.push({ midi, start, duration, velocity });
@@ -100,12 +131,19 @@ export function addPassingNotes(
       const allowed: number[] = [];
       for (const step of [-2, -1, 1, 2]) {
         let n = current;
-        for (let k = 0; k < Math.abs(step); k++) n = stepFrom(n, step > 0 ? 1 : -1, scale);
+        for (let k = 0; k < Math.abs(step); k++)
+          n = stepFrom(n, step > 0 ? 1 : -1, scale);
         if (n < MELODY_LOW - 2 || n > MELODY_HIGH + 2) continue;
         if (scaleDistance(n, approach, scale) > 2 * (left - 1)) continue;
         allowed.push(n);
       }
-      current = line.choose(allowed.length > 0 ? allowed : [current], t, duration, chord, 0.65);
+      current = line.choose(
+        allowed.length > 0 ? allowed : [current],
+        t,
+        duration,
+        chord,
+        0.65,
+      );
     }
     t += duration;
   });

@@ -1,5 +1,5 @@
-import { signInAnonymously } from 'firebase/auth';
-import { auth } from './firebase';
+import { signInAnonymously } from "firebase/auth";
+import { auth } from "./firebase";
 
 let pending: Promise<string> | null = null;
 

@@ -1,6 +1,16 @@
 import { useEffect, useMemo } from "react";
 import { StyleSheet, Text, useWindowDimensions, View } from "react-native";
-import { BlurMask, Canvas, Circle, Group, Line, Path, Rect, Skia, vec } from "@shopify/react-native-skia";
+import {
+  BlurMask,
+  Canvas,
+  Circle,
+  Group,
+  Line,
+  Path,
+  Rect,
+  Skia,
+  vec,
+} from "@shopify/react-native-skia";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -22,16 +32,33 @@ const STEPS = { C: -2, D: -1, E: 0, F: 1, G: 2, A: 3, B: 4 } as const;
 type Note = { x: number; y: number; colour: string; day: number };
 
 /** One day's note: fades in and settles as the drawing reaches its day. */
-function NoteHead({ note, progress }: { note: Note; progress: SharedValue<number> }) {
-  const shown = useDerivedValue(() => Math.min(1, Math.max(0, (progress.value * 7 - note.day) * 1.5)));
-  const centre = useDerivedValue(() => vec(note.x, note.y + (1 - shown.value) * 6));
+function NoteHead({
+  note,
+  progress,
+}: {
+  note: Note;
+  progress: SharedValue<number>;
+}) {
+  const shown = useDerivedValue(() =>
+    Math.min(1, Math.max(0, (progress.value * 7 - note.day) * 1.5)),
+  );
+  const centre = useDerivedValue(() =>
+    vec(note.x, note.y + (1 - shown.value) * 6),
+  );
   return (
     <Group opacity={shown}>
       <Circle c={centre} r={12} color={note.colour} opacity={0.35}>
         <BlurMask blur={8} style="normal" />
       </Circle>
       <Circle c={centre} r={4.5} color={note.colour} />
-      <Circle c={centre} r={7.5} style="stroke" strokeWidth={1} color={note.colour} opacity={0.5} />
+      <Circle
+        c={centre}
+        r={7.5}
+        style="stroke"
+        strokeWidth={1}
+        color={note.colour}
+        opacity={0.5}
+      />
     </Group>
   );
 }
@@ -56,22 +83,31 @@ export function ComposingMoment({ visible, days }: Props) {
   const bottom = cy + GAP; // keeps the notes (C on its ledger up to B) centred on the screen
 
   useEffect(() => {
-    opacity.value = withTiming(visible ? 1 : 0, { duration: 700, easing: Easing.out(Easing.quad) });
+    opacity.value = withTiming(visible ? 1 : 0, {
+      duration: 700,
+      easing: Easing.out(Easing.quad),
+    });
     if (!visible) return;
     progress.value = reduceMotion ? 1 : 0;
-    if (!reduceMotion) progress.value = withTiming(1, { duration: DRAW_MS, easing: Easing.inOut(Easing.quad) });
+    if (!reduceMotion)
+      progress.value = withTiming(1, {
+        duration: DRAW_MS,
+        easing: Easing.inOut(Easing.quad),
+      });
   }, [visible, reduceMotion, opacity, progress]);
 
   const notes = useMemo(
     () =>
       days.flatMap((day, i): Note[] =>
         day
-          ? [{
-              x: left + ((i + 0.5) * STAFF_WIDTH) / 7,
-              y: bottom - (STEPS[day.note] * GAP) / 2,
-              colour: colours.orb[day.note][day.mode].core,
-              day: i,
-            }]
+          ? [
+              {
+                x: left + ((i + 0.5) * STAFF_WIDTH) / 7,
+                y: bottom - (STEPS[day.note] * GAP) / 2,
+                colour: colours.orb[day.note][day.mode].core,
+                day: i,
+              },
+            ]
           : [],
       ),
     [days, left, bottom],
@@ -79,7 +115,7 @@ export function ComposingMoment({ visible, days }: Props) {
 
   // A smooth line through the notes, drawn as the notes arrive
   const melody = useMemo(() => {
-    const path = Skia.PathBuilder.Make()
+    const path = Skia.PathBuilder.Make();
     notes.forEach(({ x, y }, i) => {
       if (i === 0) return path.moveTo(x, y);
       const prev = notes[i - 1];
@@ -98,7 +134,14 @@ export function ComposingMoment({ visible, days }: Props) {
       accessibilityViewIsModal={visible}
     >
       <Canvas style={StyleSheet.absoluteFill}>
-        <Rect x={0} y={0} width={width} height={height} color={colours.canvas} opacity={0.97} />
+        <Rect
+          x={0}
+          y={0}
+          width={width}
+          height={height}
+          color={colours.canvas}
+          opacity={0.97}
+        />
         {[0, 1, 2, 3, 4].map((i) => (
           <Line
             key={i}
@@ -109,7 +152,15 @@ export function ComposingMoment({ visible, days }: Props) {
             strokeWidth={1}
           />
         ))}
-        <Path path={melody} start={0} end={progress} style="stroke" strokeWidth={1} color={colours.textPrimary} opacity={0.35} />
+        <Path
+          path={melody}
+          start={0}
+          end={progress}
+          style="stroke"
+          strokeWidth={1}
+          color={colours.textPrimary}
+          opacity={0.35}
+        />
         {notes.map((note) => (
           <NoteHead key={note.day} note={note} progress={progress} />
         ))}
@@ -127,13 +178,28 @@ export function ComposingMoment({ visible, days }: Props) {
       </Canvas>
 
       <Text
-        style={{ position: "absolute", top: bottom - GAP * 4 - 56, left: 24, right: 24 }}
+        style={{
+          position: "absolute",
+          top: bottom - GAP * 4 - 56,
+          left: 24,
+          right: 24,
+        }}
         className="text-center font-mono text-body text-muted"
       >
         Composing…
       </Text>
-      <View style={{ position: "absolute", top: bottom + GAP * 2 + 36, left: 24, right: 24 }}>
-        <Text className="text-center font-sans text-body text-secondary" accessibilityLiveRegion="polite">
+      <View
+        style={{
+          position: "absolute",
+          top: bottom + GAP * 2 + 36,
+          left: 24,
+          right: 24,
+        }}
+      >
+        <Text
+          className="text-center font-sans text-body text-secondary"
+          accessibilityLiveRegion="polite"
+        >
           Your week, as one melody
         </Text>
       </View>

@@ -80,7 +80,13 @@ export function Orb({
   return (
     <Group>
       {aura && (
-        <Circle cx={cx} cy={cy} r={size * 1.5} color={coreColour} opacity={0.15}>
+        <Circle
+          cx={cx}
+          cy={cy}
+          r={size * 1.5}
+          color={coreColour}
+          opacity={0.15}
+        >
           <BlurMask blur={size * 0.5} style="normal" />
         </Circle>
       )}

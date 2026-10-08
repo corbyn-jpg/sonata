@@ -17,11 +17,17 @@ export type StoredCheckin = {
 const STORAGE_KEY = "sonata.checkins.v1";
 
 /** Records from both lists, one per id (a confirmed copy stays confirmed), oldest first. */
-export function mergeCheckins(existing: readonly StoredCheckin[], incoming: readonly StoredCheckin[]) {
+export function mergeCheckins(
+  existing: readonly StoredCheckin[],
+  incoming: readonly StoredCheckin[],
+) {
   const byId = new Map(existing.map((record) => [record.id, record]));
   for (const record of incoming) {
     const old = byId.get(record.id);
-    byId.set(record.id, { ...record, synced: record.synced || (old?.synced ?? false) });
+    byId.set(record.id, {
+      ...record,
+      synced: record.synced || (old?.synced ?? false),
+    });
   }
   return [...byId.values()].sort((a, b) => a.timestamp - b.timestamp);
 }
@@ -54,4 +60,8 @@ export const storeCheckins = (incoming: readonly StoredCheckin[]) =>
 
 /** Note that Firestore has confirmed these records. */
 export const markSynced = (ids: readonly string[]) =>
-  update((current) => current.map((record) => (ids.includes(record.id) ? { ...record, synced: true } : record)));
+  update((current) =>
+    current.map((record) =>
+      ids.includes(record.id) ? { ...record, synced: true } : record,
+    ),
+  );

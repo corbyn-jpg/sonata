@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { KeyboardAvoidingView, Modal, Pressable, Text, TextInput, View } from "react-native";
+import {
+  KeyboardAvoidingView,
+  Modal,
+  Pressable,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { Share2 } from "lucide-react-native";
 import colours from "@/theme/colours";
 
@@ -23,19 +30,32 @@ export function ShareSheet({ visible, onShare, onClose }: Props) {
   };
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
       {/* Lift the sheet above the keyboard while typing */}
       <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
         {/* Tapping outside the sheet closes it */}
-        <Pressable className="flex-1 justify-end bg-canvas/50" onPress={onClose} accessibilityLabel="Close">
+        <Pressable
+          className="flex-1 justify-end bg-canvas/50"
+          onPress={onClose}
+          accessibilityLabel="Close"
+        >
           <Pressable
             onPress={() => {}}
             accessibilityViewIsModal
             className="gap-4 rounded-t-card border border-border bg-surface-raised px-6 pb-12 pt-6"
           >
             <View className="gap-1">
-              <Text className="font-mono-medium text-h4 text-primary">Share your song</Text>
-              <Text className="font-sans text-body text-secondary">Add a message to send with it, if you like.</Text>
+              <Text className="font-mono-medium text-h4 text-primary">
+                Share your song
+              </Text>
+              <Text className="font-sans text-body text-secondary">
+                Add a message to send with it, if you like.
+              </Text>
             </View>
             <View className="gap-1">
               <TextInput
@@ -59,10 +79,18 @@ export function ShareSheet({ visible, onShare, onClose }: Props) {
               className="min-h-[52px] flex-row items-center justify-center gap-2 rounded-pill bg-violet-700"
             >
               <Share2 color={colours.textPrimary} size={18} strokeWidth={1.5} />
-              <Text className="font-sans-bold text-body text-primary">Share</Text>
+              <Text className="font-sans-bold text-body text-primary">
+                Share
+              </Text>
             </Pressable>
-            <Pressable onPress={onClose} accessibilityRole="button" className="min-h-[44px] items-center justify-center">
-              <Text className="font-sans-medium text-body text-secondary">Cancel</Text>
+            <Pressable
+              onPress={onClose}
+              accessibilityRole="button"
+              className="min-h-[44px] items-center justify-center"
+            >
+              <Text className="font-sans-medium text-body text-secondary">
+                Cancel
+              </Text>
             </Pressable>
           </Pressable>
         </Pressable>

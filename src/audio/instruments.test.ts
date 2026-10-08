@@ -2,7 +2,9 @@ import { mostUsedInstrument } from "./instruments";
 
 describe("mostUsedInstrument", () => {
   it("picks the instrument used most", () => {
-    expect(mostUsedInstrument(["harp", "piano", "harp", undefined])).toBe("harp");
+    expect(mostUsedInstrument(["harp", "piano", "harp", undefined])).toBe(
+      "harp",
+    );
   });
 
   it("lets the later instrument win a tie", () => {

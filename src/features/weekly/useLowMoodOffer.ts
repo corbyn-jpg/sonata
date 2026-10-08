@@ -18,7 +18,9 @@ export function useLowMoodOffer() {
     useCallback(() => {
       let cancelled = false;
       const today = startOfDay(new Date());
-      const keys = Array.from({ length: 7 }, (_, i) => dayKey(addDays(today, i - 6)));
+      const keys = Array.from({ length: 7 }, (_, i) =>
+        dayKey(addDays(today, i - 6)),
+      );
       getCheckins(addDays(today, -6), addDays(today, 1))
         .then((checkins) => {
           const days: (DayNote | null)[] = Array(7).fill(null);

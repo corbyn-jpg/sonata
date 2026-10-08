@@ -31,24 +31,41 @@ export type Context = {
 export const orbOf = (day: DayNote): Orb => colours.orb[day.note][day.mode];
 const logged = (week: readonly (DayNote | null)[]) =>
   week.flatMap((day, i) => (day ? [{ ...day, day: i }] : []));
-export const pointAt = ({ c }: Context, angle: number, distance: number): Point => [
-  c + Math.cos(angle) * distance,
-  c + Math.sin(angle) * distance,
-];
+export const pointAt = (
+  { c }: Context,
+  angle: number,
+  distance: number,
+): Point => [c + Math.cos(angle) * distance, c + Math.sin(angle) * distance];
 
 /** Black vinyl with fine grooves. */
-export function vinyl({ p, c, r, px }: Context, inner = "#16101F", outer = "#07040C") {
+export function vinyl(
+  { p, c, r, px }: Context,
+  inner = "#16101F",
+  outer = "#07040C",
+) {
   p.circle(c, c, r, { gradient: { x: c, y: c, r, colours: [inner, outer] } });
-  for (let k = 0; k < 40; k++) p.circle(c, c, r * (0.3 + k * 0.0175), { colour: "#FFFFFF", alpha: 0.035, stroke: px });
+  for (let k = 0; k < 40; k++)
+    p.circle(c, c, r * (0.3 + k * 0.0175), {
+      colour: "#FFFFFF",
+      alpha: 0.035,
+      stroke: px,
+    });
 }
 
 /** Scattered specks of starlight. */
 export function stardust(ctx: Context, count: number) {
   const { p, r, px, random } = ctx;
   for (let i = 0; i < count; i++) {
-    const [x, y] = pointAt(ctx, random() * Math.PI * 2, r * (0.3 + random() * 0.68));
+    const [x, y] = pointAt(
+      ctx,
+      random() * Math.PI * 2,
+      r * (0.3 + random() * 0.68),
+    );
     const size = random() < 0.08 ? 2.2 : 0.6 + random() * 1.2;
-    p.circle(x, y, size * px, { colour: "#FFFFFF", alpha: 0.35 + random() * 0.6 });
+    p.circle(x, y, size * px, {
+      colour: "#FFFFFF",
+      alpha: 0.35 + random() * 0.6,
+    });
   }
 }
 
@@ -59,21 +76,39 @@ export function spindleHole({ p, c, r, px }: Context) {
 }
 
 /** A shaded planet in a day's colours, optionally ringed. */
-function planet({ p }: Context, x: number, y: number, size: number, orb: Orb, ringed: boolean) {
+function planet(
+  { p }: Context,
+  x: number,
+  y: number,
+  size: number,
+  orb: Orb,
+  ringed: boolean,
+) {
   const ring = (front: boolean) => {
     p.save();
     p.translate(x, y);
     p.rotate(-20);
     p.scale(1, 0.32);
     const brush = { colour: "#F3EBFA", alpha: 0.85, stroke: size * 0.5 };
-    if (front) p.arc(0, 0, size * 1.75, 0, 180, brush); // the near half passes over the planet
+    if (front)
+      p.arc(0, 0, size * 1.75, 0, 180, brush); // the near half passes over the planet
     else p.circle(0, 0, size * 1.75, brush);
     p.restore();
   };
-  p.circle(x, y, size * 1.7, { colour: orb.core, alpha: 0.35, blur: size * 0.6 });
+  p.circle(x, y, size * 1.7, {
+    colour: orb.core,
+    alpha: 0.35,
+    blur: size * 0.6,
+  });
   if (ringed) ring(false);
   p.circle(x, y, size, {
-    gradient: { x: x - size * 0.35, y: y - size * 0.35, r: size * 1.4, colours: [orb.core, orb.edge, "#05030A"], stops: [0, 0.6, 1] },
+    gradient: {
+      x: x - size * 0.35,
+      y: y - size * 0.35,
+      r: size * 1.4,
+      colours: [orb.core, orb.edge, "#05030A"],
+      stops: [0, 0.6, 1],
+    },
   });
   if (ringed) ring(true);
 }
@@ -89,18 +124,45 @@ const SCENES: Record<Scene, (ctx: Context) => void> = {
       const strokes = 2 + Math.floor(random() * 2);
       let start = random() * 360;
       for (let s = 0; s < strokes; s++) {
-        p.arc(c, c, orbit, start, 360 / strokes - 14 - random() * 30, { colour: "#F3EBFA", alpha: 0.75, stroke: r * 0.008 });
+        p.arc(c, c, orbit, start, 360 / strokes - 14 - random() * 30, {
+          colour: "#F3EBFA",
+          alpha: 0.75,
+          stroke: r * 0.008,
+        });
         start += 360 / strokes;
       }
       if (!day) return;
       const [x, y] = pointAt(ctx, random() * Math.PI * 2, orbit);
-      planet(ctx, x, y, r * (0.03 + valenceOf(day.note, day.mode) * 0.0045), orbOf(day), i % 3 === 1);
+      planet(
+        ctx,
+        x,
+        y,
+        r * (0.03 + valenceOf(day.note, day.mode) * 0.0045),
+        orbOf(day),
+        i % 3 === 1,
+      );
     });
     // The sun: the week's main colour, with faint swirls
     const L = r * 0.27;
-    p.circle(c, c, L * 1.25, { colour: palette[0].core, alpha: 0.5, blur: L * 0.3 });
-    p.circle(c, c, L, { gradient: { x: c, y: c, r: L, colours: [palette[0].core, palette[0].edge] } });
-    for (let k = 1; k < 6; k++) p.arc(c, c, (L * k) / 6, k * 50, 200, { colour: "#FFFFFF", alpha: 0.12, stroke: 2 * px });
+    p.circle(c, c, L * 1.25, {
+      colour: palette[0].core,
+      alpha: 0.5,
+      blur: L * 0.3,
+    });
+    p.circle(c, c, L, {
+      gradient: {
+        x: c,
+        y: c,
+        r: L,
+        colours: [palette[0].core, palette[0].edge],
+      },
+    });
+    for (let k = 1; k < 6; k++)
+      p.arc(c, c, (L * k) / 6, k * 50, 200, {
+        colour: "#FFFFFF",
+        alpha: 0.12,
+        stroke: 2 * px,
+      });
     spindleHole(ctx);
   },
 
@@ -117,14 +179,34 @@ const SCENES: Record<Scene, (ctx: Context) => void> = {
       const ribbon: Point[] = [];
       for (let s = 0; s < 180; s++) {
         const a = (s / 180) * Math.PI * 2;
-        ribbon.push(pointAt(ctx, a, base + Math.sin(a * waves + phase) * ripple));
+        ribbon.push(
+          pointAt(ctx, a, base + Math.sin(a * waves + phase) * ripple),
+        );
       }
       const { core } = orbOf(day);
-      p.polyline(ribbon, true, { colour: core, alpha: 0.35, stroke: r * 0.05, blur: r * 0.025, glow: true });
-      p.polyline(ribbon, true, { colour: core, alpha: 0.8, stroke: r * 0.006, glow: true });
+      p.polyline(ribbon, true, {
+        colour: core,
+        alpha: 0.35,
+        stroke: r * 0.05,
+        blur: r * 0.025,
+        glow: true,
+      });
+      p.polyline(ribbon, true, {
+        colour: core,
+        alpha: 0.8,
+        stroke: r * 0.006,
+        glow: true,
+      });
     }
     const L = r * 0.27;
-    p.circle(c, c, L, { gradient: { x: c, y: c, r: L, colours: [palette[0].core, palette[1].core] } });
+    p.circle(c, c, L, {
+      gradient: {
+        x: c,
+        y: c,
+        r: L,
+        colours: [palette[0].core, palette[1].core],
+      },
+    });
     spindleHole(ctx);
   },
 
@@ -141,9 +223,19 @@ const SCENES: Record<Scene, (ctx: Context) => void> = {
       // The tail: overlapping arcs, wider and brighter towards the head
       for (let k = 0; k < 12; k++) {
         const t = k / 12;
-        p.arc(c, c, radius, head - length * (1 - t), length * (1 - t) * 0.25 + 2, {
-          colour: core, alpha: 0.12 + t * 0.35, stroke: r * (0.004 + t * 0.024), blur: r * 0.008,
-        });
+        p.arc(
+          c,
+          c,
+          radius,
+          head - length * (1 - t),
+          length * (1 - t) * 0.25 + 2,
+          {
+            colour: core,
+            alpha: 0.12 + t * 0.35,
+            stroke: r * (0.004 + t * 0.024),
+            blur: r * 0.008,
+          },
+        );
       }
       const [x, y] = pointAt(ctx, (head * Math.PI) / 180, radius);
       p.circle(x, y, r * 0.05, { colour: core, alpha: 0.6, blur: r * 0.025 });
@@ -151,13 +243,28 @@ const SCENES: Record<Scene, (ctx: Context) => void> = {
     }
     // A cloudy planet in the week's two colours
     const L = r * 0.27;
-    p.circle(c, c, L * 1.3, { colour: palette[0].core, alpha: 0.4, blur: L * 0.3 });
+    p.circle(c, c, L * 1.3, {
+      colour: palette[0].core,
+      alpha: 0.4,
+      blur: L * 0.3,
+    });
     p.circle(c, c, L, {
-      gradient: { x: c - L * 0.35, y: c - L * 0.35, r: L * 1.5, colours: [palette[0].core, palette[1].edge, "#05030A"], stops: [0, 0.6, 1] },
+      gradient: {
+        x: c - L * 0.35,
+        y: c - L * 0.35,
+        r: L * 1.5,
+        colours: [palette[0].core, palette[1].edge, "#05030A"],
+        stops: [0, 0.6, 1],
+      },
     });
     p.save();
     p.clipCircle(c, c, L);
-    for (let k = 0; k < 4; k++) p.rect(c - L, c - L * 0.6 + k * L * 0.4, 2 * L, L * 0.12, { colour: "#FFFFFF", alpha: 0.08, blur: L * 0.04 });
+    for (let k = 0; k < 4; k++)
+      p.rect(c - L, c - L * 0.6 + k * L * 0.4, 2 * L, L * 0.12, {
+        colour: "#FFFFFF",
+        alpha: 0.08,
+        blur: L * 0.04,
+      });
     p.restore();
     spindleHole(ctx);
   },
@@ -168,20 +275,37 @@ const SCENES: Record<Scene, (ctx: Context) => void> = {
     vinyl(ctx);
     stardust(ctx, 200);
     const L = r * 0.27;
-    p.circle(c, c, L * 1.6, { colour: palette[0].core, alpha: 0.45, blur: L * 0.4 });
+    p.circle(c, c, L * 1.6, {
+      colour: palette[0].core,
+      alpha: 0.45,
+      blur: L * 0.4,
+    });
     for (const day of logged(week)) {
       const reach = 0.4 + valenceOf(day.note, day.mode) * 0.12;
       for (let i = 0; i < 26; i++) {
         const a = random() * Math.PI * 2;
         const length = L * (0.2 + random() * reach);
         p.polyline([pointAt(ctx, a, L), pointAt(ctx, a, L + length)], false, {
-          colour: orbOf(day).core, alpha: 0.25 + random() * 0.4, stroke: (1 + random() * 3) * px, blur: 1.5 * px, glow: true,
+          colour: orbOf(day).core,
+          alpha: 0.25 + random() * 0.4,
+          stroke: (1 + random() * 3) * px,
+          blur: 1.5 * px,
+          glow: true,
         });
       }
     }
-    p.circle(c, c, L * 1.02, { colour: "#FFFFFF", alpha: 0.9, stroke: 2.5 * px, blur: 2 * px });
+    p.circle(c, c, L * 1.02, {
+      colour: "#FFFFFF",
+      alpha: 0.9,
+      stroke: 2.5 * px,
+      blur: 2 * px,
+    });
     p.circle(c, c, L, { colour: "#07040C" });
-    p.circle(c, c, r * 0.045, { colour: "#FFFFFF", alpha: 0.25, stroke: 2 * px });
+    p.circle(c, c, r * 0.045, {
+      colour: "#FFFFFF",
+      alpha: 0.25,
+      stroke: 2 * px,
+    });
   },
 };
 

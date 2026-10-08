@@ -9,23 +9,35 @@ export type Playlist = Opened<Content>;
 export const MAX_NAME_LENGTH = 40;
 const playlists = sealedCollection<Content>("playlists");
 
-const cleanName = (name: string) => name.trim().slice(0, MAX_NAME_LENGTH) || "My playlist";
+const cleanName = (name: string) =>
+  name.trim().slice(0, MAX_NAME_LENGTH) || "My playlist";
 
 /** A new playlist, optionally starting with a song. Returns its id. */
 export const createPlaylist = (name: string, firstSong?: PlaylistSong) =>
-  playlists.create({ name: cleanName(name), songs: firstSong ? [firstSong] : [] });
+  playlists.create({
+    name: cleanName(name),
+    songs: firstSong ? [firstSong] : [],
+  });
 
-export const renamePlaylist = (id: string, name: string) => playlists.edit(id, (c) => ({ ...c, name: cleanName(name) }));
+export const renamePlaylist = (id: string, name: string) =>
+  playlists.edit(id, (c) => ({ ...c, name: cleanName(name) }));
 
 /** Add a song (or update it, if that week on that instrument is already in the playlist). */
-export const addSong = (id: string, song: PlaylistSong) => playlists.edit(id, (c) => ({ ...c, songs: withSong(c.songs, song) }));
+export const addSong = (id: string, song: PlaylistSong) =>
+  playlists.edit(id, (c) => ({ ...c, songs: withSong(c.songs, song) }));
 
 export const removeSong = (id: string, index: number) =>
-  playlists.edit(id, (c) => ({ ...c, songs: c.songs.filter((_, i) => i !== index) }));
+  playlists.edit(id, (c) => ({
+    ...c,
+    songs: c.songs.filter((_, i) => i !== index),
+  }));
 
 /** Undo a remove: the song goes back where it was. */
 export const restoreSong = (id: string, index: number, song: PlaylistSong) =>
-  playlists.edit(id, (c) => ({ ...c, songs: withSongAt(c.songs, index, song) }));
+  playlists.edit(id, (c) => ({
+    ...c,
+    songs: withSongAt(c.songs, index, song),
+  }));
 
 export const deletePlaylist = playlists.remove;
 export const uploadPendingPlaylists = playlists.uploadPending;
