@@ -1,7 +1,9 @@
 import { Switch, Text, View } from "react-native";
+import { BackHeader } from "@/components/BackHeader";
 import { Screen } from "@/components/Screen";
 import { feelNote } from "@/haptics";
 import { setPreference, usePreference } from "@/lib/preferences";
+
 import colours from "@/theme/colours";
 
 export default function Settings() {
@@ -13,7 +15,7 @@ export default function Settings() {
   };
 
   return (
-    <Screen title="Settings">
+    <Screen header={<BackHeader title="Settings" />}>
       <Text className="mb-1 font-sans-medium text-caption text-secondary">
         Accessibility
       </Text>
@@ -29,7 +31,10 @@ export default function Settings() {
           value={feelNotes}
           onValueChange={onFeelNotesChange}
           accessibilityLabel="Feel notes"
-          trackColor={{ false: colours.surfaceRaised, true: colours.violet[700] }}
+          trackColor={{
+            false: colours.surfaceRaised,
+            true: colours.violet[700],
+          }}
           thumbColor={colours.textPrimary}
         />
       </View>
