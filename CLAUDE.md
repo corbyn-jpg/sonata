@@ -49,6 +49,7 @@ engine), never in the UI. Putting a word on the orb boxes the feeling in and def
 | Graphics | `@shopify/react-native-skia` 2.6 | Every glow, orb, wash, disc and chart. Build paths with `Skia.PathBuilder` (the mutating `SkPath` methods are deprecated) |
 | Audio | `expo-audio` + pre-rendered WAVs from recorded samples | Chords and chimes rendered offline by a script; songs mixed to a WAV in JS on the phone. No live synthesis (§12) |
 | Sharing | `react-native-share` | Shares a file **and** a message together on Android (`expo-sharing` can't). Needs a development build |
+| PDF | `expo-print` | Sheet music to PDF from the score's SVG (§11). Native: needs a development build |
 | Local storage | AsyncStorage (sealed records) | Offline-first: check-ins and playlists are saved on the phone first, uploaded in the background (§12) |
 | Database | Firebase Cloud Firestore | Firebase JS SDK (`firebase` package, modular imports only) |
 | Auth | Firebase Anonymous Auth | `firebase/auth` with `getReactNativePersistence(AsyncStorage)` so the anonymous UID survives restarts — no email, no PII |
@@ -517,9 +518,21 @@ Features added after the original brief. Each is slotted into the build order in
    `playlists`). Screens: `app/playlists/index.tsx` (all) and `app/playlists/[id].tsx` (play all in
    order, rename, remove, delete). External services (Spotify, Apple Music) don't allow
    third-party audio, so they're out of scope.
-6. **Sheet music in the Oasis** (Stage 9) — users turn any of their songs into sheet music: a
-   scrolling treble-staff view in the Home staff's style, exportable as **PDF** (MusicXML
-   optional, for MuseScore / Sibelius).
+6. **Sheet music in the Oasis** (Stage 9) ✅ — any week's or month's song as a lead sheet: the
+   melody on a treble staff with chord names above (`app/sheet-music.tsx`, `src/features/sheet/`).
+   - Built from exactly what Weekly and Monthly compose (same weeks and seeds: the Monday's date,
+     the 1st of the month), so the score is the song. A month is written week by week at each
+     week's own tempo ("Week of 5 Oct ♩ = 84"), with its link bars between; the monthly song is
+     stored stretched to one tempo, so `score.ts` un-stretches the link bars (`linkChords` in the
+     engine names their two chords).
+   - Everything is in C, so there's no key signature: notes outside C major carry their own
+     accidental, once per bar. Missed days are whole-bar rests. `notation.ts` does the spelling,
+     rests, accidentals and beams for both the drawing and MusicXML.
+   - `svg.ts` draws it as one SVG per staff line: on screen in dark ink on a near-white page (the
+     standard look for sheet music, a deliberate exception to the dark UI), two bars to a line;
+     in the PDF black on white A4, four bars to a line, with page breaks between lines.
+   - **Export PDF** (`expo-print`, a native module) and **Export MusicXML** (MuseScore, Sibelius,
+     Dorico), both through the share sheet like songs. Nothing is uploaded.
 7. **Glockenspiel chimes** — short glockenspiel cues, never an instrument choice: a soft chime
    on **Save check-in** (Stage 5), a cue when **"Composing your week"** finishes (Stage 7), and
    the **phase changes in Breathing space** (Stage 9), so users can breathe with their eyes

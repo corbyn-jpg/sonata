@@ -9,8 +9,15 @@ export {
 export { hasLowMoodRun, movingAverage, LOW_MOOD_RUN } from "./lowMood";
 export {
   composeMonth,
+  linkChords,
   type MonthComposition,
   type MonthWeekInput,
   type Section,
 } from "./month";
-export { MODE_NAMES, type DayNote, type Week, type WeekMode } from "./theory";
+export {
+  MODE_NAMES,
+  type Chord,
+  type DayNote,
+  type Week,
+  type WeekMode,
+} from "./theory";

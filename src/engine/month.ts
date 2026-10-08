@@ -46,6 +46,11 @@ export function dominantOf(target: Chord): Chord {
 const minorMode = (song: Composition) =>
   song.mode === "dorian" || song.mode === "aeolian";
 
+/** The link bar's two chords: the next week's home chord, then the dominant of the chord it opens on. */
+export function linkChords(to: Composition): [Chord, Chord] {
+  return [diatonicChord(to.mode, 0), dominantOf(to.bars[0].chords[0].chord)];
+}
+
 /**
  One bar from the end of `from` into the start of `to`. Harmony: the next week's home chord (so itsmode is heard coming), then the dominant of the chord it opens on. Melody: the neural network walks from where the last week ended to a step away from where the next one begins.
  */
@@ -54,8 +59,7 @@ function link(
   to: Composition,
   random: () => number,
 ): { events: NoteEvent[]; chords: Chord[] } {
-  const firstChord = to.bars[0].chords[0].chord;
-  const chords = [diatonicChord(to.mode, 0), dominantOf(firstChord)];
+  const chords = linkChords(to);
   const lastNote = [...from.events]
     .reverse()
     .find((e) => e.part === "melody")!.midi;
