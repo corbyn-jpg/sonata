@@ -15,22 +15,49 @@ type Props = {
 };
 
 /** One settings row: an icon in line with its words, separated from the next row by a hairline. */
-export function SettingRow({ Icon, title, detail, right, onPress, danger = false }: Props) {
+export function SettingRow({
+  Icon,
+  title,
+  detail,
+  right,
+  onPress,
+  danger = false,
+}: Props) {
   const body = (
     <>
-      <Icon color={danger ? colours.danger : colours.textSecondary} size={20} strokeWidth={1.5} />
+      <Icon
+        color={danger ? colours.danger : colours.textSecondary}
+        size={20}
+        strokeWidth={1.5}
+      />
       <View className="flex-1 gap-0.5">
-        <Text className="font-sans text-body" style={{ color: danger ? colours.danger : colours.textPrimary }}>
+        <Text
+          className="font-sans text-body"
+          style={{ color: danger ? colours.danger : colours.textPrimary }}
+        >
           {title}
         </Text>
-        {detail && <Text className="font-sans text-caption text-secondary">{detail}</Text>}
+        {detail && (
+          <Text className="font-sans text-caption text-secondary">
+            {detail}
+          </Text>
+        )}
       </View>
-      {right ?? (onPress && <ChevronRight color={colours.textMuted} size={20} strokeWidth={1.5} />)}
+      {right ??
+        (onPress && (
+          <ChevronRight color={colours.textMuted} size={20} strokeWidth={1.5} />
+        ))}
     </>
   );
-  const className = "min-h-[64px] flex-row items-center gap-4 border-b border-border py-4";
+  const className =
+    "min-h-[64px] flex-row items-center gap-4 border-b border-border py-4";
   return onPress ? (
-    <Pressable onPress={onPress} accessibilityRole="button" accessibilityHint={detail} className={`${className} active:opacity-80`}>
+    <Pressable
+      onPress={onPress}
+      accessibilityRole="button"
+      accessibilityHint={detail}
+      className={`${className} active:opacity-80`}
+    >
       {body}
     </Pressable>
   ) : (
@@ -39,10 +66,19 @@ export function SettingRow({ Icon, title, detail, right, onPress, danger = false
 }
 
 /** A group heading above some rows. */
-export function SettingGroup({ title, children }: { title: string; children: ReactNode }) {
+export function SettingGroup({
+  title,
+  children,
+}: {
+  title: string;
+  children: ReactNode;
+}) {
   return (
     <View className="mt-8">
-      <Text className="font-sans-medium text-caption text-secondary" accessibilityRole="header">
+      <Text
+        className="font-sans-medium text-caption text-secondary"
+        accessibilityRole="header"
+      >
         {title}
       </Text>
       {children}
