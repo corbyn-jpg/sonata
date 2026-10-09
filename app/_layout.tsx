@@ -17,6 +17,7 @@ import colours from "@/theme/colours";
 import { getUserId } from "@/lib/session";
 import { ensureAudioMode } from "@/audio";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { setUpReminders } from "@/lib/reminder";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -41,6 +42,11 @@ export default function RootLayout() {
   // Set how the app's sound behaves once, at launch, before anything plays
   useEffect(() => {
     ensureAudioMode();
+  }, []);
+
+  // A reminder that arrives while Sonata is open is shown quietly too
+  useEffect(() => {
+    setUpReminders().catch(() => {});
   }, []);
 
   if (!loaded && !error) return null;

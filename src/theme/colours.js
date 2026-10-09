@@ -8,6 +8,8 @@ module.exports = {
   textMuted: "#9f9ead",
   violet: { 200: "#C9BFFB", 500: "#8B5CF6", 700: "#5B34B8" },
   teal: { 300: "#7EE4CE", 700: "#0B7A6E" },
+  // Muted red text for Delete all data (never a solid red button)
+  danger: "#EF8A8A",
 
   // Orb gradients, core to edge
   orb: {

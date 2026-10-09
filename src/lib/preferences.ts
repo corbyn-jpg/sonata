@@ -2,15 +2,23 @@ import { useSyncExternalStore } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { isInstrument, type Instrument } from "@/audio/instruments";
 
-// Device-only settings
 type Preferences = {
   /** Play each note's vibration pattern (for deaf and hard-of-hearing users).*/
   feelNotes: boolean;
   /** What check-ins sound like. The last choice is remembered. */
   instrument: Instrument;
+  /** The daily reminder (a local notification), off until the user turns it on. */
+  reminder: boolean;
+  /** When it arrives, in minutes after midnight. */
+  reminderAt: number;
 };
 
-const DEFAULTS: Preferences = { feelNotes: false, instrument: "piano" };
+const DEFAULTS: Preferences = {
+  feelNotes: false,
+  instrument: "piano",
+  reminder: false,
+  reminderAt: 21 * 60 + 30,
+};
 const STORAGE_KEY = "sonata.preferences";
 
 let current = DEFAULTS;
