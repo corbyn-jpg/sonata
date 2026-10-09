@@ -8,7 +8,14 @@ import {
   Text,
   View,
 } from "react-native";
-import { Bell, Clock, Download, Lock, Vibrate } from "lucide-react-native";
+import {
+  Bell,
+  Clock,
+  Download,
+  Lock,
+  Trash2,
+  Vibrate,
+} from "lucide-react-native";
 import { BackHeader } from "@/components/BackHeader";
 import { Screen } from "@/components/Screen";
 import { exportMyData } from "@/features/settings/exportMyData";
@@ -18,6 +25,7 @@ import { feelNote } from "@/haptics";
 import { PdfUnavailable } from "@/lib/pdf";
 import { setPreference, usePreference } from "@/lib/preferences";
 import { cancelReminder, scheduleReminder, timeLabel } from "@/lib/reminder";
+import { DeleteSheet } from "@/features/settings/DeleteSheet";
 import colours from "@/theme/colours";
 
 const switchColours = {
@@ -32,6 +40,7 @@ export default function Settings() {
   const reminderAt = usePreference("reminderAt");
   const [pickingTime, setPickingTime] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const onFeelNotesChange = (on: boolean) => {
     setPreference("feelNotes", on);
@@ -173,7 +182,15 @@ export default function Settings() {
               ) : undefined
             }
           />
+          <SettingRow
+            Icon={Trash2}
+            title="Delete all data"
+            detail="From this phone and the backup. This can't be undone."
+            onPress={() => setDeleting(true)}
+            danger
+          />
         </SettingGroup>
+        {deleting && <DeleteSheet onClose={() => setDeleting(false)} />}
 
         <SettingGroup title="Credits">
           <View className="gap-2 py-4">

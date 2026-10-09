@@ -26,3 +26,9 @@ export function getKey() {
   });
   return pending;
 }
+
+/** Forget the key, on this phone and in memory (for Delete all data). A new one is made the next time it's needed. */
+export async function forgetKey() {
+  pending = null;
+  await SecureStore.deleteItemAsync(STORE_KEY);
+}
