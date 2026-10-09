@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { Modal, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { Canvas, LinearGradient, Rect, vec } from "@shopify/react-native-skia";
+import { BottomSheet } from "@/components/BottomSheet";
 import colours from "@/theme/colours";
 import { TimeWheel, WHEEL_ROW, WHEEL_ROWS } from "./TimeWheel";
 
@@ -50,69 +51,55 @@ export function TimeSheet({ minutes, onDone, onClose }: Props) {
   const [width, setWidth] = useState(0);
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={onClose}>
-      {/* Tapping outside the sheet closes it */}
-      <Pressable
-        className="flex-1 justify-end bg-canvas/70"
-        onPress={onClose}
-        accessibilityLabel="Close"
+    <BottomSheet visible onClose={onClose} className="gap-6 px-6 pt-6">
+      <Text
+        className="font-mono-medium text-h4 text-primary"
+        accessibilityRole="header"
       >
-        <Pressable
-          onPress={() => {}}
-          className="gap-6 rounded-t-card border border-border bg-surface-raised px-6 pb-12 pt-6"
+        Remind me at
+      </Text>
+
+      <View
+        onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
+        className="flex-row items-center justify-center"
+        style={{ height: HEIGHT }}
+      >
+        {/* The band the chosen time sits on */}
+        <View
+          className="absolute left-0 right-0 rounded-card bg-surface"
+          style={{ top: FADE, height: WHEEL_ROW }}
+          pointerEvents="none"
+        />
+        <TimeWheel
+          count={24}
+          value={hour}
+          onChange={setHour}
+          label="Hour"
+          unit="hours"
+        />
+        <Text
+          className="font-mono-medium text-h2 text-primary"
+          importantForAccessibility="no"
         >
-          <Text
-            className="font-mono-medium text-h4 text-primary"
-            accessibilityRole="header"
-          >
-            Remind me at
-          </Text>
+          :
+        </Text>
+        <TimeWheel
+          count={60}
+          value={minute}
+          onChange={setMinute}
+          label="Minute"
+          unit="minutes"
+        />
+        {width > 0 && <Fades width={width} />}
+      </View>
 
-          <View
-            onLayout={(e) => setWidth(e.nativeEvent.layout.width)}
-            className="flex-row items-center justify-center"
-            style={{ height: HEIGHT }}
-          >
-            {/* The band the chosen time sits on */}
-            <View
-              className="absolute left-0 right-0 rounded-card bg-surface"
-              style={{ top: FADE, height: WHEEL_ROW }}
-              pointerEvents="none"
-            />
-            <TimeWheel
-              count={24}
-              value={hour}
-              onChange={setHour}
-              label="Hour"
-              unit="hours"
-            />
-            <Text
-              className="font-mono-medium text-h2 text-primary"
-              importantForAccessibility="no"
-            >
-              :
-            </Text>
-            <TimeWheel
-              count={60}
-              value={minute}
-              onChange={setMinute}
-              label="Minute"
-              unit="minutes"
-            />
-            {width > 0 && <Fades width={width} />}
-          </View>
-
-          <Pressable
-            onPress={() => onDone(hour * 60 + minute)}
-            accessibilityRole="button"
-            className="min-h-[52px] items-center justify-center rounded-pill bg-violet-700 active:opacity-80"
-          >
-            <Text className="font-sans-bold text-body text-primary">
-              Set time
-            </Text>
-          </Pressable>
-        </Pressable>
+      <Pressable
+        onPress={() => onDone(hour * 60 + minute)}
+        accessibilityRole="button"
+        className="min-h-[52px] items-center justify-center rounded-pill bg-violet-700 active:opacity-80"
+      >
+        <Text className="font-sans-bold text-body text-primary">Set time</Text>
       </Pressable>
-    </Modal>
+    </BottomSheet>
   );
 }

@@ -1,14 +1,12 @@
 import { useState } from "react";
 import {
   ActivityIndicator,
-  KeyboardAvoidingView,
-  Modal,
-  Platform,
   Pressable,
   Text,
   TextInput,
   View,
 } from "react-native";
+import { BottomSheet } from "@/components/BottomSheet";
 import {
   BackupUnreachable,
   CONFIRM_WORD,
@@ -53,99 +51,88 @@ export function DeleteSheet({ onClose }: Props) {
   };
 
   return (
-    <Modal visible transparent animationType="fade" onRequestClose={close}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
-      >
-        {/* Tapping outside the sheet closes it, unless it's part-way through deleting */}
-        <Pressable
-          className="flex-1 justify-end bg-canvas/70"
-          onPress={close}
-          accessibilityLabel="Close"
+    // Tapping outside the sheet closes it, unless it's part-way through deleting
+    <BottomSheet
+      visible
+      onClose={close}
+      avoidKeyboard
+      className="gap-5 px-6 pt-6"
+    >
+      <View className="gap-2">
+        <Text
+          className="font-mono-medium text-h4 text-primary"
+          accessibilityRole="header"
         >
-          <Pressable
-            onPress={() => {}}
-            className="gap-5 rounded-t-card border border-border bg-surface-raised px-6 pb-12 pt-6"
+          Delete everything?
+        </Text>
+        <Text className="font-sans text-body text-secondary">
+          Your check-ins, thought records and playlists are deleted from this
+          phone and from the encrypted backup, and Sonata starts again fresh.
+          This can&apos;t be undone.
+        </Text>
+        <Text className="font-sans text-caption text-muted">
+          Want a copy first? Use Export my data.
+        </Text>
+      </View>
+
+      <View className="gap-2">
+        <Text className="font-sans-medium text-caption text-secondary">
+          Type {CONFIRM_WORD} to confirm
+        </Text>
+        <TextInput
+          value={typed}
+          onChangeText={setTyped}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          editable={!deleting}
+          autoCapitalize="none"
+          autoCorrect={false}
+          returnKeyType="done"
+          onSubmitEditing={() => void confirm()}
+          accessibilityLabel={`Type ${CONFIRM_WORD} to confirm`}
+          placeholder={CONFIRM_WORD}
+          placeholderTextColor={colours.textMuted}
+          className={`h-12 rounded-card border px-4 font-mono text-body text-primary ${focused ? "border-violet-500" : "border-border"}`}
+        />
+      </View>
+
+      <View className="gap-3">
+        <Pressable
+          onPress={() => void confirm()}
+          disabled={!ready}
+          accessibilityRole="button"
+          accessibilityState={{ disabled: !ready, busy: deleting }}
+          className={`min-h-[52px] flex-row items-center justify-center gap-2 rounded-pill border active:opacity-80 ${ready || deleting ? "" : "opacity-40"}`}
+          style={{ borderColor: colours.danger }}
+        >
+          {deleting && <ActivityIndicator color={colours.danger} />}
+          <Text
+            className="font-sans-bold text-body"
+            style={{ color: colours.danger }}
           >
-            <View className="gap-2">
-              <Text
-                className="font-mono-medium text-h4 text-primary"
-                accessibilityRole="header"
-              >
-                Delete everything?
-              </Text>
-              <Text className="font-sans text-body text-secondary">
-                Your check-ins, thought records and playlists are deleted from
-                this phone and from the encrypted backup, and Sonata starts
-                again fresh. This can&apos;t be undone.
-              </Text>
-              <Text className="font-sans text-caption text-muted">
-                Want a copy first? Use Export my data.
-              </Text>
-            </View>
-
-            <View className="gap-2">
-              <Text className="font-sans-medium text-caption text-secondary">
-                Type {CONFIRM_WORD} to confirm
-              </Text>
-              <TextInput
-                value={typed}
-                onChangeText={setTyped}
-                onFocus={() => setFocused(true)}
-                onBlur={() => setFocused(false)}
-                editable={!deleting}
-                autoCapitalize="none"
-                autoCorrect={false}
-                returnKeyType="done"
-                onSubmitEditing={() => void confirm()}
-                accessibilityLabel={`Type ${CONFIRM_WORD} to confirm`}
-                placeholder={CONFIRM_WORD}
-                placeholderTextColor={colours.textMuted}
-                className={`h-12 rounded-card border px-4 font-mono text-body text-primary ${focused ? "border-violet-500" : "border-border"}`}
-              />
-            </View>
-
-            <View className="gap-3">
-              <Pressable
-                onPress={() => void confirm()}
-                disabled={!ready}
-                accessibilityRole="button"
-                accessibilityState={{ disabled: !ready, busy: deleting }}
-                className={`min-h-[52px] flex-row items-center justify-center gap-2 rounded-pill border active:opacity-80 ${ready || deleting ? "" : "opacity-40"}`}
-                style={{ borderColor: colours.danger }}
-              >
-                {deleting && <ActivityIndicator color={colours.danger} />}
-                <Text
-                  className="font-sans-bold text-body"
-                  style={{ color: colours.danger }}
-                >
-                  {deleting ? "Deleting…" : "Delete everything"}
-                </Text>
-              </Pressable>
-              {(state === "unreachable" || state === "failed") && (
-                <Text
-                  className="font-sans text-caption"
-                  style={{ color: colours.danger }}
-                  accessibilityLiveRegion="polite"
-                >
-                  {ERRORS[state]}
-                </Text>
-              )}
-              <Pressable
-                onPress={close}
-                disabled={deleting}
-                accessibilityRole="button"
-                className={`min-h-[44px] items-center justify-center ${deleting ? "opacity-40" : ""}`}
-              >
-                <Text className="font-sans-medium text-body text-secondary">
-                  Keep my data
-                </Text>
-              </Pressable>
-            </View>
-          </Pressable>
+            {deleting ? "Deleting…" : "Delete everything"}
+          </Text>
         </Pressable>
-      </KeyboardAvoidingView>
-    </Modal>
+        {(state === "unreachable" || state === "failed") && (
+          <Text
+            className="font-sans text-caption"
+            style={{ color: colours.danger }}
+            accessibilityLiveRegion="polite"
+          >
+            {ERRORS[state]}
+          </Text>
+        )}
+        <Pressable
+          onPress={close}
+          disabled={deleting}
+          accessibilityRole="button"
+          className={`min-h-[44px] items-center justify-center ${deleting ? "opacity-40" : ""}`}
+        >
+          <Text className="font-sans-medium text-body text-secondary">
+            Keep my data
+          </Text>
+        </Pressable>
+      </View>
+    </BottomSheet>
   );
 }

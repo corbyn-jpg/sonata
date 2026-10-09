@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal, Pressable, Text } from "react-native";
+import { Pressable, Text } from "react-native";
 import {
   AudioWaveform,
   Check,
@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react-native";
 import { INSTRUMENTS, INSTRUMENT_LABELS, type Instrument } from "@/audio";
+import { BottomSheet } from "@/components/BottomSheet";
 import colours from "@/theme/colours";
 
 // Lucide has no violin or harp, so these suggest the sound instead
@@ -52,60 +53,46 @@ export function InstrumentPicker({ instrument, onChange }: Props) {
         <ChevronDown color={colours.textMuted} size={14} strokeWidth={1.5} />
       </Pressable>
 
-      <Modal
+      <BottomSheet
         visible={open}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setOpen(false)}
+        onClose={() => setOpen(false)}
+        accessibilityRole="radiogroup"
+        className="gap-1 px-5 pt-5"
       >
-        {/* Tapping outside the sheet closes it */}
-        <Pressable
-          className="flex-1 justify-end bg-canvas/70"
-          onPress={() => setOpen(false)}
-          accessibilityLabel="Close"
-        >
-          <Pressable
-            // Stop taps on the sheet itself from closing it
-            onPress={() => {}}
-            accessibilityRole="radiogroup"
-            className="gap-1 rounded-t-card border border-border bg-surface-raised px-5 pb-12 pt-5"
-          >
-            <Text className="mb-2 px-2 font-mono-medium text-h4 text-primary">
-              Your check-in sounds like
-            </Text>
-            {INSTRUMENTS.map((option) => {
-              const OptionIcon = ICONS[option];
-              const active = option === instrument;
-              return (
-                <Pressable
-                  key={option}
-                  onPress={() => choose(option)}
-                  accessibilityRole="radio"
-                  accessibilityState={{ checked: active }}
-                  accessibilityLabel={INSTRUMENT_LABELS[option]}
-                  className={`min-h-[55px] flex-row items-center gap-3 rounded-card px-3 ${active ? "bg-violet-700/40" : ""}`}
-                >
-                  <OptionIcon
-                    color={active ? colours.violet[200] : colours.textSecondary}
-                    size={20}
-                    strokeWidth={1.5}
-                  />
-                  <Text className="flex-1 font-sans text-body text-primary">
-                    {INSTRUMENT_LABELS[option]}
-                  </Text>
-                  {active && (
-                    <Check
-                      color={colours.violet[200]}
-                      size={20}
-                      strokeWidth={1.5}
-                    />
-                  )}
-                </Pressable>
-              );
-            })}
-          </Pressable>
-        </Pressable>
-      </Modal>
+        <Text className="mb-2 px-2 font-mono-medium text-h4 text-primary">
+          Your check-in sounds like
+        </Text>
+        {INSTRUMENTS.map((option) => {
+          const OptionIcon = ICONS[option];
+          const active = option === instrument;
+          return (
+            <Pressable
+              key={option}
+              onPress={() => choose(option)}
+              accessibilityRole="radio"
+              accessibilityState={{ checked: active }}
+              accessibilityLabel={INSTRUMENT_LABELS[option]}
+              className={`min-h-[55px] flex-row items-center gap-3 rounded-card px-3 ${active ? "bg-violet-700/40" : ""}`}
+            >
+              <OptionIcon
+                color={active ? colours.violet[200] : colours.textSecondary}
+                size={20}
+                strokeWidth={1.5}
+              />
+              <Text className="flex-1 font-sans text-body text-primary">
+                {INSTRUMENT_LABELS[option]}
+              </Text>
+              {active && (
+                <Check
+                  color={colours.violet[200]}
+                  size={20}
+                  strokeWidth={1.5}
+                />
+              )}
+            </Pressable>
+          );
+        })}
+      </BottomSheet>
     </>
   );
 }

@@ -277,3 +277,11 @@ Each entry has:
 - **Cause:** `expo-print` looks up its native module the moment it's imported. `exportScore.ts` imported it at the top, so loading the screen threw on a build without the module, and Expo Router then reported the route as having no default export.
 - **Fix:** `sharePdf` checks `requireOptionalNativeModule("ExpoPrint")` first and only then loads `expo-print` with `await import(...)`. On an older build, Export PDF says the new build is needed; the score and MusicXML export still work.
 - **Lesson:** a new native module can't run until the development build is rebuilt. Import it where it's used, behind a check, so the rest of the screen keeps working in the meantime.
+
+## Stage 10: Composer, Settings, onboarding
+
+### 52. Bottom sheets sat under the Android navigation bar
+- **Seen:** on a Samsung with the three-button bar (back, home, recent apps), the last button in most bottom sheets (Cancel, Not now, the bottom instrument) sat partly under the bar.
+- **Cause:** Android draws Sonata edge to edge, under the navigation bar, and every sheet had a fixed `pb-12` (48 px) at the bottom. The bar's height differs between phones and between gesture and button navigation, so a fixed number is too little on some. Each sheet also built its own `Modal`, so the fix (and the backdrop, animation and keyboard handling) had drifted between seven copies.
+- **Fix:** one shared `src/components/BottomSheet.tsx`. Its `Modal` is always edge to edge (`statusBarTranslucent`, `navigationBarTranslucent`), and its bottom padding is the bar's real height from `useSafeAreaInsets()` plus 24 px. All seven sheets use it (instrument picker, low-mood offer, share, add to playlist, song picker, reminder time, delete all data), with one backdrop and one fade; `avoidKeyboard` lifts the ones with a text box.
+- **Lesson:** never pad for system bars with a fixed number; read the insets. And when the same piece of UI is copied a third time, make it a component so a fix lands everywhere at once.

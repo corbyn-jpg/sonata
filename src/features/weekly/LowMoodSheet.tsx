@@ -1,5 +1,6 @@
-import { Modal, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { Wind } from "lucide-react-native";
+import { BottomSheet } from "@/components/BottomSheet";
 import colours from "@/theme/colours";
 
 type Props = {
@@ -13,54 +14,36 @@ type Props = {
  */
 export function LowMoodSheet({ visible, onGround, onDismiss }: Props) {
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onDismiss}
-    >
-      {/* Tapping outside the sheet closes it */}
+    <BottomSheet visible={visible} onClose={onDismiss}>
+      <View className="h-11 w-11 items-center justify-center rounded-pill bg-teal-700/30">
+        <Wind color={colours.teal[300]} size={22} strokeWidth={1.5} />
+      </View>
+      <View className="gap-1">
+        <Text className="font-mono-medium text-h4 text-primary">
+          Notice a heavy rhythm this week?
+        </Text>
+        <Text className="font-sans text-body text-secondary">
+          Want a moment to ground yourself?
+        </Text>
+      </View>
       <Pressable
-        className="flex-1 justify-end bg-canvas/50"
-        onPress={onDismiss}
-        accessibilityLabel="Close"
+        onPress={onGround}
+        accessibilityRole="button"
+        className="min-h-[52px] items-center justify-center rounded-pill bg-teal-700"
       >
-        <Pressable
-          onPress={() => {}}
-          accessibilityViewIsModal
-          className="gap-4 rounded-t-card border border-border bg-surface-raised px-6 pb-12 pt-6"
-        >
-          <View className="h-11 w-11 items-center justify-center rounded-pill bg-teal-700/30">
-            <Wind color={colours.teal[300]} size={22} strokeWidth={1.5} />
-          </View>
-          <View className="gap-1">
-            <Text className="font-mono-medium text-h4 text-primary">
-              Notice a heavy rhythm this week?
-            </Text>
-            <Text className="font-sans text-body text-secondary">
-              Want a moment to ground yourself?
-            </Text>
-          </View>
-          <Pressable
-            onPress={onGround}
-            accessibilityRole="button"
-            className="min-h-[52px] items-center justify-center rounded-pill bg-teal-700"
-          >
-            <Text className="font-sans-bold text-body text-primary">
-              Grounding ritual
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={onDismiss}
-            accessibilityRole="button"
-            className="min-h-[44px] items-center justify-center"
-          >
-            <Text className="font-sans-medium text-body text-secondary">
-              Not now
-            </Text>
-          </Pressable>
-        </Pressable>
+        <Text className="font-sans-bold text-body text-primary">
+          Grounding ritual
+        </Text>
       </Pressable>
-    </Modal>
+      <Pressable
+        onPress={onDismiss}
+        accessibilityRole="button"
+        className="min-h-[44px] items-center justify-center"
+      >
+        <Text className="font-sans-medium text-body text-secondary">
+          Not now
+        </Text>
+      </Pressable>
+    </BottomSheet>
   );
 }
