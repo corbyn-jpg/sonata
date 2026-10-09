@@ -1,10 +1,15 @@
 // Renders a week's song to a WAV file on the phone (cached), ready to play or share.
 import { Asset } from "expo-asset";
 import { File, Paths } from "expo-file-system";
-import type { Composition } from "@/engine";
 import { NOTE_RATE, NOTES } from "./chords.generated";
 import type { Instrument } from "./instruments";
-import { decodeWav, encodeWav, mixSong, type NoteSample } from "./mixer";
+import {
+  decodeWav,
+  encodeWav,
+  mixSong,
+  type NoteSample,
+  type Playable,
+} from "./mixer";
 
 /** Who plays the chords and bass under each melody instrument (violin and flute can't go that low). */
 export const ACCOMPANIMENT: Record<Instrument, Instrument> = {
@@ -37,7 +42,7 @@ function samplesFor(instrument: Instrument): Promise<NoteSample[]> {
  The song as a WAV file in the cache. `name` must change whenever the song does (e.g. include a hash of the week), because an existing file with the same name is reused.
  */
 export async function renderSong(
-  song: Composition,
+  song: Playable,
   instrument: Instrument,
   name: string,
 ): Promise<File> {

@@ -24,10 +24,16 @@ const ICONS: Record<Instrument, LucideIcon> = {
 type Props = {
   instrument: Instrument;
   onChange: (instrument: Instrument) => void;
+  /** What the instrument is for, as the sheet's title. */
+  title?: string;
 };
 
 /** Pill showing the current instrument; opens a small sheet to choose another. */
-export function InstrumentPicker({ instrument, onChange }: Props) {
+export function InstrumentPicker({
+  instrument,
+  onChange,
+  title = "Your check-in sounds like",
+}: Props) {
   const [open, setOpen] = useState(false);
   const Icon = ICONS[instrument];
 
@@ -43,7 +49,7 @@ export function InstrumentPicker({ instrument, onChange }: Props) {
         hitSlop={4}
         accessibilityRole="button"
         accessibilityLabel={`Instrument: ${INSTRUMENT_LABELS[instrument]}`}
-        accessibilityHint="Choose what your check-in sounds like"
+        accessibilityHint={title}
         className="h-11 flex-row items-center gap-2 rounded-pill border border-border bg-surface/60 px-4"
       >
         <Icon color={colours.textSecondary} size={16} strokeWidth={1.5} />
@@ -60,7 +66,7 @@ export function InstrumentPicker({ instrument, onChange }: Props) {
         className="gap-1 px-5 pt-5"
       >
         <Text className="mb-2 px-2 font-mono-medium text-h4 text-primary">
-          Your check-in sounds like
+          {title}
         </Text>
         {INSTRUMENTS.map((option) => {
           const OptionIcon = ICONS[option];

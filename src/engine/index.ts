@@ -8,6 +8,16 @@ export {
 } from "./compose";
 export { hasLowMoodRun, movingAverage, LOW_MOOD_RUN } from "./lowMood";
 export {
+  composePiece,
+  isEmptyPiece,
+  MAX_TEMPO,
+  MIN_TEMPO,
+  PIECE_STEPS,
+  pieceMidi,
+  type Piece,
+  type PieceSong,
+} from "./piece";
+export {
   composeMonth,
   linkChords,
   type MonthComposition,

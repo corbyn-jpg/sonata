@@ -1,6 +1,9 @@
 // Turns a composed song into audio: each note is the nearest recorded sample, shifted by at most a semitone, placed at its time and mixed. Pure maths on arrays (no files), so it runs anywhere.
 import type { Composition, NoteEvent } from "@/engine";
 
+/** All the mixer needs from a song: a week's, a month's or a Composer piece. */
+export type Playable = Pick<Composition, "events" | "tempo" | "beats">;
+
 /** One recorded note: its MIDI pitch and its sound (mono, -1 to 1). */
 export type NoteSample = { midi: number; audio: Float32Array };
 
@@ -69,7 +72,7 @@ export function nearestSample(
 }
 
 /** Length of the rendered song in seconds, including the final ring-out. */
-export const songSeconds = (song: Composition) =>
+export const songSeconds = (song: Playable) =>
   (song.beats * 60) / song.tempo + TAIL;
 
 /**
@@ -77,7 +80,7 @@ export const songSeconds = (song: Composition) =>
  * `accompaniment` (piano or harp, which reach low enough).
  */
 export function mixSong(
-  song: Composition,
+  song: Playable,
   samples: {
     melody: readonly NoteSample[];
     accompaniment: readonly NoteSample[];
