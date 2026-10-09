@@ -43,5 +43,16 @@ export const deletePlaylist = playlists.remove;
 export const uploadPendingPlaylists = playlists.uploadPending;
 export const getPlaylists = playlists.getAll;
 
+/** Playlists from a backup file (skips any already here). Returns how many were added. */
+export const restorePlaylists = (
+  backup: readonly { content: Content; updatedAt: number }[],
+) =>
+  playlists.restore(
+    backup.map(({ content, updatedAt }) => ({
+      content: { name: cleanName(content.name), songs: content.songs },
+      updatedAt,
+    })),
+  );
+
 /** Every playlist, most recently changed first, kept up to date on any screen. Null until first loaded. */
 export const usePlaylists = playlists.useAll;

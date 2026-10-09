@@ -153,6 +153,29 @@ export function sealedCollection<Content extends object>(name: string) {
         if (record && !record.deleted) await save(id, null, record.updated_at);
       }),
 
+    /**
+     Records from a backup file, sealed with this phone's key under new ids. Each keeps when it last changed; one
+     already here from that same moment is skipped, so restoring twice adds nothing. Returns how many were added.
+     */
+    restore: (backup: readonly { content: Content; updatedAt: number }[]) =>
+      queued(async () => {
+        const here = new Set((await local.all()).map((r) => r.updated_at));
+        const fresh = backup.filter((r) => !here.has(r.updatedAt));
+        const records = await Promise.all(
+          fresh.map(async ({ content, updatedAt }) => ({
+            id: doc(firestore).id,
+            ...(await encryptPayload(content)),
+            updated_at: updatedAt,
+            deleted: false,
+            synced: false,
+          })),
+        );
+        await local.store(records);
+        changed();
+        void uploadPending();
+        return records.length;
+      }),
+
     uploadPending,
     getAll,
 

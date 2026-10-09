@@ -51,33 +51,69 @@ export type Checkin = Payload & {
 const checkins = collection(db, "daily_checkins");
 const IMPORTED_KEY = "sonata.checkins.imported";
 
+/** What the user chose for a check-in, and when. Everything else (pitch, emotion, valence) follows from note + mode. */
+export type CheckinEntry = {
+  note: Letter;
+  mode: Mode;
+  instrument?: Instrument;
+  reflection?: string;
+  /** Milliseconds since 1970. */
+  timestamp: number;
+};
+
+async function sealCheckin({
+  note,
+  mode,
+  instrument,
+  reflection,
+  timestamp,
+}: CheckinEntry): Promise<StoredCheckin> {
+  const payload: Payload = {
+    note,
+    pitch: pitchOf(note, mode),
+    mode,
+    emotion: emotionOf(note, mode),
+  };
+  if (instrument) payload.instrument = instrument;
+  const text = reflection?.trim();
+  if (text) payload.reflection = text;
+
+  return {
+    id: doc(checkins).id, // generated on the phone, no connection needed
+    ...(await encryptPayload(payload)),
+    valence_score: valenceOf(note, mode),
+    timestamp,
+    synced: false,
+  };
+}
+
 export async function saveCheckin(
   note: Letter,
   mode: Mode,
   instrument: Instrument,
   reflection?: string,
 ) {
-  const payload: Payload = {
-    note,
-    pitch: pitchOf(note, mode),
-    mode,
-    emotion: emotionOf(note, mode),
-    instrument,
-  };
-  const text = reflection?.trim();
-  if (text) payload.reflection = text;
-
-  const sealed = await encryptPayload(payload);
   await storeCheckins([
-    {
-      id: doc(checkins).id, // generated on the phone, no connection needed
-      ...sealed,
-      valence_score: valenceOf(note, mode),
+    await sealCheckin({
+      note,
+      mode,
+      instrument,
+      reflection,
       timestamp: Date.now(),
-      synced: false,
-    },
+    }),
   ]);
   void uploadPending(); // in the background; if offline it tries again next time
+}
+
+/**
+ Check-ins from a backup file, sealed with this phone's key under new ids (so they can't clash with the old account's documents). One already here from the same moment is skipped, so restoring twice adds nothing. Returns how many were added.
+ */
+export async function restoreCheckins(entries: readonly CheckinEntry[]) {
+  const here = new Set((await allCheckins()).map((record) => record.timestamp));
+  const fresh = entries.filter((entry) => !here.has(entry.timestamp));
+  await storeCheckins(await Promise.all(fresh.map(sealCheckin)));
+  void uploadPending();
+  return fresh.length;
 }
 
 let uploading: Promise<void> | null = null;

@@ -9,19 +9,25 @@ import {
   View,
 } from "react-native";
 import {
+  ArchiveRestore,
   Bell,
   Clock,
   Download,
+  FileLock,
   Lock,
   Trash2,
   Vibrate,
 } from "lucide-react-native";
 import { BackHeader } from "@/components/BackHeader";
 import { Screen } from "@/components/Screen";
+import { pickBackup } from "@/features/settings/backup";
+import { BackupSheet } from "@/features/settings/BackupSheet";
 import { exportMyData } from "@/features/settings/exportMyData";
+import { RestoreSheet } from "@/features/settings/RestoreSheet";
 import { SettingGroup, SettingRow } from "@/features/settings/SettingRow";
 import { TimeSheet } from "@/features/settings/TimeSheet";
 import { feelNote } from "@/haptics";
+import { isBackup } from "@/lib/backupFile";
 import { PdfUnavailable } from "@/lib/pdf";
 import { setPreference, usePreference } from "@/lib/preferences";
 import { cancelReminder, scheduleReminder, timeLabel } from "@/lib/reminder";
@@ -41,6 +47,8 @@ export default function Settings() {
   const [pickingTime, setPickingTime] = useState(false);
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [backingUp, setBackingUp] = useState(false);
+  const [restoring, setRestoring] = useState<string | null>(null); // the chosen backup file's text
 
   const onFeelNotesChange = (on: boolean) => {
     setPreference("feelNotes", on);
@@ -105,6 +113,26 @@ export default function Settings() {
       }
     } finally {
       setExporting(false);
+    }
+  };
+
+  /** Pick a backup file; only a real Sonata backup gets as far as asking for the passphrase. */
+  const chooseBackup = async () => {
+    try {
+      const text = await pickBackup();
+      if (text === null) return;
+      if (isBackup(text)) setRestoring(text);
+      else
+        Alert.alert(
+          "That isn't a Sonata backup",
+          "Choose the .json file Sonata made when you backed up.",
+        );
+    } catch (error) {
+      console.warn(
+        "Couldn't open the file:",
+        error instanceof Error ? error.message : error,
+      );
+      Alert.alert("Couldn't open that file", "Please try again.");
     }
   };
 
@@ -183,14 +211,30 @@ export default function Settings() {
             }
           />
           <SettingRow
+            Icon={FileLock}
+            title="Back up to a file"
+            detail="Everything you've logged, locked with a passphrase, so you can bring it back on a new phone."
+            onPress={() => setBackingUp(true)}
+          />
+          <SettingRow
+            Icon={ArchiveRestore}
+            title="Restore from a backup"
+            detail="Adds a backup's check-ins, thought records and playlists. Nothing here is replaced."
+            onPress={() => void chooseBackup()}
+          />
+          <SettingRow
             Icon={Trash2}
             title="Delete all data"
-            detail="From this phone and the backup. This can't be undone."
+            detail="From this phone and the online backup. This can't be undone."
             onPress={() => setDeleting(true)}
             danger
           />
         </SettingGroup>
         {deleting && <DeleteSheet onClose={() => setDeleting(false)} />}
+        {backingUp && <BackupSheet onClose={() => setBackingUp(false)} />}
+        {restoring !== null && (
+          <RestoreSheet text={restoring} onClose={() => setRestoring(null)} />
+        )}
 
         <SettingGroup title="Credits">
           <View className="gap-2 py-4">

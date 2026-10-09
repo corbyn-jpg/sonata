@@ -14,5 +14,16 @@ export const deleteThoughtRecord = records.remove;
 /** Every thought record, newest first, kept up to date on any screen. Null until first loaded. */
 export const useThoughtRecords = records.useAll;
 
-/** Every thought record on this phone, newest first (for Export my data). */
+/** Every thought record on this phone, newest first (for Export my data and backups). */
 export const getThoughtRecords = records.getAll;
+
+/** Thought records from a backup file (skips any already here). Returns how many were added. */
+export const restoreThoughtRecords = (
+  backup: readonly { content: ThoughtRecord; updatedAt: number }[],
+) =>
+  records.restore(
+    backup.map(({ content, updatedAt }) => ({
+      content: cleanRecord(content),
+      updatedAt,
+    })),
+  );
