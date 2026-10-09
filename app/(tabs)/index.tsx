@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useIsFocused } from "expo-router";
+import { useIsFocused } from "expo-router";
 import {
   AccessibilityInfo,
   KeyboardAvoidingView,
@@ -15,8 +15,8 @@ import {
   withTiming,
 } from "react-native-reanimated";
 import { interpolateColors } from "@shopify/react-native-skia";
-import { FileMusic, Settings } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
+import { TabHeader } from "@/components/TabHeader";
 import { Sky } from "@/components/Sky";
 import { LETTERS, type Letter, type Mode } from "@/data/notes";
 import { ModeToggle } from "@/features/home/ModeToggle";
@@ -143,41 +143,7 @@ export default function Home() {
         />
       }
       header={
-        <View className="gap-4">
-          <View className="flex-row items-center justify-between">
-            <Text
-              numberOfLines={1}
-              className="shrink font-mono-medium text-h3 text-primary"
-            >
-              {greeting()}
-            </Text>
-            <View className="flex-row items-center">
-              <Link href="/composer" asChild>
-                <Pressable
-                  accessibilityLabel="Open composer"
-                  className="h-11 w-11 items-center justify-center"
-                >
-                  <FileMusic
-                    color={colours.textSecondary}
-                    size={24}
-                    strokeWidth={1.5}
-                  />
-                </Pressable>
-              </Link>
-              <Link href="/settings" asChild>
-                <Pressable
-                  accessibilityLabel="Settings"
-                  className="h-11 w-11 items-center justify-center"
-                >
-                  <Settings
-                    color={colours.textSecondary}
-                    size={24}
-                    strokeWidth={1.5}
-                  />
-                </Pressable>
-              </Link>
-            </View>
-          </View>
+        <TabHeader title={greeting()} className="gap-4">
           <View className="flex-row items-center justify-center gap-3">
             <ModeToggle mode={mode} onChange={onModeChange} />
             <InstrumentPicker
@@ -185,7 +151,7 @@ export default function Home() {
               onChange={onInstrumentChange}
             />
           </View>
-        </View>
+        </TabHeader>
       }
     >
       {/* Keeps the reflection input above the keyboard */}

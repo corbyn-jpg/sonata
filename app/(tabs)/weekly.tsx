@@ -2,17 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   PixelRatio,
-  Pressable,
   ScrollView,
   Text,
   View,
 } from "react-native";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { Skia } from "@shopify/react-native-skia";
-import { Link, router, useIsFocused } from "expo-router";
-import { ListMusic } from "lucide-react-native";
+import { router, useIsFocused } from "expo-router";
 import { useSharedValue } from "react-native-reanimated";
 import { Screen } from "@/components/Screen";
+import { TabHeader } from "@/components/TabHeader";
 import { Sky } from "@/components/Sky";
 import { ensureAudioMode, INSTRUMENT_LABELS } from "@/audio";
 import { MODE_NAMES } from "@/engine";
@@ -157,28 +156,11 @@ export default function Weekly() {
   const next = song ? nextBarStart(position, song.tempo) : null;
 
   const header = (
-    <View className="mb-6 items-center gap-1">
-      <View className="flex-row items-center justify-center gap-4">
-        <Text className="font-mono-medium text-h3 text-primary">
-          Your week in sound
-        </Text>
-        <Link href="/playlists" asChild>
-          <Pressable
-            accessibilityLabel="Your playlists"
-            className="h-11 w-11 items-center justify-center"
-          >
-            <ListMusic
-              color={colours.textSecondary}
-              size={24}
-              strokeWidth={1.5}
-            />
-          </Pressable>
-        </Link>
-      </View>
+    <TabHeader title="Your week in sound">
       <Text className="font-sans text-caption text-secondary">
         {weekRange(weekStart)}
       </Text>
-    </View>
+    </TabHeader>
   );
 
   return (

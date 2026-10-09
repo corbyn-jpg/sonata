@@ -9,6 +9,7 @@ import {
 import { useIsFocused } from "expo-router";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
+import { TabHeader } from "@/components/TabHeader";
 import { Sky } from "@/components/Sky";
 import { MonthBento } from "@/features/monthly/MonthBento";
 import { MonthCalendar } from "@/features/monthly/MonthCalendar";
@@ -28,40 +29,40 @@ export default function Monthly() {
   const atLatest = month.getTime() >= thisMonth.getTime(); // nothing to show in future months
 
   const header = (
-    <View className="mb-6 flex-row items-center justify-between">
-      <Pressable
-        onPress={() => setMonth(addMonths(month, -1))}
-        accessibilityRole="button"
-        accessibilityLabel="Previous month"
-        className="h-11 w-11 items-center justify-center"
-      >
-        <ChevronLeft
-          color={colours.textSecondary}
-          size={24}
-          strokeWidth={1.5}
-        />
-      </Pressable>
-      <Text
-        className="font-mono-medium text-h3 text-primary"
-        accessibilityRole="header"
-      >
-        {monthTitle(month)}
-      </Text>
-      <Pressable
-        onPress={() => setMonth(addMonths(month, 1))}
-        disabled={atLatest}
-        accessibilityRole="button"
-        accessibilityLabel="Next month"
-        accessibilityState={{ disabled: atLatest }}
-        className={`h-11 w-11 items-center justify-center ${atLatest ? "opacity-30" : ""}`}
-      >
-        <ChevronRight
-          color={colours.textSecondary}
-          size={24}
-          strokeWidth={1.5}
-        />
-      </Pressable>
-    </View>
+    <TabHeader title="Your month in sound">
+      {/* -mx-2.5 lines the arrows' icons up with the screen margins */}
+      <View className="-mx-2.5 flex-row items-center justify-between">
+        <Pressable
+          onPress={() => setMonth(addMonths(month, -1))}
+          accessibilityRole="button"
+          accessibilityLabel="Previous month"
+          className="h-11 w-11 items-center justify-center"
+        >
+          <ChevronLeft
+            color={colours.textSecondary}
+            size={24}
+            strokeWidth={1.5}
+          />
+        </Pressable>
+        <Text className="font-mono-medium text-h4 text-primary">
+          {monthTitle(month)}
+        </Text>
+        <Pressable
+          onPress={() => setMonth(addMonths(month, 1))}
+          disabled={atLatest}
+          accessibilityRole="button"
+          accessibilityLabel="Next month"
+          accessibilityState={{ disabled: atLatest }}
+          className={`h-11 w-11 items-center justify-center ${atLatest ? "opacity-30" : ""}`}
+        >
+          <ChevronRight
+            color={colours.textSecondary}
+            size={24}
+            strokeWidth={1.5}
+          />
+        </Pressable>
+      </View>
+    </TabHeader>
   );
 
   return (
