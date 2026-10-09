@@ -11,6 +11,8 @@ type Preferences = {
   reminder: boolean;
   /** When it arrives, in minutes after midnight. */
   reminderAt: number;
+  /** The intro has been seen (or skipped). Delete all data clears it, so a fresh start shows it again. */
+  onboarded: boolean;
 };
 
 const DEFAULTS: Preferences = {
@@ -18,12 +20,20 @@ const DEFAULTS: Preferences = {
   instrument: "piano",
   reminder: false,
   reminderAt: 21 * 60 + 30,
+  onboarded: false,
 };
 const STORAGE_KEY = "sonata.preferences";
 
 let current = DEFAULTS;
+let ready = false; // the saved preferences have been read (or there were none)
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((listener) => listener());
+const subscribe = (listener: () => void) => {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+};
 
 // Load once at startup; the defaults apply until it finishes
 AsyncStorage.getItem(STORAGE_KEY)
@@ -33,9 +43,12 @@ AsyncStorage.getItem(STORAGE_KEY)
     // An instrument that's since been removed (e.g. "ambient") falls back to the default
     if (!isInstrument(current.instrument))
       current.instrument = DEFAULTS.instrument;
-    notify();
   })
-  .catch(() => {});
+  .catch(() => {})
+  .finally(() => {
+    ready = true;
+    notify();
+  });
 
 export function setPreference<K extends keyof Preferences>(
   key: K,
@@ -50,11 +63,10 @@ export function setPreference<K extends keyof Preferences>(
 export function usePreference<K extends keyof Preferences>(
   key: K,
 ): Preferences[K] {
-  return useSyncExternalStore(
-    (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    () => current[key],
-  );
+  return useSyncExternalStore(subscribe, () => current[key]);
+}
+
+/** Whether the saved preferences have been read yet: until then they're only the defaults. */
+export function usePreferencesReady() {
+  return useSyncExternalStore(subscribe, () => ready);
 }

@@ -18,6 +18,7 @@ import { getUserId } from "@/lib/session";
 import { ensureAudioMode } from "@/audio";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { setUpReminders } from "@/lib/reminder";
+import { usePreference, usePreferencesReady } from "@/lib/preferences";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -30,9 +31,14 @@ export default function RootLayout() {
     Roboto_700Bold,
   });
 
+  // The splash stays up until the fonts and the saved preferences are in, so a returning user never sees the intro flash past
+  const ready = usePreferencesReady();
+  const onboarded = usePreference("onboarded");
+  const fontsDone = loaded || !!error;
+
   useEffect(() => {
-    if (loaded || error) SplashScreen.hideAsync();
-  }, [loaded, error]);
+    if (fontsDone && ready) SplashScreen.hideAsync();
+  }, [fontsDone, ready]);
 
   // Sign in early so the first check-in doesn't wait on it. Failures retry on save.
   useEffect(() => {
@@ -49,7 +55,7 @@ export default function RootLayout() {
     setUpReminders().catch(() => {});
   }, []);
 
-  if (!loaded && !error) return null;
+  if (!fontsDone || !ready) return null;
 
   return (
     <GestureHandlerRootView
@@ -62,15 +68,23 @@ export default function RootLayout() {
           contentStyle: { backgroundColor: colours.canvas },
         }}
       >
-        <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="settings" />
-        <Stack.Screen name="composer" />
-        <Stack.Screen name="breathing" />
-        <Stack.Screen name="thought-record/index" />
-        <Stack.Screen name="thought-record/new" />
-        <Stack.Screen name="calming-sounds" />
-        <Stack.Screen name="sheet-music" />
-        <Stack.Screen name="helplines" />
+        {/* The intro first, once; finishing it sets "onboarded", which swaps these over and opens Home */}
+        <Stack.Protected guard={!onboarded}>
+          <Stack.Screen name="onboarding" />
+        </Stack.Protected>
+        <Stack.Protected guard={onboarded}>
+          <Stack.Screen name="(tabs)" />
+          <Stack.Screen name="settings" />
+          <Stack.Screen name="composer" />
+          <Stack.Screen name="breathing" />
+          <Stack.Screen name="thought-record/index" />
+          <Stack.Screen name="thought-record/new" />
+          <Stack.Screen name="calming-sounds" />
+          <Stack.Screen name="sheet-music" />
+          <Stack.Screen name="helplines" />
+          <Stack.Screen name="playlists/index" />
+          <Stack.Screen name="playlists/[id]" />
+        </Stack.Protected>
       </Stack>
     </GestureHandlerRootView>
   );
