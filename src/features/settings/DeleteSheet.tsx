@@ -66,7 +66,7 @@ export function DeleteSheet({ onClose }: Props) {
           Delete everything?
         </Text>
         <Text className="font-sans text-body text-secondary">
-          Your check-ins, thought records and playlists are deleted from this
+          Your check-ins, thought records, playlists and pieces are deleted from this
           phone and from the encrypted backup, and Sonata starts again fresh.
           This can&apos;t be undone.
         </Text>

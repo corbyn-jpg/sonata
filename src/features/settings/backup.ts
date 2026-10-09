@@ -12,6 +12,7 @@ import {
 import { addDays, dayKey } from "@/lib/dates";
 import { shareFile } from "@/lib/pdf";
 import type { PlaylistSong } from "@/lib/playlistSongs";
+import { getPieces, restorePieces, type PieceContent } from "@/lib/pieces";
 import { getPlaylists, restorePlaylists } from "@/lib/playlists";
 import { getThoughtRecords, restoreThoughtRecords } from "@/lib/thoughtRecords";
 
@@ -24,12 +25,15 @@ type BackupContent = {
   checkins: CheckinEntry[];
   thoughtRecords: Dated<ThoughtRecord>[];
   playlists: Dated<{ name: string; songs: PlaylistSong[] }>[];
+  /** Missing from backups made before the Composer could save. */
+  pieces?: Dated<PieceContent>[];
 };
 
 export type Restored = {
   checkins: number;
   thoughtRecords: number;
   playlists: number;
+  pieces: number;
 };
 
 /** Lock everything on this phone with `passphrase` and open the share sheet with the file. */
@@ -38,10 +42,11 @@ export async function makeBackup(
   onProgress?: (done: number) => void,
 ) {
   const now = new Date();
-  const [checkins, thoughts, playlists] = await Promise.all([
+  const [checkins, thoughts, playlists, pieces] = await Promise.all([
     getCheckins(new Date(0), addDays(now, 1)),
     getThoughtRecords(),
     getPlaylists(),
+    getPieces(),
   ]);
   const content: BackupContent = {
     checkins: checkins.map(
@@ -61,6 +66,10 @@ export async function makeBackup(
     ),
     playlists: playlists.map(({ name, songs, updatedAt }) => ({
       content: { name, songs },
+      updatedAt,
+    })),
+    pieces: pieces.map(({ name, instrument, piece, updatedAt }) => ({
+      content: { name, instrument, piece },
       updatedAt,
     })),
   };
@@ -101,5 +110,6 @@ export async function restoreBackup(
     checkins: await restoreCheckins((backup.checkins ?? []).filter(isEntry)),
     thoughtRecords: await restoreThoughtRecords(backup.thoughtRecords ?? []),
     playlists: await restorePlaylists(backup.playlists ?? []),
+    pieces: await restorePieces(backup.pieces ?? []),
   };
 }

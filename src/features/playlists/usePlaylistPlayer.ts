@@ -3,7 +3,7 @@ import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { useIsFocused } from "expo-router";
 import { renderSong } from "@/audio/song";
 import { takeTurn } from "@/audio/turns";
-import type { Composition } from "@/engine";
+import type { Playable } from "@/audio/mixer";
 import { songCacheName, type PlaylistSong } from "@/lib/playlistSongs";
 
 /**
@@ -11,7 +11,7 @@ import { songCacheName, type PlaylistSong } from "@/lib/playlistSongs";
  */
 export function usePlaylistPlayer(
   songs: readonly PlaylistSong[],
-  compositions: readonly Composition[],
+  compositions: readonly Playable[],
 ) {
   const player = useAudioPlayer(null);
   const status = useAudioPlayerStatus(player);

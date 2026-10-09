@@ -9,7 +9,7 @@ import {
   usePlaylists,
   type Playlist,
 } from "@/lib/playlists";
-import type { PlaylistSong } from "@/lib/playlistSongs";
+import { sameSong, type PlaylistSong } from "@/lib/playlistSongs";
 import colours from "@/theme/colours";
 
 type Props = {
@@ -36,15 +36,9 @@ export function AddToPlaylistSheet({ visible, song, onDone, onClose }: Props) {
     onClose();
   };
 
-  // Already in this playlist? (Same week on the same instrument; adding it again updates it.)
+  // Already in this playlist? (Same week or piece on the same instrument; adding it again updates it.)
   const holds = (playlist: Playlist) =>
-    song !== null &&
-    playlist.songs.some(
-      (s) =>
-        s.kind === song.kind &&
-        s.week === song.week &&
-        s.instrument === song.instrument,
-    );
+    song !== null && playlist.songs.some((s) => sameSong(s, song));
 
   const run = async (
     task: (song: PlaylistSong) => Promise<unknown>,

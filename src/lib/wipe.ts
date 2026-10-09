@@ -19,7 +19,12 @@ import { withTimeout } from "@/lib/timeout";
 // The real steps of "Delete all data" (the order lives in deleteEverything.ts).
 
 /** Every Firestore collection that holds the user's records. */
-const COLLECTIONS = ["daily_checkins", "playlists", "cbt_thought_records"];
+const COLLECTIONS = [
+  "daily_checkins",
+  "playlists",
+  "cbt_thought_records",
+  "composer_pieces",
+];
 
 /** Every record this user owns on the server, read from the server itself (not a cached copy), then deleted. */
 async function deleteServerData() {

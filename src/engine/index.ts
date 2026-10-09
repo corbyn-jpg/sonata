@@ -1,6 +1,7 @@
 // The on-device symbolic AI (CLAUDE.md §7): pure TypeScript, no network, no React.
 export {
   composeWeek,
+  paletteOf,
   BEATS_PER_BAR,
   type Bar,
   type Composition,

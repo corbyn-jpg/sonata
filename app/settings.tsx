@@ -202,7 +202,7 @@ export default function Settings() {
           <SettingRow
             Icon={Download}
             title="Export my data"
-            detail="A readable PDF of your check-ins, thought records and playlists. It isn't encrypted, so keep it private."
+            detail="A readable PDF of your check-ins, thought records, playlists and pieces. It isn't encrypted, so keep it private."
             onPress={() => void exportData()}
             right={
               exporting ? (
@@ -219,7 +219,7 @@ export default function Settings() {
           <SettingRow
             Icon={ArchiveRestore}
             title="Restore from a backup"
-            detail="Adds a backup's check-ins, thought records and playlists. Nothing here is replaced."
+            detail="Adds a backup's check-ins, thought records, playlists and pieces. Nothing here is replaced."
             onPress={() => void chooseBackup()}
           />
           <SettingRow

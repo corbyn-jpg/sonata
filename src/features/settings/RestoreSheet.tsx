@@ -22,12 +22,13 @@ const count = (n: number, one: string, many: string) =>
   n === 1 ? `1 ${one}` : `${n} ${many}`;
 
 /** "Added 12 check-ins and 1 playlist." */
-function summary({ checkins, thoughtRecords, playlists }: Restored) {
+function summary({ checkins, thoughtRecords, playlists, pieces }: Restored) {
   const parts = [
     checkins && count(checkins, "check-in", "check-ins"),
     thoughtRecords &&
       count(thoughtRecords, "thought record", "thought records"),
     playlists && count(playlists, "playlist", "playlists"),
+    pieces && count(pieces, "piece", "pieces"),
   ].filter(Boolean);
   if (parts.length === 0) return "Everything in this backup is already here.";
   const last = parts.pop();

@@ -34,7 +34,32 @@ describe("data report", () => {
             instrument: "piano",
             days: [null, null, null, null, null, null, null],
           },
+          {
+            kind: "piece",
+            id: "p1",
+            name: "Rain <again>",
+            instrument: "harp",
+            piece: {
+              mode: "minor",
+              steps: ["E", null, "C"],
+              tempo: 96,
+              harmony: true,
+            },
+          },
         ],
+      },
+    ],
+    pieces: [
+      {
+        name: "Rain <again>",
+        instrument: "harp",
+        piece: {
+          mode: "minor",
+          steps: ["E", null, "C", "G", "B"],
+          tempo: 96,
+          harmony: true,
+        },
+        updatedAt: madeAt.getTime(),
       },
     ],
     madeAt,
@@ -64,10 +89,18 @@ describe("data report", () => {
     expect(html).toContain("Mind reading");
     expect(html).toContain("One comment isn't everyone");
     expect(html).toContain("Week of 28 Sep 2026 · Piano");
+    expect(html).toContain("Rain &lt;again&gt; (your piece) · Harp");
+  });
+
+  it("writes out each piece's notes a bar at a time", () => {
+    expect(html).toContain("Minor · 96 bpm · Harp · with harmony");
+    expect(html).toContain("E♭ – C G | B♭");
   });
 
   it("counts everything and warns that the copy isn't encrypted", () => {
-    expect(html).toContain("2 check-ins · 1 thought record · 1 playlist");
+    expect(html).toContain(
+      "2 check-ins · 1 thought record · 1 playlist · 1 piece",
+    );
     expect(html).toContain("isn't encrypted");
   });
 
@@ -76,10 +109,12 @@ describe("data report", () => {
       checkins: [],
       thoughts: [],
       playlists: [],
+      pieces: [],
       madeAt,
     });
     expect(empty).toContain("No check-ins yet.");
     expect(empty).toContain("No thought records yet.");
     expect(empty).toContain("No playlists yet.");
+    expect(empty).toContain("No pieces yet.");
   });
 });

@@ -1,6 +1,7 @@
 import { getCheckins } from "@/lib/checkins";
 import { addDays, dayKey } from "@/lib/dates";
 import { shareAsPdf } from "@/lib/pdf";
+import { getPieces } from "@/lib/pieces";
 import { getPlaylists } from "@/lib/playlists";
 import { getThoughtRecords } from "@/lib/thoughtRecords";
 import { dataReport } from "./dataReport";
@@ -10,10 +11,11 @@ import { dataReport } from "./dataReport";
  */
 export async function exportMyData() {
   const now = new Date();
-  const [checkins, thoughts, playlists] = await Promise.all([
+  const [checkins, thoughts, playlists, pieces] = await Promise.all([
     getCheckins(new Date(0), addDays(now, 1)),
     getThoughtRecords(),
     getPlaylists(),
+    getPieces(),
   ]);
   const html = dataReport({
     checkins: checkins.map(
@@ -27,6 +29,7 @@ export async function exportMyData() {
     ),
     thoughts,
     playlists,
+    pieces,
     madeAt: now,
   });
   await shareAsPdf(html, `Sonata - my data ${dayKey(now)}`, "Share your data");

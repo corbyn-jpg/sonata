@@ -1,14 +1,28 @@
 import { useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  ScrollView,
+  Text,
+  TextInput,
+  View,
+} from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ChevronLeft, Pause, Pencil, Play } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
-import { composeWeek } from "@/engine";
 import { PlaylistSongRow } from "@/features/playlists/PlaylistSongRow";
 import { usePlaylistPlayer } from "@/features/playlists/usePlaylistPlayer";
-import { deletePlaylist, MAX_NAME_LENGTH, removeSong, renamePlaylist, restoreSong, usePlaylists } from "@/lib/playlists";
-import type { PlaylistSong } from "@/lib/playlistSongs";
+import {
+  deletePlaylist,
+  MAX_NAME_LENGTH,
+  removeSong,
+  renamePlaylist,
+  restoreSong,
+  usePlaylists,
+} from "@/lib/playlists";
+import { playableOf, songKey, type PlaylistSong } from "@/lib/playlistSongs";
 import colours from "@/theme/colours";
 
 const UNDO_MS = 5000;
@@ -21,8 +35,9 @@ export default function PlaylistScreen() {
 
   // Each song is composed again from its saved notes: the same notes always make the same song
   const songs = useMemo(() => playlist?.songs ?? [], [playlist]);
-  const compositions = useMemo(() => songs.map((song) => composeWeek(song.days, song.week)), [songs]);
-  const { current, playing, loading, toggle, playAll, stop } = usePlaylistPlayer(songs, compositions);
+  const compositions = useMemo(() => songs.map(playableOf), [songs]);
+  const { current, playing, loading, toggle, playAll, stop } =
+    usePlaylistPlayer(songs, compositions);
 
   const [renaming, setRenaming] = useState(false);
   const [name, setName] = useState("");
@@ -33,12 +48,16 @@ export default function PlaylistScreen() {
   };
   const finishRenaming = () => {
     setRenaming(false);
-    if (name.trim() && name.trim() !== playlist?.name) void renamePlaylist(id, name);
+    if (name.trim() && name.trim() !== playlist?.name)
+      void renamePlaylist(id, name);
   };
 
   // Removing a song can be undone, so it happens straight away with an Undo rather than a question first
   const insets = useSafeAreaInsets();
-  const [removed, setRemoved] = useState<{ index: number; song: PlaylistSong } | null>(null);
+  const [removed, setRemoved] = useState<{
+    index: number;
+    song: PlaylistSong;
+  } | null>(null);
   useEffect(() => {
     if (!removed) return;
     const timer = setTimeout(() => setRemoved(null), UNDO_MS);
@@ -58,18 +77,22 @@ export default function PlaylistScreen() {
   };
 
   const confirmDelete = () =>
-    Alert.alert("Delete this playlist?", "Your weeks and their songs aren't affected.", [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: async () => {
-          stop();
-          await deletePlaylist(id);
-          router.back();
+    Alert.alert(
+      "Delete this playlist?",
+      "Your weeks and pieces aren't affected.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: async () => {
+            stop();
+            await deletePlaylist(id);
+            router.back();
+          },
         },
-      },
-    ]);
+      ],
+    );
 
   const header = (
     <View className="mb-6 flex-row items-center gap-2">
@@ -79,7 +102,11 @@ export default function PlaylistScreen() {
         accessibilityLabel="Back"
         className="-ml-3 h-11 w-11 items-center justify-center"
       >
-        <ChevronLeft color={colours.textSecondary} size={24} strokeWidth={1.5} />
+        <ChevronLeft
+          color={colours.textSecondary}
+          size={24}
+          strokeWidth={1.5}
+        />
       </Pressable>
       {renaming ? (
         <TextInput
@@ -101,10 +128,15 @@ export default function PlaylistScreen() {
           accessibilityLabel={`${playlist?.name ?? "Playlist"}, rename`}
           className="flex-1 flex-row items-center gap-2"
         >
-          <Text numberOfLines={1} className="shrink font-mono-medium text-h3 text-primary">
+          <Text
+            numberOfLines={1}
+            className="shrink font-mono-medium text-h3 text-primary"
+          >
             {playlist?.name ?? "Playlist"}
           </Text>
-          {playlist && <Pencil color={colours.textMuted} size={16} strokeWidth={1.5} />}
+          {playlist && (
+            <Pencil color={colours.textMuted} size={16} strokeWidth={1.5} />
+          )}
         </Pressable>
       )}
     </View>
@@ -121,7 +153,9 @@ export default function PlaylistScreen() {
   if (!playlist) {
     return (
       <Screen header={header}>
-        <Text className="text-center font-sans text-body text-secondary">This playlist has been deleted.</Text>
+        <Text className="text-center font-sans text-body text-secondary">
+          This playlist has been deleted.
+        </Text>
       </Screen>
     );
   }
@@ -129,10 +163,14 @@ export default function PlaylistScreen() {
   const going = current !== null && playing;
   return (
     <Screen header={header}>
-      <ScrollView contentContainerClassName="gap-2 pb-8" showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerClassName="gap-2 pb-8"
+        showsVerticalScrollIndicator={false}
+      >
         {songs.length === 0 ? (
           <Text className="text-center font-sans text-body text-secondary">
-            No songs yet. Add one with the Playlist button on the Weekly tab.
+            No songs yet. Add a week with the Playlist button on the Weekly tab,
+            or a piece from the Composer.
           </Text>
         ) : (
           <Pressable
@@ -141,9 +179,19 @@ export default function PlaylistScreen() {
             className="mb-2 min-h-[52px] flex-row items-center justify-center gap-2 rounded-pill bg-violet-700"
           >
             {going ? (
-              <Pause color={colours.textPrimary} fill={colours.textPrimary} size={18} strokeWidth={1.5} />
+              <Pause
+                color={colours.textPrimary}
+                fill={colours.textPrimary}
+                size={18}
+                strokeWidth={1.5}
+              />
             ) : (
-              <Play color={colours.textPrimary} fill={colours.textPrimary} size={18} strokeWidth={1.5} />
+              <Play
+                color={colours.textPrimary}
+                fill={colours.textPrimary}
+                size={18}
+                strokeWidth={1.5}
+              />
             )}
             <Text className="font-sans-bold text-body text-primary">
               {going ? "Pause" : current === null ? "Play all" : "Play"}
@@ -153,9 +201,8 @@ export default function PlaylistScreen() {
 
         {songs.map((song, index) => (
           <PlaylistSongRow
-            key={`${song.week}-${song.instrument}`}
+            key={songKey(song)}
             song={song}
-            composition={compositions[index]}
             active={index === current}
             playing={playing}
             loading={loading}
@@ -169,7 +216,9 @@ export default function PlaylistScreen() {
           accessibilityRole="button"
           className="mt-6 min-h-[44px] items-center justify-center"
         >
-          <Text className="font-sans-medium text-body text-muted">Delete playlist</Text>
+          <Text className="font-sans-medium text-body text-muted">
+            Delete playlist
+          </Text>
         </Pressable>
       </ScrollView>
 
@@ -179,9 +228,17 @@ export default function PlaylistScreen() {
           style={{ bottom: insets.bottom + 16 }}
           className="absolute left-6 right-6 min-h-[52px] flex-row items-center justify-between rounded-pill border border-border bg-surface-raised pl-5 pr-2"
         >
-          <Text className="font-sans text-body text-secondary">Song removed</Text>
-          <Pressable onPress={undo} accessibilityRole="button" className="min-h-[44px] justify-center px-4">
-            <Text className="font-sans-bold text-body text-violet-200">Undo</Text>
+          <Text className="font-sans text-body text-secondary">
+            Song removed
+          </Text>
+          <Pressable
+            onPress={undo}
+            accessibilityRole="button"
+            className="min-h-[44px] justify-center px-4"
+          >
+            <Text className="font-sans-bold text-body text-violet-200">
+              Undo
+            </Text>
           </Pressable>
         </View>
       )}

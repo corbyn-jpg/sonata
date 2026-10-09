@@ -60,7 +60,7 @@ export function BackupSheet({ onClose }: Props) {
           Back up to a file
         </Text>
         <Text className="font-sans text-body text-secondary">
-          Your check-ins, thought records and playlists, locked with a
+          Your check-ins, thought records, playlists and pieces, locked with a
           passphrase. Keep the file somewhere safe, like your cloud drive.
         </Text>
         <Text className="font-sans text-caption text-secondary">

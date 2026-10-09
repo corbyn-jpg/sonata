@@ -3,6 +3,7 @@ import { INSTRUMENT_LABELS, type Instrument } from "@/audio/instruments";
 import { displayName, type Letter, type Mode } from "@/data/notes";
 import { patternOf, type ThoughtRecord } from "@/features/oasis/thoughts";
 import { fromDayKey } from "@/lib/dates";
+import type { PieceContent } from "@/lib/pieces";
 import type { PlaylistSong } from "@/lib/playlistSongs";
 
 export type ReportCheckin = {
@@ -14,6 +15,7 @@ export type ReportCheckin = {
 };
 export type ReportThought = ThoughtRecord & { updatedAt: number };
 export type ReportPlaylist = { name: string; songs: PlaylistSong[] };
+export type ReportPiece = PieceContent & { updatedAt: number };
 
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTHS = [
@@ -84,10 +86,40 @@ function playlistList(playlists: readonly ReportPlaylist[]) {
       const songs = p.songs
         .map(
           (s) =>
-            `<li>Week of ${fullDate(fromDayKey(s.week)).slice(4)} · ${INSTRUMENT_LABELS[s.instrument]}</li>`,
+            `<li>${s.kind === "week" ? `Week of ${fullDate(fromDayKey(s.week)).slice(4)}` : `${escape(s.name)} (your piece)`} · ${INSTRUMENT_LABELS[s.instrument]}</li>`,
         )
         .join("");
       return `<section class="record"><h3>${escape(p.name)}</h3>${songs ? `<ul>${songs}</ul>` : none("songs")}</section>`;
+    })
+    .join("");
+}
+
+/** A piece's notes, a bar at a time: "C E G – | …" (a dash is a rest). */
+function tune({ mode, steps }: ReportPiece["piece"]) {
+  const bars: string[] = [];
+  for (let start = 0; start < steps.length; start += 4)
+    bars.push(
+      steps
+        .slice(start, start + 4)
+        .map((note) => (note ? displayName(note, mode) : "–"))
+        .join(" "),
+    );
+  return bars.join(" | ");
+}
+
+function pieceList(pieces: readonly ReportPiece[]) {
+  if (pieces.length === 0) return none("pieces");
+  return [...pieces]
+    .sort((a, b) => b.updatedAt - a.updatedAt)
+    .map(({ name, instrument, piece, updatedAt }) => {
+      const about = [
+        fullDate(new Date(updatedAt)),
+        piece.mode === "major" ? "Major" : "Minor",
+        `${piece.tempo} bpm`,
+        INSTRUMENT_LABELS[instrument],
+        piece.harmony ? "with harmony" : "melody only",
+      ].join(" · ");
+      return `<section class="record"><h3>${escape(name)}</h3><p>${about}</p><p class="note">${tune(piece)}</p></section>`;
     })
     .join("");
 }
@@ -96,12 +128,14 @@ export function dataReport(data: {
   checkins: readonly ReportCheckin[];
   thoughts: readonly ReportThought[];
   playlists: readonly ReportPlaylist[];
+  pieces: readonly ReportPiece[];
   madeAt: Date;
 }): string {
   const counts = [
     plural(data.checkins.length, "check-in"),
     plural(data.thoughts.length, "thought record"),
     plural(data.playlists.length, "playlist"),
+    plural(data.pieces.length, "piece"),
   ].join(" · ");
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
     @page { size: A4; margin: 16mm; }
@@ -129,5 +163,6 @@ export function dataReport(data: {
     <h2>Check-ins</h2>${checkinTable(data.checkins)}
     <h2>Thought records</h2>${thoughtList(data.thoughts)}
     <h2>Playlists</h2>${playlistList(data.playlists)}
+    <h2>Composer pieces</h2>${pieceList(data.pieces)}
   </body></html>`;
 }
