@@ -271,3 +271,9 @@ Each entry has:
 - **Cause:** each was a default pattern (the template card, the KPI row, the stock tab bar, the confirm dialog) rather than a choice made for Sonata. The glow colours were picked per card, so they meant nothing.
 - **Fix:** `BentoCard`'s glow is optional and kept only where the colours mean something; the Oasis became a bento where size follows content, with helplines as a plain link below it; the Monthly bento is one card with the chart and a line of figures; `CapsuleTabBar` draws the floating capsule; removing a song happens straight away with a 5 s Undo (`restoreSong`, `withSongAt`); success is silent (announced to screen readers); "Composing…" in sentence case; `text-primary` instead of white. CLAUDE.md §5, §6 and §12 updated, and its colour tokens now match `colours.js`.
 - **Lesson:** a decoration on every card means nothing on any of them. Before reaching for a familiar pattern, check the content asks for it.
+
+### 51. "Cannot find native module 'ExpoPrint'" and "Route ./sheet-music.tsx is missing the required default export"
+- **Seen:** opening Sheet music crashed the screen after `expo-print` was installed, before a new development build was on the phone (the EAS upload had failed).
+- **Cause:** `expo-print` looks up its native module the moment it's imported. `exportScore.ts` imported it at the top, so loading the screen threw on a build without the module, and Expo Router then reported the route as having no default export.
+- **Fix:** `sharePdf` checks `requireOptionalNativeModule("ExpoPrint")` first and only then loads `expo-print` with `await import(...)`. On an older build, Export PDF says the new build is needed; the score and MusicXML export still work.
+- **Lesson:** a new native module can't run until the development build is rebuilt. Import it where it's used, behind a check, so the rest of the screen keeps working in the meantime.

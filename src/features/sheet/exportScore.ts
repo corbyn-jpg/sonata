@@ -1,4 +1,4 @@
-import { printToFileAsync } from "expo-print";
+import { requireOptionalNativeModule } from "expo";
 import { Directory, File, Paths } from "expo-file-system";
 import Share from "react-native-share";
 import { scoreToMusicXml } from "./musicxml";
@@ -46,8 +46,15 @@ function page(score: Score) {
   </body></html>`;
 }
 
+/** Thrown when the app was built before expo-print was added: PDF export needs a new development build. */
+export class PdfUnavailable extends Error {}
+
 /** Make the score into an A4 PDF and open the share sheet with it. */
 export async function sharePdf(score: Score, fileName: string) {
+  // expo-print is loaded only when it's needed and only if this build has it: importing it up front
+  // crashed the whole screen on a build made before it was added
+  if (!requireOptionalNativeModule("ExpoPrint")) throw new PdfUnavailable("This build can't make PDFs yet");
+  const { printToFileAsync } = await import("expo-print");
   const { uri } = await printToFileAsync({
     html: page(score),
     width: 595, // A4 in points

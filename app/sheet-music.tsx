@@ -6,7 +6,7 @@ import { INSTRUMENT_LABELS } from "@/audio";
 import { BackHeader } from "@/components/BackHeader";
 import { Screen } from "@/components/Screen";
 import { composeWeek, MODE_NAMES } from "@/engine";
-import { shareMusicXml, sharePdf } from "@/features/sheet/exportScore";
+import { PdfUnavailable, shareMusicXml, sharePdf } from "@/features/sheet/exportScore";
 import { monthScore, weekScore, type Score } from "@/features/sheet/score";
 import { SongPicker } from "@/features/sheet/SongPicker";
 import type { SongChoice } from "@/features/sheet/songs";
@@ -60,8 +60,12 @@ export default function SheetMusic() {
       if (kind === "pdf") await sharePdf(score, name);
       else await shareMusicXml(score, INSTRUMENT_LABELS[selected.instrument], name);
     } catch (error) {
-      console.warn("Couldn't export the sheet music:", error);
-      Alert.alert(kind === "pdf" ? "Couldn't make the PDF" : "Couldn't make the MusicXML file", "Please try again.");
+      if (error instanceof PdfUnavailable)
+        Alert.alert("PDF needs the new app build", "Install the latest development build, then try again. MusicXML works now.");
+      else {
+        console.warn("Couldn't export the sheet music:", error);
+        Alert.alert(kind === "pdf" ? "Couldn't make the PDF" : "Couldn't make the MusicXML file", "Please try again.");
+      }
     } finally {
       setExporting(null);
     }
@@ -85,7 +89,7 @@ export default function SheetMusic() {
 
   return (
     <Screen header={<BackHeader title="Sheet music" />}>
-      <ScrollView contentContainerClassName="pb-6" showsVerticalScrollIndicator={false}>
+      <ScrollView contentContainerClassName="pb-10" showsVerticalScrollIndicator={false}>
         <SongPicker weeks={songs.weeks} months={songs.months} selected={selected} onChange={setChosen} />
         <Text className="mb-4 mt-3 font-sans text-caption text-secondary">{score.subtitle}</Text>
         <View
