@@ -1,20 +1,27 @@
-import { useState } from "react";
+import { Fragment, useState } from "react";
 import { Pressable, ScrollView, Text } from "react-native";
 import { Check, ChevronDown } from "lucide-react-native";
 import { INSTRUMENT_LABELS } from "@/audio";
 import { BottomSheet } from "@/components/BottomSheet";
 import colours from "@/theme/colours";
-import type { MonthSong, SongChoice, WeekSong } from "./songs";
+import type { MonthSong, PieceChoice, SongChoice, WeekSong } from "./songs";
 
 type Props = {
   weeks: readonly WeekSong[];
   months: readonly MonthSong[];
+  pieces: readonly PieceChoice[];
   selected: SongChoice;
   onChange: (song: SongChoice) => void;
 };
 
-/** The chosen song as a pill; opens a sheet of every week and month to choose another. */
-export function SongPicker({ weeks, months, selected, onChange }: Props) {
+/** The chosen song as a pill; opens a sheet of every week, month and saved piece to choose another. */
+export function SongPicker({
+  weeks,
+  months,
+  pieces,
+  selected,
+  onChange,
+}: Props) {
   const [open, setOpen] = useState(false);
 
   const choose = (song: SongChoice) => {
@@ -70,16 +77,24 @@ export function SongPicker({ weeks, months, selected, onChange }: Props) {
           contentContainerClassName="gap-1 px-5"
           accessibilityRole="radiogroup"
         >
-          <Text className="mb-1 px-2 font-mono-medium text-h4 text-primary">
-            Weeks
-          </Text>
-          {weeks.map(option)}
-          {months.length > 0 && (
-            <Text className="mb-1 mt-5 px-2 font-mono-medium text-h4 text-primary">
-              Months
-            </Text>
-          )}
-          {months.map(option)}
+          {(
+            [
+              ["Weeks", weeks],
+              ["Months", months],
+              ["Your pieces", pieces],
+            ] as const
+          )
+            .filter(([, songs]) => songs.length > 0)
+            .map(([title, songs], i) => (
+              <Fragment key={title}>
+                <Text
+                  className={`mb-1 px-2 font-mono-medium text-h4 text-primary ${i > 0 ? "mt-5" : ""}`}
+                >
+                  {title}
+                </Text>
+                {songs.map(option)}
+              </Fragment>
+            ))}
         </ScrollView>
       </BottomSheet>
     </>

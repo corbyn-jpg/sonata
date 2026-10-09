@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { SvgXml } from "react-native-svg";
+import { useLocalSearchParams } from "expo-router";
 import { FileDown, FileMusic } from "lucide-react-native";
 import { INSTRUMENT_LABELS } from "@/audio";
 import { BackHeader } from "@/components/BackHeader";
@@ -16,9 +17,14 @@ import { Screen } from "@/components/Screen";
 import { composeWeek, MODE_NAMES } from "@/engine";
 import { shareMusicXml, sharePdf } from "@/features/sheet/exportScore";
 import { PdfUnavailable } from "@/lib/pdf";
-import { monthScore, weekScore, type Score } from "@/features/sheet/score";
+import {
+  monthScore,
+  pieceScore,
+  weekScore,
+  type Score,
+} from "@/features/sheet/score";
 import { SongPicker } from "@/features/sheet/SongPicker";
-import type { SongChoice } from "@/features/sheet/songs";
+import { pieceKey, type SongChoice } from "@/features/sheet/songs";
 import { scoreLines } from "@/features/sheet/svg";
 import { useSheetSongs } from "@/features/sheet/useSheetSongs";
 import colours from "@/theme/colours";
@@ -26,6 +32,14 @@ import colours from "@/theme/colours";
 /** The song as a lead sheet: its melody on a treble staff with the chords named above. */
 function scoreOf(song: SongChoice): Score {
   const instrument = INSTRUMENT_LABELS[song.instrument];
+  if (song.kind === "piece") {
+    const { mode, harmony } = song.piece;
+    return pieceScore(
+      song.piece,
+      song.title,
+      `${mode === "major" ? "Major" : "Minor"} · ${harmony ? "with harmony" : "melody only"} · ${instrument}`,
+    );
+  }
   if (song.kind === "week") {
     const composition = composeWeek(song.week, song.seed);
     return weekScore(
@@ -45,15 +59,26 @@ function scoreOf(song: SongChoice): Score {
   );
 }
 
-/** Sheet music: any week's or month's song as a score, to read here or export as PDF or MusicXML. */
+/** Sheet music: any week's or month's song, or a Composer piece, as a score, to read here or export as PDF or MusicXML. */
 export default function SheetMusic() {
+  // The Composer opens this with its piece already chosen
+  const { piece } = useLocalSearchParams<{ piece?: string }>();
   const songs = useSheetSongs();
   const { width } = useWindowDimensions();
   const [chosen, setChosen] = useState<SongChoice | null>(null);
   const [exporting, setExporting] = useState<"pdf" | "xml" | null>(null);
 
-  // The newest week until another song is chosen
-  const selected = chosen ?? songs?.weeks[0] ?? songs?.months[0] ?? null;
+  // The piece the Composer asked for, or else the newest week, until another song is chosen
+  const asked = piece
+    ? songs?.pieces.find((p) => p.key === pieceKey(piece))
+    : undefined;
+  const selected =
+    chosen ??
+    asked ??
+    songs?.weeks[0] ??
+    songs?.months[0] ??
+    songs?.pieces[0] ??
+    null;
   const score = useMemo(
     () => (selected ? scoreOf(selected) : null),
     [selected],
@@ -118,7 +143,8 @@ export default function SheetMusic() {
     return (
       <Screen header={<BackHeader title="Sheet music" />}>
         <Text className="font-sans text-body text-secondary">
-          Your songs appear here as sheet music after your first check-in.
+          Your songs appear here as sheet music after your first check-in, and
+          your Composer pieces once you save one.
         </Text>
       </Screen>
     );
@@ -132,6 +158,7 @@ export default function SheetMusic() {
         <SongPicker
           weeks={songs.weeks}
           months={songs.months}
+          pieces={songs.pieces}
           selected={selected}
           onChange={setChosen}
         />

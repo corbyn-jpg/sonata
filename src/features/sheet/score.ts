@@ -1,14 +1,16 @@
 // A song as sheet music: the melody, bar by bar, with its chords named above. Built from exactly
-// what the engine composes for Weekly and Monthly (same weeks, same seeds), so the score is the song.
+// what the engine composes for Weekly, Monthly and the Composer (same weeks, same seeds, same piece), so the score is the song.
 import {
   BEATS_PER_BAR,
   composeMonth,
+  composePiece,
   composeWeek,
   linkChords,
   type Chord,
   type Composition,
   type MonthWeekInput,
   type NoteEvent,
+  type Piece,
 } from "@/engine";
 import type { NoteIn } from "./notation";
 
@@ -26,9 +28,14 @@ export type ScoreSection = {
   bars: ScoreBar[];
 };
 
-export type Score = { title: string; subtitle: string; sections: ScoreSection[] };
+export type Score = {
+  title: string;
+  subtitle: string;
+  sections: ScoreSection[];
+};
 
-const melody = (events: readonly NoteEvent[]) => events.filter((e) => e.part === "melody");
+const melody = (events: readonly NoteEvent[]) =>
+  events.filter((e) => e.part === "melody");
 
 /** A week's seven bars, one per day. */
 function weekBars(song: Composition): ScoreBar[] {
@@ -38,14 +45,58 @@ function weekBars(song: Composition): ScoreBar[] {
     return {
       notes: notes
         .filter((n) => n.start >= from && n.start < from + BEATS_PER_BAR)
-        .map((n) => ({ midi: n.midi, start: n.start - from, duration: n.duration })),
-      chords: bar.chords.map(({ chord, start }) => ({ chord, start: start - from })),
+        .map((n) => ({
+          midi: n.midi,
+          start: n.start - from,
+          duration: n.duration,
+        })),
+      chords: bar.chords.map(({ chord, start }) => ({
+        chord,
+        start: start - from,
+      })),
     };
   });
 }
 
-export function weekScore(song: Composition, title: string, subtitle: string): Score {
-  return { title, subtitle, sections: [{ label: null, tempo: song.tempo, bars: weekBars(song) }] };
+export function weekScore(
+  song: Composition,
+  title: string,
+  subtitle: string,
+): Score {
+  return {
+    title,
+    subtitle,
+    sections: [{ label: null, tempo: song.tempo, bars: weekBars(song) }],
+  };
+}
+
+/** A Composer piece: a bar per four steps, up to its last note, with the harmony's chord over each bar (if it has one). */
+export function pieceScore(
+  piece: Piece,
+  title: string,
+  subtitle: string,
+): Score {
+  const song = composePiece(piece);
+  const notes = melody(song.events);
+  const bars: ScoreBar[] = [];
+  for (let from = 0; from < song.beats; from += BEATS_PER_BAR)
+    bars.push({
+      notes: notes
+        .filter((n) => n.start >= from && n.start < from + BEATS_PER_BAR)
+        .map((n) => ({
+          midi: n.midi,
+          start: n.start - from,
+          duration: n.duration,
+        })),
+      chords: song.chords[from / BEATS_PER_BAR]
+        ? [{ chord: song.chords[from / BEATS_PER_BAR], start: 0 }]
+        : [],
+    });
+  return {
+    title,
+    subtitle,
+    sections: [{ label: null, tempo: piece.tempo, bars }],
+  };
 }
 
 /**
@@ -63,7 +114,9 @@ export function monthScore(
   const withSongs = inputs
     .map((input, i) => ({ ...input, label: labels[i] }))
     .filter(({ week }) => week.some(Boolean));
-  const weeks = withSongs.map(({ week, seed: weekSeed }) => composeWeek(week, weekSeed));
+  const weeks = withSongs.map(({ week, seed: weekSeed }) =>
+    composeWeek(week, weekSeed),
+  );
   const month = composeMonth(withSongs, seed);
   const events = melody(month.events);
 
@@ -72,7 +125,11 @@ export function monthScore(
   for (const part of month.sections) {
     if (part.kind === "week") {
       const song = weeks[week];
-      sections.push({ label: withSongs[week].label, tempo: song.tempo, bars: weekBars(song) });
+      sections.push({
+        label: withSongs[week].label,
+        tempo: song.tempo,
+        bars: weekBars(song),
+      });
       week++;
       continue;
     }
@@ -88,7 +145,11 @@ export function monthScore(
         {
           notes: events
             .filter((e) => e.start >= part.start - 1e-6 && e.start < end)
-            .map((e) => ({ midi: e.midi, start: (e.start - part.start) / stretch, duration: e.duration / stretch })),
+            .map((e) => ({
+              midi: e.midi,
+              start: (e.start - part.start) / stretch,
+              duration: e.duration / stretch,
+            })),
           chords: [
             { chord: home, start: 0 },
             { chord: dominant, start: 2 },

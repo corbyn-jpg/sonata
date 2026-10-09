@@ -8,10 +8,11 @@ import {
   Text,
   View,
 } from "react-native";
-import { useNavigation } from "expo-router";
+import { router, useNavigation } from "expo-router";
 import { usePreventRemove } from "expo-router/react-navigation";
 import {
   Check,
+  FileMusic,
   FolderOpen,
   Gauge,
   Layers,
@@ -356,7 +357,7 @@ export default function Composer() {
             </Text>
           )}
 
-          <View className="flex-row justify-center gap-2">
+          <View className="flex-row flex-wrap justify-center gap-2">
             {/* Saving shows itself: the button turns into "Saved" */}
             {action(
               saved ? "Saved" : "Save",
@@ -370,6 +371,18 @@ export default function Composer() {
               () => setChoosing(true),
               !playlistSong,
               playlistSong ? undefined : "Save the piece first",
+            )}
+            {action(
+              "Sheet music",
+              FileMusic,
+              () =>
+                savedId &&
+                router.push({
+                  pathname: "/sheet-music",
+                  params: { piece: savedId },
+                }),
+              !saved,
+              saved ? undefined : "Save the piece first",
             )}
           </View>
           {message && (

@@ -2,11 +2,24 @@
 // and seeds as Weekly and Monthly (summariseMonth, the Monday's date, the 1st of the month), so a
 // score is always the song as it sounds there.
 import { mostUsedInstrument, type Instrument } from "@/audio/instruments";
-import type { MonthWeekInput, Week } from "@/engine";
-import { monthTitle, shortDate, startOfMonth, summariseMonth, type DatedNote } from "@/features/monthly/month";
+import type { MonthWeekInput, Piece, Week } from "@/engine";
+import {
+  monthTitle,
+  shortDate,
+  startOfMonth,
+  summariseMonth,
+  type DatedNote,
+} from "@/features/monthly/month";
 import { dayKey, startOfWeek } from "@/lib/dates";
 
-export type WeekSong = { kind: "week"; key: string; title: string; instrument: Instrument; week: Week; seed: string };
+export type WeekSong = {
+  kind: "week";
+  key: string;
+  title: string;
+  instrument: Instrument;
+  week: Week;
+  seed: string;
+};
 export type MonthSong = {
   kind: "month";
   key: string;
@@ -17,10 +30,40 @@ export type MonthSong = {
   labels: string[];
   seed: string;
 };
-export type SongChoice = WeekSong | MonthSong;
+export type PieceChoice = {
+  kind: "piece";
+  key: string;
+  title: string;
+  instrument: Instrument;
+  piece: Piece;
+};
+export type SongChoice = WeekSong | MonthSong | PieceChoice;
+
+/** The key a saved piece is listed under, so the Composer can open its score directly. */
+export const pieceKey = (id: string) => `piece-${id}`;
+
+/** Saved Composer pieces, in the order given (most recently changed first). */
+export const pieceChoices = (
+  pieces: readonly {
+    id: string;
+    name: string;
+    instrument: Instrument;
+    piece: Piece;
+  }[],
+): PieceChoice[] =>
+  pieces.map(({ id, name, instrument, piece }) => ({
+    kind: "piece",
+    key: pieceKey(id),
+    title: name,
+    instrument,
+    piece,
+  }));
 
 /** Weeks with a check-in and months with a song, each newest first. A week belongs to the month it starts in. */
-export function songChoices(checkins: readonly DatedNote[]): { weeks: WeekSong[]; months: MonthSong[] } {
+export function songChoices(checkins: readonly DatedNote[]): {
+  weeks: WeekSong[];
+  months: MonthSong[];
+} {
   const months = new Map<string, Date>();
   for (const { timestamp } of checkins) {
     const month = startOfMonth(startOfWeek(timestamp));
@@ -29,14 +72,19 @@ export function songChoices(checkins: readonly DatedNote[]): { weeks: WeekSong[]
 
   const weeks: WeekSong[] = [];
   const monthSongs: MonthSong[] = [];
-  for (const month of [...months.values()].sort((a, b) => b.getTime() - a.getTime())) {
-    const withSongs = summariseMonth(checkins, month).weeks.filter((w) => w.mode !== null);
+  for (const month of [...months.values()].sort(
+    (a, b) => b.getTime() - a.getTime(),
+  )) {
+    const withSongs = summariseMonth(checkins, month).weeks.filter(
+      (w) => w.mode !== null,
+    );
     if (withSongs.length === 0) continue;
     monthSongs.push({
       kind: "month",
       key: `month-${dayKey(month)}`,
       title: monthTitle(month),
-      instrument: mostUsedInstrument(withSongs.map((w) => w.instrument)) ?? "piano",
+      instrument:
+        mostUsedInstrument(withSongs.map((w) => w.instrument)) ?? "piano",
       weeks: withSongs.map((w) => ({ week: w.days, seed: dayKey(w.start) })),
       labels: withSongs.map((w) => `Week of ${shortDate(w.start)}`),
       seed: dayKey(month),
