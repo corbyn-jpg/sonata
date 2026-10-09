@@ -1,12 +1,10 @@
-import { requireOptionalNativeModule } from "expo";
-import { Directory, File, Paths } from "expo-file-system";
 import Share from "react-native-share";
+import { shareAsPdf, shareFile } from "@/lib/pdf";
 import { scoreToMusicXml } from "./musicxml";
 import type { Score } from "./score";
 import { scoreLines, type Look } from "./svg";
 
-// Sheet music leaves the app the same way songs do: made on the phone, then the phone's share sheet
-// (Save to Files, email, Drive…). Nothing is uploaded by Sonata.
+// Sheet music leaves the app the same way songs do: made on the phone, then the phone's share sheet (Save to Files, email, Drive…). Nothing is uploaded by Sonata.
 
 // Black on white for paper; four bars to a line on A4
 const PAPER: Look = {
@@ -19,19 +17,16 @@ const PAPER: Look = {
   barsPerLine: 4,
 };
 
-const escape = (text: string) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-
-/** A file in the cache's share folder, under the name it should have once it leaves the app. */
-function shareFile(name: string) {
-  const folder = new Directory(Paths.cache, "share");
-  folder.create({ idempotent: true });
-  return new File(folder, name);
-}
+const escape = (text: string) =>
+  text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 
 /** The printable page: a title, then the score one staff line at a time, so pages break between lines. */
 function page(score: Score) {
   const lines = scoreLines(score, PAPER)
-    .map((line) => `<div class="line">${line.svg.replace("<svg ", '<svg style="width:100%;height:auto" ')}</div>`)
+    .map(
+      (line) =>
+        `<div class="line">${line.svg.replace("<svg ", '<svg style="width:100%;height:auto" ')}</div>`,
+    )
     .join("");
   return `<!DOCTYPE html><html><head><meta charset="utf-8"><style>
     @page { size: A4; margin: 16mm; }
@@ -46,33 +41,16 @@ function page(score: Score) {
   </body></html>`;
 }
 
-/** Thrown when the app was built before expo-print was added: PDF export needs a new development build. */
-export class PdfUnavailable extends Error {}
-
 /** Make the score into an A4 PDF and open the share sheet with it. */
-export async function sharePdf(score: Score, fileName: string) {
-  // expo-print is loaded only when it's needed and only if this build has it: importing it up front
-  // crashed the whole screen on a build made before it was added
-  if (!requireOptionalNativeModule("ExpoPrint")) throw new PdfUnavailable("This build can't make PDFs yet");
-  const { printToFileAsync } = await import("expo-print");
-  const { uri } = await printToFileAsync({
-    html: page(score),
-    width: 595, // A4 in points
-    height: 842,
-    margins: { top: 45, right: 45, bottom: 45, left: 45 }, // iOS; Android uses @page
-  });
-  const file = shareFile(`${fileName}.pdf`);
-  new File(uri).copySync(file, { overwrite: true });
-  await Share.open({
-    url: file.uri,
-    type: "application/pdf",
-    title: "Share your sheet music",
-    failOnCancel: false, // closing the share sheet isn't an error
-  });
-}
+export const sharePdf = (score: Score, fileName: string) =>
+  shareAsPdf(page(score), fileName, "Share your sheet music");
 
 /** Write the score as MusicXML (opens in MuseScore, Sibelius, Dorico) and open the share sheet with it. */
-export async function shareMusicXml(score: Score, instrument: string, fileName: string) {
+export async function shareMusicXml(
+  score: Score,
+  instrument: string,
+  fileName: string,
+) {
   const file = shareFile(`${fileName}.musicxml`);
   file.create({ overwrite: true });
   file.write(scoreToMusicXml(score, instrument));

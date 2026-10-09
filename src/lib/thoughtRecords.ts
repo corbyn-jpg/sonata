@@ -13,3 +13,6 @@ export const deleteThoughtRecord = records.remove;
 
 /** Every thought record, newest first, kept up to date on any screen. Null until first loaded. */
 export const useThoughtRecords = records.useAll;
+
+/** Every thought record on this phone, newest first (for Export my data). */
+export const getThoughtRecords = records.getAll;
