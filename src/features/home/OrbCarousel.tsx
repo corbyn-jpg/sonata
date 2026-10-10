@@ -10,8 +10,10 @@ import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
   Canvas,
   Group,
+  LinearGradient,
   mixColors,
   Oval,
+  Rect,
   vec,
 } from "@shopify/react-native-skia";
 import Animated, {
@@ -47,6 +49,7 @@ const STAFF_GAP = 35; // orb edge to top staff line
 const LABEL_GAP = STAFF_GAP + 32 + 10; // below the staff, clear of ledger lines and stems
 const NEIGHBOUR_SCALE = 0.6;
 const NEIGHBOUR_OPACITY = 0.35;
+const FADE = 15; // the halos fade out over this much of the canvas's top and bottom, rather than stopping at its edge
 const LAST = LETTERS.length - 1;
 const SPRING = { duration: 650, dampingRatio: 0.9 };
 const FLICK_VELOCITY = 500; // px/s — a quick flick moves one orb even if the drag was short
@@ -76,7 +79,7 @@ export function OrbCarousel({
   onSelect,
   animated = true,
 }: Props) {
-  const { width } = useWindowDimensions();
+  const { width, fontScale } = useWindowDimensions();
   const [height, setHeight] = useState(0);
   const step = width * 0.45; // puts the neighbours' centres near the screen edges
   const start = useSharedValue(0);
@@ -94,8 +97,7 @@ export function OrbCarousel({
     if (offset === 0) onSelect(LETTERS[focused]);
   };
 
-  // Rebuilt on each render (only when the focused orb changes), so it always calls the latest
-  // callbacks. Shared values use get()/set(): the React Compiler rules forbid writing .value here.
+  // Rebuilt on each render (only when the focused orb changes), so it always calls the latest callbacks. Shared values use get()/set(): the React Compiler rules forbid writing .value here.
   const pan = Gesture.Pan()
     .activeOffsetX([-10, 10])
     .failOffsetY([-15, 15]) // leave vertical swipes for the Bright/Dark pages
@@ -136,7 +138,9 @@ export function OrbCarousel({
 
   const letter = LETTERS[focused];
   const cx = width / 2;
-  const cy = height / 2;
+  // Centred, unless that would push the note name into the week strip below: then lift it just enough. The name's height grows with the phone's font size.
+  const below = ORB_SIZE / 2 + LABEL_GAP + 16 * fontScale + 16;
+  const cy = Math.max(ORB_SIZE / 2, Math.min(height / 2, height - below));
 
   // Only the focused orb and two either side can be on screen. Draw the farthest first, so the focused orb sits on top of its neighbours' halos.
   const visible = LETTERS.map((l, index) => ({ letter: l, index }))
@@ -190,6 +194,27 @@ export function OrbCarousel({
                 page={page}
                 position={position}
               />
+              {/* The halos reach past the canvas: rub them out gradually at its top and bottom instead of a hard line */}
+              <Rect x={0} y={0} width={width} height={FADE} blendMode="dstOut">
+                <LinearGradient
+                  start={vec(0, 0)}
+                  end={vec(0, FADE)}
+                  colors={["black", "transparent"]}
+                />
+              </Rect>
+              <Rect
+                x={0}
+                y={height - FADE}
+                width={width}
+                height={FADE}
+                blendMode="dstOut"
+              >
+                <LinearGradient
+                  start={vec(0, height - FADE)}
+                  end={vec(0, height)}
+                  colors={["transparent", "black"]}
+                />
+              </Rect>
             </Canvas>
             {visible.map(({ letter: l, index }) => (
               <OrbLabel
