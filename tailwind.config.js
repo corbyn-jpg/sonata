@@ -8,7 +8,7 @@ module.exports = {
     extend: {
       backgroundColor: { canvas: c.canvas, surface: c.surface, 'surface-raised': c.surfaceRaised },
       textColor: { primary: c.textPrimary, secondary: c.textSecondary, muted: c.textMuted },
-      borderColor: { DEFAULT: c.border },
+      borderColor: { DEFAULT: c.border, field: c.field },
       colors: { violet: c.violet, teal: c.teal, border: c.border },
       fontFamily: {
         mono: ['DMMono_400Regular'],

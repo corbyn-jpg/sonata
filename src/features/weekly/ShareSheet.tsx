@@ -43,7 +43,7 @@ export function ShareSheet({ visible, onShare, onClose }: Props) {
           multiline
           textAlignVertical="top"
           accessibilityLabel="Message"
-          className="min-h-[96px] rounded-card border border-border bg-surface/60 px-4 py-3 font-sans text-body text-primary"
+          className="min-h-[96px] rounded-card border border-field bg-surface/60 px-4 py-3 font-sans text-body text-primary"
         />
         <Text className="self-end font-sans text-caption text-muted">
           {caption.length}/{MAX_LENGTH}

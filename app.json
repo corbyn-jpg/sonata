@@ -18,14 +18,19 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router",
-      "expo-splash-screen",
       "expo-font",
       "expo-secure-store",
       [
@@ -36,7 +41,7 @@
           "enableBackgroundPlayback": false
         }
       ],
-            [
+      [
         "expo-splash-screen",
         {
           "image": "./assets/splash-icon.png",
@@ -45,7 +50,7 @@
           "backgroundColor": "#060011"
         }
       ],
-            [
+      [
         "expo-notifications",
         {
           "icon": "./assets/android-icon-monochrome.png",

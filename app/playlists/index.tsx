@@ -56,9 +56,7 @@ export default function Playlists() {
               accessibilityLabel={`${playlist.name}, ${songCount(playlist.songs.length)}`}
               className="min-h-[64px] flex-row items-center gap-3 rounded-card border border-border bg-surface/60 px-4 py-2"
             >
-              <View className="h-10 w-10 items-center justify-center rounded-pill bg-violet-700/40">
-                <ListMusic color={colours.violet[200]} size={20} strokeWidth={1.5} />
-              </View>
+              <ListMusic color={colours.violet[200]} size={20} strokeWidth={1.5} />
               <View className="flex-1 gap-0.5">
                 <Text numberOfLines={1} className="font-sans-medium text-body text-primary">
                   {playlist.name}
@@ -81,7 +79,7 @@ export default function Playlists() {
                 returnKeyType="done"
                 onSubmitEditing={() => trimmed && create()}
                 accessibilityLabel="New playlist name"
-                className="h-12 rounded-card border border-border bg-surface/60 px-4 font-sans text-body text-primary"
+                className="h-12 rounded-card border border-field bg-surface/60 px-4 font-sans text-body text-primary"
               />
               <Pressable
                 onPress={create}

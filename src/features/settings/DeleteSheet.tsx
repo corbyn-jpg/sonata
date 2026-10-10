@@ -92,7 +92,7 @@ export function DeleteSheet({ onClose }: Props) {
           accessibilityLabel={`Type ${CONFIRM_WORD} to confirm`}
           placeholder={CONFIRM_WORD}
           placeholderTextColor={colours.textMuted}
-          className={`h-12 rounded-card border px-4 font-mono text-body text-primary ${focused ? "border-violet-500" : "border-border"}`}
+          className={`h-12 rounded-card border px-4 font-mono text-body text-primary ${focused ? "border-violet-500" : "border-field"}`}
         />
       </View>
 

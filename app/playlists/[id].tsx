@@ -118,7 +118,7 @@ export default function PlaylistScreen() {
           maxLength={MAX_NAME_LENGTH}
           returnKeyType="done"
           accessibilityLabel="Playlist name"
-          className="h-12 flex-1 rounded-card border border-border bg-surface/60 px-4 font-mono-medium text-h4 text-primary"
+          className="h-12 flex-1 rounded-card border border-field bg-surface/60 px-4 font-mono-medium text-h4 text-primary"
         />
       ) : (
         <Pressable

@@ -37,7 +37,7 @@ export function NameSheet({ suggestion, onSave, onClose }: Props) {
         returnKeyType="done"
         onSubmitEditing={save}
         accessibilityLabel="Piece name"
-        className={`h-12 rounded-card border bg-surface/60 px-4 font-sans text-body text-primary ${focused ? "border-violet-500" : "border-border"}`}
+        className={`h-12 rounded-card border bg-surface/60 px-4 font-sans text-body text-primary ${focused ? "border-violet-500" : "border-field"}`}
       />
       <View className="gap-3">
         <Pressable

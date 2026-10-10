@@ -180,7 +180,7 @@ export default function Home() {
             placeholderTextColor={colours.textMuted}
             maxLength={140}
             returnKeyType="done"
-            className={`h-12 rounded-card border border-border bg-surface/60 px-4 font-sans text-body text-primary ${todayLogged ? "opacity-40" : ""}`}
+            className={`h-12 rounded-card border border-field bg-surface/60 px-4 font-sans text-body text-primary ${todayLogged ? "opacity-40" : ""}`}
           />
           <Pressable
             onPress={onSave}

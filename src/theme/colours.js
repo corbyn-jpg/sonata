@@ -3,11 +3,13 @@ module.exports = {
   surface: "#15052A",
   surfaceRaised: "#2A1642",
   border: "#493461",
+  // Text-box outlines: 3:1 against every surface (WCAG 1.4.11), where the hairline border is only 1.8:1
+  field: "#76628F",
   textPrimary: "#f3ebfa",
   textSecondary: "#c2bfd6",
   textMuted: "#9f9ead",
   violet: { 200: "#C9BFFB", 500: "#8B5CF6", 700: "#5B34B8" },
-  teal: { 300: "#7EE4CE", 700: "#0B7A6E" },
+  teal: { 300: "#7EE4CE", 700: "#0A766A" }, // 700: white text on it passes 4.5:1
   // Muted red text for Delete all data (never a solid red button)
   danger: "#EF8A8A",
 

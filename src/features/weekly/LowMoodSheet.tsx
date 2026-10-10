@@ -15,13 +15,14 @@ type Props = {
 export function LowMoodSheet({ visible, onGround, onDismiss }: Props) {
   return (
     <BottomSheet visible={visible} onClose={onDismiss}>
-      <View className="h-11 w-11 items-center justify-center rounded-pill bg-teal-700/30">
-        <Wind color={colours.teal[300]} size={22} strokeWidth={1.5} />
-      </View>
       <View className="gap-1">
-        <Text className="font-mono-medium text-h4 text-primary">
-          Notice a heavy rhythm this week?
-        </Text>
+        {/* The icon sits in line with the question, not in a tile above it */}
+        <View className="flex-row items-center gap-2">
+          <Wind color={colours.teal[300]} size={20} strokeWidth={1.5} />
+          <Text className="flex-1 font-mono-medium text-h4 text-primary">
+            Notice a heavy rhythm this week?
+          </Text>
+        </View>
         <Text className="font-sans text-body text-secondary">
           Want a moment to ground yourself?
         </Text>

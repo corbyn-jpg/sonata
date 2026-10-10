@@ -120,7 +120,7 @@ export function AddToPlaylistSheet({ visible, song, onDone, onClose }: Props) {
             maxLength={MAX_NAME_LENGTH}
             returnKeyType="done"
             accessibilityLabel="New playlist name"
-            className="h-12 rounded-card border border-border bg-surface/60 px-4 font-sans text-body text-primary"
+            className="h-12 rounded-card border border-field bg-surface/60 px-4 font-sans text-body text-primary"
           />
           <Pressable
             onPress={() =>

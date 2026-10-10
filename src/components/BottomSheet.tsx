@@ -37,6 +37,7 @@ export function BottomSheet({
     <Pressable
       className="flex-1 justify-end bg-canvas/70"
       onPress={onClose}
+      accessibilityRole="button"
       accessibilityLabel="Close"
     >
       <Pressable

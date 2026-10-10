@@ -31,7 +31,7 @@ export function PassphraseField({
         {label}
       </Text>
       <View
-        className={`h-12 flex-row items-center rounded-card border pl-4 ${focused ? "border-violet-500" : "border-border"}`}
+        className={`h-12 flex-row items-center rounded-card border pl-4 ${focused ? "border-violet-500" : "border-field"}`}
       >
         <TextInput
           value={value}
