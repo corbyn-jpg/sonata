@@ -65,7 +65,7 @@ const PAGES: Page[] = [
   },
   {
     title: "Private by design",
-    body: "Everything you log is encrypted on this phone before it is backed up. No account, no email, no trackers.",
+    body: "Everything you log is encrypted on this phone before it is backed up",
     Picture: LockedOrb,
     glow: colours.teal[700],
     button: "Begin",
@@ -122,7 +122,7 @@ export default function Onboarding() {
   });
   const glow = useDerivedValue(() => {
     const [r, g, b] = interpolateColors(position.value, INDICES, GLOWS);
-    return [r, g, b, 0.85];
+    return [r, g, b, 0.55];
   });
 
   const settle = (event: NativeSyntheticEvent<NativeScrollEvent>) =>
@@ -153,7 +153,7 @@ export default function Onboarding() {
   return (
     <View className="flex-1 bg-canvas">
       <View style={StyleSheet.absoluteFill} pointerEvents="none">
-        <Sky glow={glow} pace={1.3} />
+        <Sky glow={glow} pace={1.4} />
       </View>
 
       <Animated.ScrollView

@@ -18,7 +18,7 @@ import { MODE_NAMES } from "@/engine";
 import { DayChips } from "@/features/weekly/DayChips";
 import { InstrumentPills } from "@/features/weekly/InstrumentPills";
 import { SongDisc } from "@/features/weekly/SongDisc";
-import { OrbitTransport } from "@/features/weekly/OrbitTransport";
+import { SongTransport } from "@/features/weekly/SongTransport";
 import { makeDiscArt } from "@/features/weekly/discArt";
 import { ComposingMoment } from "@/features/weekly/ComposingMoment";
 import { LowMoodSheet } from "@/features/weekly/LowMoodSheet";
@@ -221,18 +221,13 @@ export default function Weekly() {
               </View>
             )}
 
-            <OrbitTransport
+            <SongTransport
               playing={playback.playing}
               disabled={!ready}
               canGoForward={next !== null}
               orb={
                 song
                   ? colours.orb[song.palette[0].note][song.palette[0].mode]
-                  : colours.orb.C.major
-              }
-              moon={
-                song
-                  ? colours.orb[song.palette[1].note][song.palette[1].mode]
                   : colours.orb.C.major
               }
               onToggle={toggle}

@@ -19,10 +19,9 @@ import { NoteStaff } from "@/features/home/NoteStaff";
 import { makeDiscArt } from "@/features/weekly/discArt";
 import colours from "@/theme/colours";
 
-// The four intro pictures (wireframe 01 First launch). Each is the app's own visual, not a stock graphic: the orb,
-// the carousel with its staff, a real record painted by the engine, and the teal orb that stands for privacy.
+// The four intro pictures (wireframe 01 First launch). Each is the app's own visual, not a stock graphic: the orb, the carousel with its staff, a real record painted by the engine, and the teal orb that stands for privacy.
 
-export const ILLUSTRATION_HEIGHT = 260;
+export const ILLUSTRATION_HEIGHT = 280
 const H = ILLUSTRATION_HEIGHT;
 
 /** A sample week, only for the record on the third screen (nothing is saved). */
@@ -62,17 +61,17 @@ export function RingedOrb({ width }: Props) {
       <Orb
         cx={cx}
         cy={cy}
-        size={120}
+        size={115}
         core={colours.violet[200]}
         edge={colours.violet[500]}
-        aura
+
       />
       <Path
         path={inFront}
         style="stroke"
         strokeWidth={1.5}
         color={colours.violet[200]}
-        opacity={0.7}
+        opacity={0.5}
       />
     </Canvas>
   );
@@ -81,7 +80,7 @@ export function RingedOrb({ width }: Props) {
 /** 2 · One orb a day: the carousel in miniature, its neighbours soft at the sides, the note on its staff below. */
 export function OrbRow({ width }: Props) {
   const cx = width / 2;
-  const cy = 96;
+  const cy = 130;
   const side = Math.min(width * 0.3, 110);
   const position = useSharedValue(LETTERS.indexOf("E")); // the staff shows E, like the centre orb
   const page = useSharedValue(0); // major
@@ -89,7 +88,7 @@ export function OrbRow({ width }: Props) {
   const D = colours.orb.D.major;
   const F = colours.orb.F.major;
   return (
-    <Canvas style={{ width, height: H }}>
+    <Canvas style={{ width, height: H}}>
       <Orb
         cx={cx - side}
         cy={cy}
@@ -108,13 +107,13 @@ export function OrbRow({ width }: Props) {
         softness={1}
         glow={0.35}
       />
-      <Orb cx={cx} cy={cy} size={104} core={E.core} edge={E.edge} />
-      <NoteStaff cx={cx} top={200} page={page} position={position} />
+      <Orb cx={cx} cy={cy} size={100} core={E.core} edge={E.edge} />
+      <NoteStaff cx={cx} top={220} page={page} position={position} />
     </Canvas>
   );
 }
 
-const DISC = 200;
+const DISC = 180;
 const RING = DISC / 2 + 12;
 
 /** 3 · Your week becomes a song: a real record, painted by the same code as Weekly, with its progress ring. */
@@ -190,11 +189,10 @@ export function LockedOrb({ width }: Props) {
         <Orb
           cx={width / 2}
           cy={H / 2}
-          size={112}
+          size={105}
           core={colours.teal[300]}
           edge={colours.teal[700]}
-          aura
-        />
+          />
       </Canvas>
       <View style={{ opacity: 0.55 }}>
         <Lock color={colours.canvas} size={36} strokeWidth={1.5} />
