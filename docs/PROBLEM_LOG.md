@@ -293,3 +293,9 @@ Each entry has:
 - **Cause:** the teal and border tokens were chosen by eye on a dark screen; the hairline `border` colour was reused for text boxes, where it has a different job. Expo and its libraries add those permissions by default, whether or not the app uses them.
 - **Fix:** `teal-700` darkened from `#0B7A6E` to `#0A766A` (4.74:1); a new `field` token `#76628F` (at least 3:1 on every surface) for text-box outlines, cards keep the hairline; `android.blockedPermissions` in `app.json` removes the four permissions (confirmed with `npx expo config --type introspect`; takes effect from the next EAS build); icons sit in line with their text; the backdrop has `accessibilityRole="button"`. Also removed a duplicate `expo-splash-screen` plugin entry.
 - **Lesson:** measure contrast instead of judging it on screen, and check a colour against what it's used for (text, an outline, a divider each need different ratios). Read the final manifest rather than trusting `app.json` alone: libraries add permissions of their own.
+
+### 54. "<Canvas onLayout={onLayout} /> is not supported on the new architecture"
+- **Seen:** Weekly (and every screen with the sky) showed this error straight after the sky was given a fade above the tab bar.
+- **Cause:** the fade needs the sky's visible height, and it was measured with `onLayout` on Skia's `<Canvas>`. On React Native's New Architecture, Skia's Canvas doesn't take `onLayout`.
+- **Fix:** the Canvas sits inside a plain `View` (absolute fill, `pointerEvents="none"`), and the View measures the height instead.
+- **Lesson:** a Skia Canvas isn't an ordinary View. To size something to a canvas, measure a View around it (or use Skia's own `onSize`).

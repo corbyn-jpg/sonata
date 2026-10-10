@@ -1,9 +1,10 @@
-import { memo, useEffect, useMemo } from "react";
-import { StyleSheet, useWindowDimensions } from "react-native";
+import { memo, useEffect, useMemo, useState } from "react";
+import { StyleSheet, useWindowDimensions, View } from "react-native";
 import {
   Canvas,
   Circle,
   Group,
+  LinearGradient,
   RadialGradient,
   Rect,
   vec,
@@ -23,6 +24,8 @@ import colours from "@/theme/colours";
 const STARS_PER_LAYER = 24;
 const LAYERS = 3;
 const NO_GLOW = [0, 0, 0, 0];
+// The sky's bottom fades into the plain background over this much, so the wash softens away above the tab bar (as an orb's halo does) instead of stopping in a straight line where the tab bar begins
+const FADE = 140;
 
 type Star = { x: number; y: number; r: number; opacity: number };
 
@@ -52,6 +55,7 @@ export const Sky = memo(function Sky({
   seed = 7,
 }: Props) {
   const { width, height } = useWindowDimensions();
+  const [shown, setShown] = useState(0); // how much of the sky is visible: the screen above the tab bar
   const reduceMotion = useReducedMotion();
   const drift = useSharedValue(0);
   const twinkle = useSharedValue(1);
@@ -98,28 +102,44 @@ export const Sky = memo(function Sky({
     ];
   });
 
+  // Measured on a plain View: Skia's Canvas can't take onLayout on the New Architecture
   return (
-    <Canvas style={StyleSheet.absoluteFill}>
-      {glow && (
-        <Rect x={0} y={0} width={width} height={height}>
-          <RadialGradient
-            c={vec(width / 2, height * 0.42)}
-            r={height * 0.6}
-            colors={glowColours}
-            positions={[0, 0.5, 1]}
+    <View
+      style={StyleSheet.absoluteFill}
+      pointerEvents="none"
+      onLayout={(e) => setShown(e.nativeEvent.layout.height)}
+    >
+      <Canvas style={StyleSheet.absoluteFill}>
+        {glow && (
+          <Rect x={0} y={0} width={width} height={height}>
+            <RadialGradient
+              c={vec(width / 2, height * 0.42)}
+              r={height * 0.6}
+              colors={glowColours}
+              positions={[0, 0.5, 1]}
+            />
+          </Rect>
+        )}
+        {layers.map((stars, index) => (
+          <StarLayer
+            key={index}
+            index={index}
+            stars={stars}
+            drift={drift}
+            twinkle={twinkle}
           />
-        </Rect>
-      )}
-      {layers.map((stars, index) => (
-        <StarLayer
-          key={index}
-          index={index}
-          stars={stars}
-          drift={drift}
-          twinkle={twinkle}
-        />
-      ))}
-    </Canvas>
+        ))}
+        {shown > 0 && (
+          <Rect x={0} y={shown - FADE} width={width} height={FADE}>
+            <LinearGradient
+              start={vec(0, shown - FADE)}
+              end={vec(0, shown)}
+              colors={[`${colours.canvas}00`, colours.canvas]}
+            />
+          </Rect>
+        )}
+      </Canvas>
+    </View>
   );
 });
 
