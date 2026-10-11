@@ -311,3 +311,9 @@ Each entry has:
 - **Cause:** `expo-asset` was in `node_modules` only because `expo` itself pulls it in, so imports worked and the development build ran. A native module's peer dependency has to be a direct dependency, or a release build can be missing it and crash on start-up.
 - **Fix:** `npx expo install expo-asset` (adds it and its config plugin). expo-doctor then passed 21/21.
 - **Lesson:** run `npx expo-doctor` before every standalone build: the development build hides dependency gaps that a release build exposes.
+
+### 57. The standalone build kept failing to start
+- **Seen:** `eas build --profile preview` failed three times: twice with "request to https://api.expo.dev/graphql failed" before anything was queued, then with "write ECONNRESET" at 50 of 81.1 MB while uploading the project.
+- **Cause:** two things. The connection to Expo's API worked over IPv4 (tested with curl) but Node sometimes tried the IPv6 addresses first, and those requests dropped. And half the 81 MB upload was the git history (`.git`, about 50 MB of loose objects), which the build server doesn't need; the transfer kept resetting around 50 MB.
+- **Fix:** run EAS with Node preferring IPv4 (`NODE_OPTIONS=--dns-result-order=ipv4first`), and a `.easignore` that leaves `.git/` and `docs/` out of the upload (it repeats `.gitignore`, because EAS stops reading `.gitignore` once `.easignore` exists).
+- **Lesson:** when an upload dies at the same size every time, shrink the upload rather than retrying. Look at what's being sent first.
