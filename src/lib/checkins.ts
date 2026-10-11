@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocsFromServer,
@@ -21,9 +22,11 @@ import {
 import type { Instrument } from "@/audio/instruments";
 import { decryptPayload, encryptPayload } from "@/lib/crypto";
 import { db } from "@/lib/firebase";
+import { addDays, startOfDay } from "@/lib/dates";
 import {
   localCheckins,
   markSynced,
+  removeCheckins,
   storeCheckins,
   type StoredCheckin,
 } from "@/lib/localCheckins";
@@ -50,6 +53,56 @@ export type Checkin = Payload & {
 
 const checkins = collection(db, "daily_checkins");
 const IMPORTED_KEY = "sonata.checkins.imported";
+// Check-ins removed on this phone that the backup still holds; deleted from Firestore whenever there's a connection
+const DELETED_KEY = "sonata.checkins.deleted";
+
+async function deletedIds(): Promise<string[]> {
+  const saved = await AsyncStorage.getItem(DELETED_KEY).catch(() => null);
+  return saved ? (JSON.parse(saved) as string[]) : [];
+}
+
+/** Delete from Firestore what's been removed on the phone. Anything that fails (offline) is tried again next time. */
+async function deletePending() {
+  const ids = await deletedIds();
+  if (ids.length === 0) return;
+  const done: string[] = [];
+  await Promise.all(
+    ids.map(async (id) => {
+      try {
+        await withTimeout(deleteDoc(doc(checkins, id)));
+        done.push(id);
+      } catch {
+        // Offline or not signed in yet: it stays queued
+      }
+    }),
+  );
+  // Read the list again, so a removal made meanwhile isn't lost
+  const left = (await deletedIds()).filter((id) => !done.includes(id));
+  await AsyncStorage.setItem(DELETED_KEY, JSON.stringify(left));
+}
+
+/**
+ Remove today's check-in, so the day can be chosen again. It goes from the phone straight away and from the backup as
+ soon as there's a connection. Returns how many records were removed (normally one).
+ */
+export async function forgetTodaysCheckin() {
+  const from = startOfDay(new Date());
+  const to = addDays(from, 1);
+  const today = (await localCheckins()).filter(
+    (r) => r.timestamp >= from.getTime() && r.timestamp < to.getTime(),
+  );
+  if (today.length === 0) return 0;
+  // Only uploaded records need deleting from the backup (one that never reached it has nothing to delete there)
+  const uploaded = today.filter((r) => r.synced).map((r) => r.id);
+  if (uploaded.length > 0)
+    await AsyncStorage.setItem(
+      DELETED_KEY,
+      JSON.stringify([...new Set([...(await deletedIds()), ...uploaded])]),
+    );
+  await removeCheckins(today.map((r) => r.id));
+  void uploadPending(); // also sends the deletions
+  return today.length;
+}
 
 /** What the user chose for a check-in, and when. Everything else (pitch, emotion, valence) follows from note + mode. */
 export type CheckinEntry = {
@@ -121,6 +174,7 @@ let uploading: Promise<void> | null = null;
 /** Send any check-ins Firestore hasn't confirmed yet. Safe to call often. */
 export function uploadPending(): Promise<void> {
   uploading ??= (async () => {
+    await deletePending().catch(() => {});
     const pending = (await localCheckins()).filter((record) => !record.synced);
     if (pending.length === 0) return;
     const user_id = await getUserId();

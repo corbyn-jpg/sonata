@@ -58,6 +58,16 @@ function update(change: (current: StoredCheckin[]) => StoredCheckin[]) {
 export const storeCheckins = (incoming: readonly StoredCheckin[]) =>
   update((current) => mergeCheckins(current, incoming));
 
+/** The records without the ones with these ids. */
+export const withoutCheckins = (
+  records: readonly StoredCheckin[],
+  ids: readonly string[],
+) => records.filter((record) => !ids.includes(record.id));
+
+/** Remove records from the phone (e.g. today's check-in, to choose it again). */
+export const removeCheckins = (ids: readonly string[]) =>
+  update((current) => withoutCheckins(current, ids));
+
 /** Note that Firestore has confirmed these records. */
 export const markSynced = (ids: readonly string[]) =>
   update((current) =>

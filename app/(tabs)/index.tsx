@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useIsFocused } from "expo-router";
 import {
   AccessibilityInfo,
+  Alert,
   KeyboardAvoidingView,
   Pressable,
   Text,
@@ -23,7 +24,7 @@ import { ModeToggle } from "@/features/home/ModeToggle";
 import { OrbCarousel } from "@/features/home/OrbCarousel";
 import { useWeek } from "@/features/home/useWeek";
 import { WeekStrip } from "@/features/home/WeekStrip";
-import { saveCheckin } from "@/lib/checkins";
+import { forgetTodaysCheckin, saveCheckin } from "@/lib/checkins";
 import colours from "@/theme/colours";
 import * as Haptics from "expo-haptics";
 import { feelNote } from "@/haptics";
@@ -56,7 +57,10 @@ export default function Home() {
   const [selected, setSelected] = useState<Letter | null>(null);
   const [reflection, setReflection] = useState("");
   // Success is silent (the dot appears and the button says so); only a failure gets a message
-  const [status, setStatus] = useState<"idle" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "error" | "changeFailed">(
+    "idle",
+  );
+  const [changing, setChanging] = useState(false); // today's check-in is being removed
   const { days, todayIndex, todayLogged, loaded, logToday } = useWeek();
   const feelNotes = usePreference("feelNotes");
   const instrument = usePreference("instrument");
@@ -133,6 +137,34 @@ export default function Home() {
     });
   };
 
+  /** Remove today's check-in so the day can be chosen again. It can't be brought back, so it asks first. */
+  const changeToday = () =>
+    Alert.alert(
+      "Change today's note?",
+      "Today's check-in is removed, so you can choose again.",
+      [
+        { text: "Keep it", style: "cancel" },
+        {
+          text: "Change",
+          onPress: async () => {
+            setChanging(true);
+            try {
+              await forgetTodaysCheckin();
+              logToday(null); // the dot clears; pick an orb again
+              setStatus("idle");
+              AccessibilityInfo.announceForAccessibility(
+                "Today's check-in removed. Choose again.",
+              );
+            } catch {
+              setStatus("changeFailed");
+            } finally {
+              setChanging(false);
+            }
+          },
+        },
+      ],
+    );
+
   return (
     <Screen
       background={
@@ -193,12 +225,33 @@ export default function Home() {
               {todayLogged ? "Checked in for today" : "Save check-in"}
             </Text>
           </Pressable>
-          <Text
-            accessibilityLiveRegion="polite"
-            className="h-5 text-center font-sans text-caption text-secondary"
-          >
-            {status === "error" ? "Couldn't save. Check your connection." : ""}
-          </Text>
+          {/* One quiet line: a failure, or, once checked in, the way to choose again. It keeps the same height either way, so the orb doesn't move. */}
+          {todayLogged && status === "idle" ? (
+            <Pressable
+              onPress={changeToday}
+              disabled={changing}
+              hitSlop={12} // a 44 pt target without taking more room
+              accessibilityRole="button"
+              accessibilityState={{ disabled: changing, busy: changing }}
+              accessibilityHint="Removes today's check-in so you can choose again"
+              className={`h-5 items-center justify-center active:opacity-60 ${changing ? "opacity-40" : ""}`}
+            >
+              <Text className="font-sans-medium text-caption text-secondary">
+                Change today&apos;s note
+              </Text>
+            </Pressable>
+          ) : (
+            <Text
+              accessibilityLiveRegion="polite"
+              className="h-5 text-center font-sans text-caption text-secondary"
+            >
+              {status === "error"
+                ? "Couldn't save. Check your connection."
+                : status === "changeFailed"
+                  ? "Couldn't change today's note. Please try again."
+                  : ""}
+            </Text>
+          )}
         </View>
       </KeyboardAvoidingView>
     </Screen>

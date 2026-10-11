@@ -3,7 +3,9 @@ import {
   localCheckins,
   markSynced,
   mergeCheckins,
+  removeCheckins,
   storeCheckins,
+  withoutCheckins,
   type StoredCheckin,
 } from "./localCheckins";
 
@@ -48,5 +50,18 @@ describe("local store", () => {
     expect((await localCheckins()).map((r) => r.id)).toEqual(["x", "y"]);
     await markSynced(["x"]);
     expect((await localCheckins()).map((r) => r.synced)).toEqual([true, false]);
+    await removeCheckins(["x"]);
+    expect((await localCheckins()).map((r) => r.id)).toEqual(["y"]);
+  });
+});
+
+describe("withoutCheckins", () => {
+  it("drops only the records asked for", () => {
+    const records = [record("a", 1), record("b", 2), record("c", 3)];
+    expect(withoutCheckins(records, ["b"]).map((r) => r.id)).toEqual([
+      "a",
+      "c",
+    ]);
+    expect(withoutCheckins(records, [])).toEqual(records);
   });
 });
