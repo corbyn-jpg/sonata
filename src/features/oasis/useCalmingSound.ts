@@ -18,6 +18,10 @@ export function useCalmingSound() {
     if (!isFocused) player.pause();
   }, [isFocused, player]);
 
+  // Going back closes the screen without it ever losing focus first, and the player outlives the screen (it's
+  // shared, so loops can be set on it), so stop it when the screen closes too
+  useEffect(() => () => player.pause(), [player]);
+
   /** Play a sound, or pause / carry on if it's the one already loaded. */
   const toggle = (sound: CalmingSound) => {
     if (sound.id === current) {

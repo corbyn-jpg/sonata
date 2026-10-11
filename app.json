@@ -56,13 +56,22 @@
           "icon": "./assets/android-icon-monochrome.png",
           "color": "#5B34B8"
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "extra": {
       "router": {},
       "eas": {
         "projectId": "60b2c30a-979e-462d-842e-7f01fb336553"
       }
+    },
+    "updates": {
+      "url": "https://u.expo.dev/60b2c30a-979e-462d-842e-7f01fb336553",
+      "checkAutomatically": "ON_LOAD",
+      "fallbackToCacheTimeout": 0
+    },
+    "runtimeVersion": {
+      "policy": "fingerprint"
     }
   }
 }

@@ -299,3 +299,15 @@ Each entry has:
 - **Cause:** the fade needs the sky's visible height, and it was measured with `onLayout` on Skia's `<Canvas>`. On React Native's New Architecture, Skia's Canvas doesn't take `onLayout`.
 - **Fix:** the Canvas sits inside a plain `View` (absolute fill, `pointerEvents="none"`), and the View measures the height instead.
 - **Lesson:** a Skia Canvas isn't an ordinary View. To size something to a canvas, measure a View around it (or use Skia's own `onSize`).
+
+### 55. Calming sounds kept playing after leaving the screen
+- **Seen:** going back from Calming sounds to the Oasis left the sound looping in the background.
+- **Cause:** the hook paused the sound when the screen lost focus, but Back removes the screen without it ever losing focus first, so that pause never ran. The player is shared for the app's whole life (`calmPlayer()`, so its loop can be set), so it outlived the screen and carried on.
+- **Fix:** `useCalmingSound` also pauses the player when the screen closes (an effect cleanup), alongside the existing pause on losing focus.
+- **Lesson:** a player that outlives its screen needs stopping on unmount as well as on blur: leaving with Back and opening another screen on top are different events.
+
+### 56. expo-asset was only installed indirectly
+- **Seen:** before the first standalone (preview) build, `npx expo-doctor` failed one check: "Missing peer dependency: expo-asset, required by expo-audio".
+- **Cause:** `expo-asset` was in `node_modules` only because `expo` itself pulls it in, so imports worked and the development build ran. A native module's peer dependency has to be a direct dependency, or a release build can be missing it and crash on start-up.
+- **Fix:** `npx expo install expo-asset` (adds it and its config plugin). expo-doctor then passed 21/21.
+- **Lesson:** run `npx expo-doctor` before every standalone build: the development build hides dependency gaps that a release build exposes.
