@@ -323,3 +323,9 @@ Each entry has:
 - **Cause:** the soft fade above and below the chosen row is a Skia `Canvas` laid over both wheels. It had `pointerEvents="none"`, but on the New Architecture Skia's Canvas doesn't honour it (the same family of problem as 54), so the overlay took every touch before the wheels' scroll views could.
 - **Fix:** the Canvas now sits inside a plain `View` with `pointerEvents: "none"` in its style, so touches pass through to the wheels. The wheel was also hardened: a slow drag that's let go without a flick now settles too (`onScrollEndDrag` with a short timer, cancelled if momentum starts), tapping a number brings it to the middle, and scrolling to a value respects Reduce Motion.
 - **Lesson:** never put a Skia Canvas over something that needs touches without wrapping it in a View that lets them through. Any overlay on a gesture surface is the first suspect when a control "opens but won't move".
+
+### 59. Tooltips closed before they could be read
+- **Seen:** on the phone, tapping an "i" opened its explanation for about a second and then it closed; long-pressing an icon button didn't keep its label up either.
+- **Cause:** the tips were drawn by an overlay View placed after the screen stack in the root layout, and a label was set to close 1.5 s after the finger lifted. On Android the screens are native containers, so an overlay beside them isn't a dependable place for something that has to hold the touch; together with the short timer, nothing stayed up long enough to read.
+- **Fix:** tips are drawn in a native `Modal` (edge to edge, like the bottom sheets), and both kinds stay open until a tap anywhere or Back. A long-press opens an "i" too. Hover and focus no longer open a label, since a Modal would block the screen under a pointer.
+- **Lesson:** on mobile, anything floating that the user must read should be modal and dismissed by them, not by a timer, and should use the same layer the app already trusts for sheets.
