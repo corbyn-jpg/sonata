@@ -1,4 +1,4 @@
-<!-- Images are hosted as GitHub attachments (exported from the Figma file); the GIFs live in docs/readme/. -->
+<!-- Images are GitHub attachments (exported from the design files); the GIFs live in docs/readme/. -->
 
 <p align="center">
   <img src="https://github.com/user-attachments/assets/dfbbe4d6-f40b-44c1-8a0d-ffb375aac5ca" alt="Sonata: your days, in music. A treble staff with a week of glowing orb notes, beside the Sonata logo, a quaver whose head is a ringed planet." width="100%">
@@ -61,15 +61,15 @@ Sonata runs on Android 7.0 or newer. It isn't on the Play Store, so you install 
 
 ### On an iPhone
 
-<!-- TODO: choose one option below and delete the others. -->
-
-iPhones don't install apps from outside the App Store, so there are other ways to try Sonata:
+iPhones only install apps from the App Store, so there are two other ways to try Sonata:
 
 | Option | What you get |
 | --- | --- |
-| **[Try it in the browser](#)** (Appetize) | The real app, running in Safari on your iPhone. Sessions last a few minutes. |
-| **[Click through the prototype](https://www.figma.com/proto/HwpksPZs1OY5Svz1uletJL/Ux-Term-4?node-id=119-149&starting-point-node-id=119-149)** (Figma) | Every screen, with working buttons, sheets and animations. |
-| **[Watch the walkthrough](#)** (video) | The whole app, start to finish, in a few minutes. |
+| **[Try it in the browser](https://appetize.io/app/b_ty5ozfyg7ml2jcpatqfwmehbpa)** (Appetize) | The real app, streamed to your browser. It works in Safari on an iPhone, or on any computer. Tap **Play**, and wait a moment for it to start. Sessions last a few minutes. |
+| **[Watch the walkthrough](https://drive.google.com/drive/folders/1OdtUAE4BKCDYtNwHIShrASlKAedjgx8b)** (video) | The whole app, start to finish, recorded on a phone. |
+
+> [!TIP]
+> The browser version can't vibrate or send reminders, and its sound depends on your browser. For the full experience, use an Android phone.
 
 <img src="https://github.com/user-attachments/assets/a50ca28f-2277-47f3-b627-7e8e0626e103" alt="" width="100%">
 
@@ -183,9 +183,27 @@ Nothing runs in the cloud. The app ships only the learned numbers, Bach's music 
 
 ## Design
 
-- **Figma:** [wireframes, annotated wireframes, mockups and the clickable prototype](https://www.figma.com/design/HwpksPZs1OY5Svz1uletJL/Ux-Term-4).
-- **Type:** DM Mono for headings and Roboto for everything else.
-- **Colour:** a violet-black night sky. Colour comes from the orbs: fourteen two-tone gradients, one for each note in major and minor.
+Nocturnal, calm, musical, private, unhurried. The night sky is most of the screen. Colour comes only from the orbs: fourteen two-tone gradients, one for each note in major and minor. Headings are in DM Mono, like the markings on a score, and everything else is in Roboto.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/ef940816-0a20-4d4d-8171-4ad299c96b0e" alt="Sonata style tile: the colour palette, the fourteen orb colours, DM Mono and Roboto type at real sizes, buttons and controls, icons, imagery, shape and spacing, and three examples of the app's voice." width="100%">
+</p>
+
+<details>
+<summary><b>Annotated wireframes</b>: sketches to wireframes, then every screen with its annotations</summary>
+<br>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/80a0371b-d4d8-4732-bce6-90f75decd99a" alt="Design development from sketch to wireframe, followed by annotated wireframes of each screen covering content, interaction, functionality and accessibility." width="100%">
+</p>
+</details>
+
+<details>
+<summary><b>Component kit</b>: the buttons, orbs, players and interactive components the screens are built from</summary>
+<br>
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/1583bb39-8c60-4f4b-a293-37fe96a46ea6" alt="The Sonata component kit: icons, buttons and pills, navigation, orbs and note staffs, cards and rows, and interactive components such as the breathing session and the week player." width="100%">
+</p>
+</details>
 
 
 <img src="https://github.com/user-attachments/assets/a50ca28f-2277-47f3-b627-7e8e0626e103" alt="" width="100%">
