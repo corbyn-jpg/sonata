@@ -221,12 +221,35 @@ export function TooltipHost() {
     if (!measured || measured.width !== w || measured.height !== h) setSize({ tip, width: w, height: h });
   };
 
-  const bubble: ReactNode = (
+  const maxWidth = Math.min(popup ? 280 : 220, screenWidth - EDGE * 2);
+  const padding = popup ? "px-4 py-3" : "px-3 py-1.5";
+  const words = (
+    <Text
+      className={popup ? "font-sans text-caption text-primary" : "font-sans-medium text-caption"}
+      style={popup ? undefined : { color: colours.canvas }}
+    >
+      {tip.text}
+    </Text>
+  );
+
+  // First an invisible copy, only to learn the bubble's size so it can be placed. The real bubble mounts once that's
+  // known, and only it fades in: putting the fade-in on a view whose own opacity starts at 0 left it invisible (the
+  // animation finished on the opacity the view had when it began), so tips vanished as soon as they appeared.
+  const bubble: ReactNode = !measured ? (
+    <View
+      onLayout={onLayout}
+      importantForAccessibility="no-hide-descendants"
+      accessibilityElementsHidden
+      style={{ position: "absolute", left: 0, top: 0, maxWidth, opacity: 0, pointerEvents: "none" }}
+      className={`border ${padding}`}
+    >
+      {words}
+    </View>
+  ) : (
     <Animated.View
       key={tip.owner + tip.kind}
       entering={FadeIn.duration(120).reduceMotion(ReduceMotion.System)}
       exiting={FadeOut.duration(90).reduceMotion(ReduceMotion.System)}
-      onLayout={onLayout}
       // The label repeats the button's own name, so screen readers skip it; a popup's text is announced on opening
       importantForAccessibility="no-hide-descendants"
       accessibilityElementsHidden
@@ -234,13 +257,12 @@ export function TooltipHost() {
         position: "absolute",
         left,
         top,
-        maxWidth: Math.min(popup ? 280 : 220, screenWidth - EDGE * 2),
-        opacity: measured ? 1 : 0, // placed once its size is known
+        width,
         backgroundColor: fill,
         borderColor: popup ? colours.border : fill,
         pointerEvents: "none",
       }}
-      className={`rounded-card border ${popup ? "px-4 py-3" : "px-3 py-1.5"}`}
+      className={`rounded-card border ${padding}`}
     >
       <View
         style={{
@@ -258,12 +280,7 @@ export function TooltipHost() {
           transform: [{ rotate: "45deg" }],
         }}
       />
-      <Text
-        className={popup ? "font-sans text-caption text-primary" : "font-sans-medium text-caption"}
-        style={popup ? undefined : { color: colours.canvas }}
-      >
-        {tip.text}
-      </Text>
+      {words}
     </Animated.View>
   );
 

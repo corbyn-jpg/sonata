@@ -329,3 +329,9 @@ Each entry has:
 - **Cause:** the tips were drawn by an overlay View placed after the screen stack in the root layout, and a label was set to close 1.5 s after the finger lifted. On Android the screens are native containers, so an overlay beside them isn't a dependable place for something that has to hold the touch; together with the short timer, nothing stayed up long enough to read.
 - **Fix:** tips are drawn in a native `Modal` (edge to edge, like the bottom sheets), and both kinds stay open until a tap anywhere or Back. A long-press opens an "i" too. Hover and focus no longer open a label, since a Modal would block the screen under a pointer.
 - **Lesson:** on mobile, anything floating that the user must read should be modal and dismissed by them, not by a timer, and should use the same layer the app already trusts for sheets.
+
+### 60. Tips still vanished as soon as they appeared
+- **Seen:** after 59, a screen recording showed an explanation starting to fade in and disappearing within about a tenth of a second; the next tap seemed to do nothing.
+- **Cause:** the bubble rendered with `opacity: 0` until its size was measured, and the same view had a Reanimated `entering` fade. The fade began while the view's own opacity was 0 and finished on that value, so the later change to 1 never showed: the tip was open but invisible (and the next tap just closed it).
+- **Fix:** an invisible plain View measures the bubble first; the real bubble mounts only once its size is known, with no opacity of its own, and only it fades in. The "i" on Monthly's mode figure also moved beside its label, so it no longer cuts "Dorian" to "Dori…".
+- **Lesson:** don't give a view with an `entering` animation its own opacity that changes after mount. Measure with a separate hidden view, then mount the animated one.

@@ -31,16 +31,16 @@ function Figure({
     <View
       className={`flex-1 gap-0.5 ${first ? "" : "border-l border-border pl-3"}`}
     >
-      <View className="flex-row items-center gap-1.5">
-        <Text
-          numberOfLines={1}
-          className="shrink font-mono-medium text-h4 text-primary"
-        >
-          {value}
+      <Text numberOfLines={1} className="font-mono-medium text-h4 text-primary">
+        {value}
+      </Text>
+      {/* The "i" sits by the words under the value, so it never squeezes the value itself ("Dori…") */}
+      <View className="flex-row items-start gap-1">
+        <Text className="shrink font-sans text-caption text-muted">
+          {label}
         </Text>
         {tip}
       </View>
-      <Text className="font-sans text-caption text-muted">{label}</Text>
     </View>
   );
 }
