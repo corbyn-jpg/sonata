@@ -1,5 +1,6 @@
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { Minus, Plus } from "lucide-react-native";
+import { IconButton } from "@/components/Tooltip";
 import { MAX_TEMPO, MIN_TEMPO } from "@/engine";
 import colours from "@/theme/colours";
 
@@ -15,14 +16,14 @@ export function TempoStepper({ tempo, onChange }: Props) {
   const button = (by: number, label: string, Icon: typeof Plus) => {
     const disabled = by < 0 ? tempo <= MIN_TEMPO : tempo >= MAX_TEMPO;
     return (
-      <Pressable
+      <IconButton
+        label={label}
         onPress={() => change(by)}
         disabled={disabled}
-        accessibilityLabel={label}
         className={`h-11 w-11 items-center justify-center rounded-pill border border-border active:opacity-60 ${disabled ? "opacity-30" : ""}`}
       >
         <Icon color={colours.textSecondary} size={18} strokeWidth={1.5} />
-      </Pressable>
+      </IconButton>
     );
   };
 

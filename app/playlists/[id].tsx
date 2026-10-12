@@ -24,6 +24,7 @@ import {
 } from "@/lib/playlists";
 import { playableOf, songKey, type PlaylistSong } from "@/lib/playlistSongs";
 import colours from "@/theme/colours";
+import { IconButton } from "@/components/Tooltip";
 
 const UNDO_MS = 5000;
 
@@ -96,18 +97,17 @@ export default function PlaylistScreen() {
 
   const header = (
     <View className="mb-6 flex-row items-center gap-2">
-      <Pressable
+      <IconButton
+        label="Back"
         onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        className="-ml-3 h-11 w-11 items-center justify-center"
+        className="-ml-3 h-11 w-11 items-center justify-center rounded-pill active:opacity-60"
       >
         <ChevronLeft
           color={colours.textSecondary}
           size={24}
           strokeWidth={1.5}
         />
-      </Pressable>
+      </IconButton>
       {renaming ? (
         <TextInput
           value={name}

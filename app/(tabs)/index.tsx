@@ -18,6 +18,7 @@ import {
 import { interpolateColors } from "@shopify/react-native-skia";
 import { Screen } from "@/components/Screen";
 import { TabHeader } from "@/components/TabHeader";
+import { PopupTip } from "@/components/Tooltip";
 import { Sky } from "@/components/Sky";
 import { LETTERS, type Letter, type Mode } from "@/data/notes";
 import { ModeToggle } from "@/features/home/ModeToggle";
@@ -178,6 +179,10 @@ export default function Home() {
         <TabHeader title={greeting()} className="gap-4">
           <View className="flex-row items-center justify-center gap-3">
             <ModeToggle mode={mode} onChange={onModeChange} />
+            <PopupTip
+              label="About Major and Minor"
+              text="Major plays each orb as a major chord. Minor plays it as a minor chord, which sounds darker, and lowers E, A and B to E♭, A♭ and B♭."
+            />
             <InstrumentPicker
               instrument={instrument}
               onChange={onInstrumentChange}

@@ -1,14 +1,9 @@
 import { useState } from "react";
-import {
-  ActivityIndicator,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useIsFocused } from "expo-router";
 import { ChevronLeft, ChevronRight } from "lucide-react-native";
 import { Screen } from "@/components/Screen";
+import { IconButton } from "@/components/Tooltip";
 import { TabHeader } from "@/components/TabHeader";
 import { Sky } from "@/components/Sky";
 import { MonthBento } from "@/features/monthly/MonthBento";
@@ -32,35 +27,32 @@ export default function Monthly() {
     <TabHeader title="Your month in sound">
       {/* -mx-2.5 lines the arrows' icons up with the screen margins */}
       <View className="-mx-2.5 flex-row items-center justify-between">
-        <Pressable
+        <IconButton
+          label="Previous month"
           onPress={() => setMonth(addMonths(month, -1))}
-          accessibilityRole="button"
-          accessibilityLabel="Previous month"
-          className="h-11 w-11 items-center justify-center"
+          className="h-11 w-11 items-center justify-center rounded-pill active:opacity-60"
         >
           <ChevronLeft
             color={colours.textSecondary}
             size={24}
             strokeWidth={1.5}
           />
-        </Pressable>
+        </IconButton>
         <Text className="font-mono-medium text-h4 text-primary">
           {monthTitle(month)}
         </Text>
-        <Pressable
+        <IconButton
+          label="Next month"
           onPress={() => setMonth(addMonths(month, 1))}
           disabled={atLatest}
-          accessibilityRole="button"
-          accessibilityLabel="Next month"
-          accessibilityState={{ disabled: atLatest }}
-          className={`h-11 w-11 items-center justify-center ${atLatest ? "opacity-30" : ""}`}
+          className={`h-11 w-11 items-center justify-center rounded-pill active:opacity-60 ${atLatest ? "opacity-30" : ""}`}
         >
           <ChevronRight
             color={colours.textSecondary}
             size={24}
             strokeWidth={1.5}
           />
-        </Pressable>
+        </IconButton>
       </View>
     </TabHeader>
   );

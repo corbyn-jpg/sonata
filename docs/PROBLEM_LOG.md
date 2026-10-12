@@ -317,3 +317,9 @@ Each entry has:
 - **Cause:** two things. The connection to Expo's API worked over IPv4 (tested with curl) but Node sometimes tried the IPv6 addresses first, and those requests dropped. And half the 81 MB upload was the git history (`.git`, about 50 MB of loose objects), which the build server doesn't need; the transfer kept resetting around 50 MB.
 - **Fix:** run EAS with Node preferring IPv4 (`NODE_OPTIONS=--dns-result-order=ipv4first`), and a `.easignore` that leaves `.git/` and `docs/` out of the upload (it repeats `.gitignore`, because EAS stops reading `.gitignore` once `.easignore` exists).
 - **Lesson:** when an upload dies at the same size every time, shrink the upload rather than retrying. Look at what's being sent first.
+
+### 58. The reminder time wheel wouldn't spin
+- **Seen:** in Settings → Reminder time, the sheet opened with the hour and minute wheels, but dragging them did nothing, so the time couldn't be changed.
+- **Cause:** the soft fade above and below the chosen row is a Skia `Canvas` laid over both wheels. It had `pointerEvents="none"`, but on the New Architecture Skia's Canvas doesn't honour it (the same family of problem as 54), so the overlay took every touch before the wheels' scroll views could.
+- **Fix:** the Canvas now sits inside a plain `View` with `pointerEvents: "none"` in its style, so touches pass through to the wheels. The wheel was also hardened: a slow drag that's let go without a flick now settles too (`onScrollEndDrag` with a short timer, cancelled if momentum starts), tapping a number brings it to the middle, and scrolling to a value respects Reduce Motion.
+- **Lesson:** never put a Skia Canvas over something that needs touches without wrapping it in a View that lets them through. Any overlay on a gesture surface is the first suspect when a control "opens but won't move".

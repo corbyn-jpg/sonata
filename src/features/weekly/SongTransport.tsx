@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -7,6 +7,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { Pause, Play, SkipBack, SkipForward } from "lucide-react-native";
+import { IconButton } from "@/components/Tooltip";
 import colours from "@/theme/colours";
 
 // A flat capsule with back and forward at its ends. While the song plays, the round play button rises half out of it in the week's colour; paused, it sinks back into the slot. Still and quiet, so the spinning disc above stays the thing to look at.
@@ -77,12 +78,10 @@ export function SongTransport({
     onPress: () => void,
     enabled: boolean,
   ) => (
-    <Pressable
+    <IconButton
+      label={label}
       onPress={onPress}
       disabled={!enabled}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityState={{ disabled: !enabled }}
       hitSlop={4}
       className={`h-12 w-12 items-center justify-center rounded-card active:opacity-60 ${enabled ? "" : "opacity-40"}`}
     >
@@ -92,7 +91,7 @@ export function SongTransport({
         size={22}
         strokeWidth={1.5}
       />
-    </Pressable>
+    </IconButton>
   );
 
   return (
@@ -140,12 +139,10 @@ export function SongTransport({
             glow,
           ]}
         />
-        <Pressable
+        <IconButton
+          label={playing ? "Pause" : "Play"}
           onPress={onToggle}
           disabled={disabled}
-          accessibilityRole="button"
-          accessibilityLabel={playing ? "Pause" : "Play"}
-          accessibilityState={{ disabled: !!disabled }}
           className={`h-full w-full items-center justify-center rounded-pill active:opacity-80 ${disabled ? "opacity-50" : ""}`}
           style={{ backgroundColor: fill }}
         >
@@ -165,7 +162,7 @@ export function SongTransport({
               style={{ marginLeft: 3 }} // a play triangle looks centred a little right of centre
             />
           )}
-        </Pressable>
+        </IconButton>
       </Animated.View>
     </View>
   );

@@ -4,6 +4,7 @@ import { INSTRUMENT_LABELS } from "@/audio";
 import { longDate } from "@/features/weekly/songTime";
 import { fromDayKey } from "@/lib/dates";
 import { songPalette, type PlaylistSong } from "@/lib/playlistSongs";
+import { IconButton } from "@/components/Tooltip";
 import colours from "@/theme/colours";
 
 type Props = {
@@ -93,14 +94,13 @@ export function PlaylistSongRow({
           />
         )}
       </Pressable>
-      <Pressable
+      <IconButton
+        label={`Remove ${label} from this playlist`}
         onPress={onRemove}
-        accessibilityRole="button"
-        accessibilityLabel={`Remove ${label} from this playlist`}
-        className="h-11 w-11 items-center justify-center"
+        className="h-11 w-11 items-center justify-center rounded-pill active:opacity-60"
       >
         <X color={colours.textMuted} size={18} strokeWidth={1.5} />
-      </Pressable>
+      </IconButton>
     </View>
   );
 }

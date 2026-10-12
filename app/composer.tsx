@@ -25,6 +25,7 @@ import {
 import { preloadChords, previewNote, type Instrument } from "@/audio";
 import { BackHeader } from "@/components/BackHeader";
 import { Screen } from "@/components/Screen";
+import { IconButton } from "@/components/Tooltip";
 import type { Letter, Mode } from "@/data/notes";
 import { isEmptyPiece, PIECE_STEPS, type Piece } from "@/engine";
 import { NameSheet } from "@/features/composer/NameSheet";
@@ -266,18 +267,17 @@ export default function Composer() {
         <BackHeader
           title={savedId ? name : "Composer"}
           right={
-            <Pressable
+            <IconButton
+              label="Your pieces"
               onPress={() => setBrowsing(true)}
-              accessibilityRole="button"
-              accessibilityLabel="Your pieces"
-              className="-mr-2.5 h-11 w-11 items-center justify-center active:opacity-60"
+              className="-mr-2.5 h-11 w-11 items-center justify-center rounded-pill active:opacity-60"
             >
               <FolderOpen
                 color={colours.textSecondary}
                 size={24}
                 strokeWidth={1.5}
               />
-            </Pressable>
+            </IconButton>
           }
         />
       }

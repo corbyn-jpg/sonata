@@ -1,5 +1,10 @@
-import { useMemo, useRef } from "react";
+/* Hallmark · component: time wheel · genre: atmospheric · theme: Sonata tokens (src/theme/colours.js)
+ * states: default · active (dragging, tick per row) · focus (screen-reader focus, adjustable) · disabled, loading,
+ * error, success: n/a, the wheel always holds a valid time and the sheet's Set time button saves it
+ */
+import { useEffect, useMemo, useRef } from "react";
 import {
+  Pressable,
   ScrollView,
   Text,
   View,
@@ -7,14 +12,17 @@ import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
 } from "react-native";
+import { useReducedMotion } from "react-native-reanimated";
 import * as Haptics from "expo-haptics";
 
-/** Height of one row; the wheel shows five, with the chosen one in the middle. */
+/** Height of one row (also its tap target); the wheel shows five, with the chosen one in the middle. */
 export const WHEEL_ROW = 52;
 export const WHEEL_ROWS = 5;
 // The numbers repeat so the wheel turns past 59 back to 00, like a phone's alarm clock; after each spin it
 // quietly re-centres on the middle copy, so it never runs out in either direction
 const COPIES = 5;
+// A slow drag that's let go without a flick may never get a momentum event, so settle on the drag's end too
+const SETTLE_AFTER_DRAG_MS = 120;
 
 const two = (n: number) => String(n).padStart(2, "0");
 
@@ -30,50 +38,72 @@ type Props = {
 };
 
 /**
- One wheel of the time picker: drag or flick, and it settles on a value with a small tick as each one
+ One wheel of the time picker: drag, flick or tap a number, and it settles on a value with a small tick as each one
  passes, as on a phone. To a screen reader it's one adjustable control (swipe up or down to change it).
  */
 export function TimeWheel({ count, value, onChange, label, unit }: Props) {
   const scroller = useRef<ScrollView>(null);
+  const reduceMotion = useReducedMotion();
   const middle = Math.floor(COPIES / 2) * count;
   const centred = useRef(middle + value); // the row in the middle right now, for the tick
   const placed = useRef(false);
+  const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rows = useMemo(
     () => Array.from({ length: count * COPIES }, (_, i) => i % count),
     [count],
   );
 
-  const rowAt = (e: NativeSyntheticEvent<NativeScrollEvent>) =>
-    Math.round(e.nativeEvent.contentOffset.y / WHEEL_ROW);
+  useEffect(
+    () => () => {
+      if (settleTimer.current) clearTimeout(settleTimer.current);
+    },
+    [],
+  );
+
+  const rowAt = (y: number) => Math.round(y / WHEEL_ROW);
   const valueOf = (row: number) => ((row % count) + count) % count;
   const jumpTo = (row: number, animated: boolean) =>
-    scroller.current?.scrollTo({ y: row * WHEEL_ROW, animated });
+    scroller.current?.scrollTo({
+      y: row * WHEEL_ROW,
+      animated: animated && !reduceMotion,
+    });
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const row = rowAt(e);
+    const row = rowAt(e.nativeEvent.contentOffset.y);
     if (row === centred.current) return;
     centred.current = row;
     void Haptics.selectionAsync();
   };
 
-  const onSettle = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const settled = valueOf(rowAt(e));
+  const settle = (y: number) => {
+    if (settleTimer.current) clearTimeout(settleTimer.current);
+    settleTimer.current = null;
+    const row = rowAt(y);
+    const settled = valueOf(row);
     onChange(settled);
     const home = middle + settled;
-    if (rowAt(e) !== home) {
-      centred.current = home;
-      jumpTo(home, false);
-    }
+    centred.current = home;
+    // Snap exactly onto the row (a slow drag can stop between two), on the middle copy
+    if (row !== home || y !== row * WHEEL_ROW) jumpTo(home, false);
   };
 
-  const onAccessibilityAction = (e: AccessibilityActionEvent) => {
-    const next = valueOf(
-      value + (e.nativeEvent.actionName === "increment" ? 1 : -1),
-    );
+  const onDragEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const y = e.nativeEvent.contentOffset.y;
+    settleTimer.current = setTimeout(() => settle(y), SETTLE_AFTER_DRAG_MS);
+  };
+
+  const choose = (row: number) => {
+    const next = valueOf(row);
     onChange(next);
     centred.current = middle + next;
     jumpTo(middle + next, true);
+    void Haptics.selectionAsync();
   };
+
+  const onAccessibilityAction = (e: AccessibilityActionEvent) =>
+    choose(
+      middle + value + (e.nativeEvent.actionName === "increment" ? 1 : -1),
+    );
 
   return (
     <View
@@ -96,23 +126,32 @@ export function TimeWheel({ count, value, onChange, label, unit }: Props) {
         decelerationRate="fast"
         showsVerticalScrollIndicator={false}
         nestedScrollEnabled
+        overScrollMode="never"
         scrollEventThrottle={16}
         onScroll={onScroll}
-        onMomentumScrollEnd={onSettle}
+        onScrollEndDrag={onDragEnd}
+        onMomentumScrollBegin={() => {
+          // A flick: the momentum end settles it instead
+          if (settleTimer.current) clearTimeout(settleTimer.current);
+          settleTimer.current = null;
+        }}
+        onMomentumScrollEnd={(e) => settle(e.nativeEvent.contentOffset.y)}
         contentContainerStyle={{
           paddingVertical: WHEEL_ROW * Math.floor(WHEEL_ROWS / 2),
         }}
       >
         {rows.map((n, i) => (
-          <View
+          <Pressable
             key={i}
+            onPress={() => choose(i)} // tap a number to bring it to the middle
+            importantForAccessibility="no"
             style={{ height: WHEEL_ROW }}
             className="items-center justify-center"
           >
             <Text className="font-mono-medium text-h2 text-primary">
               {two(n)}
             </Text>
-          </View>
+          </Pressable>
         ))}
       </ScrollView>
     </View>

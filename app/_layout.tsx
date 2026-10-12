@@ -19,6 +19,7 @@ import { ensureAudioMode } from "@/audio";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { setUpReminders } from "@/lib/reminder";
 import { usePreference, usePreferencesReady } from "@/lib/preferences";
+import { TooltipHost } from "@/components/Tooltip";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -84,8 +85,11 @@ export default function RootLayout() {
           <Stack.Screen name="helplines" />
           <Stack.Screen name="playlists/index" />
           <Stack.Screen name="playlists/[id]" />
+          <Stack.Screen name="introduction" />
         </Stack.Protected>
       </Stack>
+      {/* The one tooltip or explanation that's open, above every screen */}
+      <TooltipHost />
     </GestureHandlerRootView>
   );
 }

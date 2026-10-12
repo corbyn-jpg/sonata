@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Text, View } from "react-native";
+import { IconButton } from "@/components/Tooltip";
 import { router } from "expo-router";
 import { ChevronLeft } from "lucide-react-native";
 import colours from "@/theme/colours";
@@ -13,18 +14,17 @@ type Props = {
 export function BackHeader({ title, right }: Props) {
   return (
     <View className="mb-6 flex-row items-center gap-2">
-      <Pressable
+      <IconButton
+        label="Back"
         onPress={() => router.back()}
-        accessibilityRole="button"
-        accessibilityLabel="Back"
-        className="-ml-3 h-11 w-11 items-center justify-center"
+        className="-ml-3 h-11 w-11 items-center justify-center rounded-pill active:opacity-60"
       >
         <ChevronLeft
           color={colours.textSecondary}
           size={24}
           strokeWidth={1.5}
         />
-      </Pressable>
+      </IconButton>
       <Text
         className="flex-1 font-mono-medium text-h3 text-primary"
         accessibilityRole="header"

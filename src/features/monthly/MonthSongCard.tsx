@@ -1,11 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import {
-  ActivityIndicator,
-  PixelRatio,
-  Pressable,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, PixelRatio, Text, View } from "react-native";
 import { useAudioPlayer, useAudioPlayerStatus } from "expo-audio";
 import { useIsFocused } from "expo-router";
 import { Pause, Play } from "lucide-react-native";
@@ -18,6 +12,7 @@ import { composeMonth, type DayNote } from "@/engine";
 import { hashString } from "@/engine/random";
 import { clock } from "@/features/weekly/songTime";
 import { dayKey } from "@/lib/dates";
+import { IconButton, PopupTip } from "@/components/Tooltip";
 import colours from "@/theme/colours";
 import { makeMonthArt } from "./disc/monthArt";
 import { daysOfMonth, monthName, type MonthWeek } from "./month";
@@ -119,20 +114,29 @@ export function MonthSongCard({ month, days, weeks }: Props) {
           spinning={status.playing}
         />
         <View className="flex-1 gap-0.5">
-          <Text className="font-mono-medium text-h4 text-primary">{title}</Text>
+          <View className="flex-row items-start gap-2">
+            <Text className="shrink font-mono-medium text-h4 text-primary">
+              {title}
+            </Text>
+            <View className="pt-0.5">
+              <PopupTip
+                label="About the month's record"
+                text="Each moon is one week of the month, in that week's colours. A fuller moon is a brighter week; a new moon is a week without check-ins."
+              />
+            </View>
+          </View>
           <Text className="font-sans text-caption text-muted">
             {making
               ? "Joining your weeks…"
               : `${weeksText} as one piece · ${INSTRUMENT_LABELS[instrument]} · ${clock(songSeconds(song))}`}
           </Text>
         </View>
-        <Pressable
+        <IconButton
+          label={`${status.playing ? "Pause" : "Play"} ${title}`}
           onPress={toggle}
           disabled={making}
-          accessibilityRole="button"
-          accessibilityLabel={`${status.playing ? "Pause" : "Play"} ${title}`}
           accessibilityState={{ busy: making }}
-          className="h-12 w-12 items-center justify-center rounded-full bg-violet-700"
+          className="h-12 w-12 items-center justify-center rounded-full bg-violet-700 active:opacity-80"
         >
           {making ? (
             <ActivityIndicator color={colours.textPrimary} />
@@ -149,7 +153,7 @@ export function MonthSongCard({ month, days, weeks }: Props) {
               size={18}
             />
           )}
-        </Pressable>
+        </IconButton>
       </View>
     </BentoCard>
   );

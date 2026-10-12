@@ -37,6 +37,7 @@ import { useWeekSong } from "@/features/weekly/useWeekSong";
 import { SongActions } from "@/features/weekly/SongActions";
 import { dayKey } from "@/lib/dates";
 import type { PlaylistSong } from "@/lib/playlistSongs";
+import { MODE_TIP, PopupTip } from "@/components/Tooltip";
 import colours from "@/theme/colours";
 
 const ART_SIZE = Math.round(230 * PixelRatio.get()); // the disc's size in real pixels
@@ -247,9 +248,12 @@ export default function Weekly() {
               playlistSong={playlistSong}
             />
 
-            <Text className="font-sans text-caption text-muted">
-              {MODE_NAMES[song.mode]} · {song.tempo} BPM
-            </Text>
+            <View className="flex-row items-center gap-1.5">
+              <Text className="font-sans text-caption text-muted">
+                {MODE_NAMES[song.mode]} · {song.tempo} BPM
+              </Text>
+              <PopupTip label="About modes" text={MODE_TIP} />
+            </View>
           </ScrollView>
         )}
       </Screen>

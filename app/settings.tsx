@@ -8,9 +8,11 @@ import {
   Text,
   View,
 } from "react-native";
+import { router } from "expo-router";
 import {
   ArchiveRestore,
   Bell,
+  CirclePlay,
   Clock,
   Download,
   FileLock,
@@ -231,6 +233,15 @@ export default function Settings() {
           />
         </SettingGroup>
         {deleting && <DeleteSheet onClose={() => setDeleting(false)} />}
+
+        <SettingGroup title="Help">
+          <SettingRow
+            Icon={CirclePlay}
+            title="Replay introduction"
+            detail="Watch the welcome walkthrough again"
+            onPress={() => router.push("/introduction")}
+          />
+        </SettingGroup>
         {backingUp && <BackupSheet onClose={() => setBackingUp(false)} />}
         {restoring !== null && (
           <RestoreSheet text={restoring} onClose={() => setRestoring(null)} />

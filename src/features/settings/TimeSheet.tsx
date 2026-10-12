@@ -15,30 +15,40 @@ type Props = {
   onClose: () => void;
 };
 
-/** The rows above and below the chosen one fade into the sheet, so the eye lands on the middle. */
+/**
+ The rows above and below the chosen one fade into the sheet, so the eye lands on the middle. The fade lies over the
+ wheels, so it sits in a plain View that lets touches through: Skia's Canvas ignores pointerEvents on the New
+ Architecture, and on its own it swallowed every drag, so the wheels wouldn't turn.
+ */
 function Fades({ width }: { width: number }) {
   const solid = colours.surfaceRaised;
   const clear = `${colours.surfaceRaised}00`;
   return (
-    <Canvas
-      style={{ position: "absolute", width, height: HEIGHT }}
-      pointerEvents="none"
+    <View
+      style={{
+        position: "absolute",
+        width,
+        height: HEIGHT,
+        pointerEvents: "none",
+      }}
     >
-      <Rect x={0} y={0} width={width} height={FADE}>
-        <LinearGradient
-          start={vec(0, 0)}
-          end={vec(0, FADE)}
-          colors={[solid, clear]}
-        />
-      </Rect>
-      <Rect x={0} y={HEIGHT - FADE} width={width} height={FADE}>
-        <LinearGradient
-          start={vec(0, HEIGHT - FADE)}
-          end={vec(0, HEIGHT)}
-          colors={[clear, solid]}
-        />
-      </Rect>
-    </Canvas>
+      <Canvas style={{ width, height: HEIGHT }}>
+        <Rect x={0} y={0} width={width} height={FADE}>
+          <LinearGradient
+            start={vec(0, 0)}
+            end={vec(0, FADE)}
+            colors={[solid, clear]}
+          />
+        </Rect>
+        <Rect x={0} y={HEIGHT - FADE} width={width} height={FADE}>
+          <LinearGradient
+            start={vec(0, HEIGHT - FADE)}
+            end={vec(0, HEIGHT)}
+            colors={[clear, solid]}
+          />
+        </Rect>
+      </Canvas>
+    </View>
   );
 }
 
@@ -67,8 +77,7 @@ export function TimeSheet({ minutes, onDone, onClose }: Props) {
         {/* The band the chosen time sits on */}
         <View
           className="absolute left-0 right-0 rounded-card bg-surface"
-          style={{ top: FADE, height: WHEEL_ROW }}
-          pointerEvents="none"
+          style={{ top: FADE, height: WHEEL_ROW, pointerEvents: "none" }}
         />
         <TimeWheel
           count={24}

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { Pressable, Text, View } from "react-native";
-import { Link } from "expo-router";
+import { Text, View } from "react-native";
+import { router } from "expo-router";
+import { IconButton } from "@/components/Tooltip";
 import { Settings } from "lucide-react-native";
 import colours from "@/theme/colours";
 
@@ -30,20 +31,14 @@ export function TabHeader({
         >
           {title}
         </Text>
-        <Link href="/settings" asChild>
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Settings"
-            // The icon's edge lines up with the screen margin; the tap area reaches into it
-            className="-mr-2.5 h-11 w-11 items-center justify-center active:opacity-60"
-          >
-            <Settings
-              color={colours.textSecondary}
-              size={24}
-              strokeWidth={1.5}
-            />
-          </Pressable>
-        </Link>
+        <IconButton
+          label="Settings"
+          onPress={() => router.push("/settings")}
+          // The icon's edge lines up with the screen margin; the tap area reaches into it
+          className="-mr-2.5 h-11 w-11 items-center justify-center rounded-pill active:opacity-60"
+        >
+          <Settings color={colours.textSecondary} size={24} strokeWidth={1.5} />
+        </IconButton>
       </View>
       {children}
     </View>

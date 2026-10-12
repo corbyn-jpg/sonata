@@ -1,5 +1,7 @@
+import type { ReactNode } from "react";
 import { Text, View } from "react-native";
 import { BentoCard } from "@/components/BentoCard";
+import { MODE_TIP, PopupTip } from "@/components/Tooltip";
 import { MODE_NAMES } from "@/engine";
 import type { MonthSummary } from "./month";
 import { ValenceChart } from "./ValenceChart";
@@ -17,18 +19,27 @@ function Figure({
   value,
   label,
   first = false,
+  tip,
 }: {
   value: string | number;
   label: string;
   first?: boolean;
+  /** An "i" beside the value, for a figure a newcomer may not know. */
+  tip?: ReactNode;
 }) {
   return (
     <View
       className={`flex-1 gap-0.5 ${first ? "" : "border-l border-border pl-3"}`}
     >
-      <Text numberOfLines={1} className="font-mono-medium text-h4 text-primary">
-        {value}
-      </Text>
+      <View className="flex-row items-center gap-1.5">
+        <Text
+          numberOfLines={1}
+          className="shrink font-mono-medium text-h4 text-primary"
+        >
+          {value}
+        </Text>
+        {tip}
+      </View>
       <Text className="font-sans text-caption text-muted">{label}</Text>
     </View>
   );
@@ -67,6 +78,7 @@ export function MonthBento({ summary, streak, isCurrentMonth }: Props) {
         <Figure
           first
           value={mostUsedMode ? MODE_NAMES[mostUsedMode.mode] : "–"}
+          tip={mostUsedMode && <PopupTip label="About modes" text={MODE_TIP} />}
           label={
             mostUsedMode
               ? `mode in ${mostUsedMode.weeks} of ${melodies} weeks`
