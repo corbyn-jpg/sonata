@@ -9,7 +9,7 @@ import {
 } from "react";
 import {
   AccessibilityInfo,
-  BackHandler,
+  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -26,12 +26,11 @@ import * as Haptics from "expo-haptics";
 import { Info } from "lucide-react-native";
 import colours from "@/theme/colours";
 
-// A phone has no hover, so a label tip shows on long-press (and on hover or keyboard focus where those exist).
-// It names an icon-only button; the button's accessibilityLabel already says the same, so screen readers never need it.
-// A popup tip is an "i" button that explains an idea and stays until tapped away. Only one tip shows at a time.
+// A label tip names an icon-only button and shows on a long-press (the button's accessibilityLabel already gives screen
+// readers the same name). A popup tip is an "i" that explains an idea. Both stay open until a tap anywhere (or Back),
+// so there's time to read them, and only one shows at a time. They're drawn in a native Modal, like the bottom sheets,
+// so they always sit above every screen and can't lose the touch to the screens underneath.
 
-const HOVER_DELAY = 600;
-const LINGER = 1500; // how long a long-press label stays after the finger lifts
 const EDGE = 12; // from the screen's edges
 const GAP = 8; // between the trigger and the bubble's arrow
 const ARROW = 10;
@@ -72,64 +71,31 @@ export const focusRing = (focused: boolean): ViewStyle =>
     : {};
 
 /**
- Props for an icon-only Pressable: its accessible name, plus a label tip on long-press, hover and keyboard focus.
+ Props for an icon-only Pressable: its accessible name, and a label tip on long-press that stays until a tap.
  `IconButton` uses this; reach for it directly only where a Pressable can't be swapped.
  */
 export function useTooltip(label: string, disabled = false) {
   const owner = useId();
   const ref = useRef<View>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [focused, setFocused] = useState(false);
 
-  const clear = () => {
-    if (timer.current) clearTimeout(timer.current);
-    timer.current = null;
-  };
-  const open = () => {
-    clear();
-    if (!disabled)
-      measure(ref.current, (anchor) => show({ owner, kind: "label", text: label, anchor }));
-  };
-  const close = (after = 0) => {
-    clear();
-    if (after) timer.current = setTimeout(() => hide(owner), after);
-    else hide(owner);
-  };
-
-  useEffect(
-    () => () => {
-      if (timer.current) clearTimeout(timer.current);
-      hide(owner);
-    },
-    [owner],
-  );
+  useEffect(() => () => hide(owner), [owner]);
 
   return {
     focused,
     props: {
       ref,
       accessibilityLabel: label,
-      delayLongPress: 400,
+      delayLongPress: 350,
       onLongPress: () => {
-        open();
+        if (disabled) return;
         void Haptics.selectionAsync();
+        measure(ref.current, (anchor) =>
+          show({ owner, kind: "label", text: label, anchor }),
+        );
       },
-      onPressOut: () => {
-        if (current?.owner === owner) close(LINGER);
-      },
-      onHoverIn: () => {
-        clear();
-        timer.current = setTimeout(open, HOVER_DELAY);
-      },
-      onHoverOut: () => close(),
-      onFocus: () => {
-        setFocused(true);
-        open(); // at once on keyboard focus
-      },
-      onBlur: () => {
-        setFocused(false);
-        close();
-      },
+      onFocus: () => setFocused(true), // keyboard focus: the ring shows at once
+      onBlur: () => setFocused(false),
     },
   };
 }
@@ -189,8 +155,8 @@ export function PopupTip({ label, text, disabled = false }: PopupTipProps) {
 
   useEffect(() => () => hide(owner), [owner]);
 
-  const toggle = () => {
-    if (open) return hide(owner);
+  const openTip = () => {
+    if (open) return;
     measure(ref.current, (anchor) => {
       show({ owner, kind: "popup", text, anchor });
       AccessibilityInfo.announceForAccessibility(text); // read out without moving focus
@@ -200,7 +166,9 @@ export function PopupTip({ label, text, disabled = false }: PopupTipProps) {
   return (
     <Pressable
       ref={ref}
-      onPress={toggle}
+      onPress={openTip}
+      onLongPress={openTip} // holding it opens it too
+      delayLongPress={350}
       disabled={disabled}
       hitSlop={10} // 24 + 2 × 10 = the 44 pt target, without taking 44 pt of room
       onFocus={() => setFocused(true)}
@@ -227,16 +195,6 @@ export function TooltipHost() {
   const { width: screenWidth, height: screenHeight } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const [size, setSize] = useState<{ tip: Tip; width: number; height: number } | null>(null);
-
-  // Android's back button closes an open explanation, like Escape
-  useEffect(() => {
-    if (tip?.kind !== "popup") return;
-    const subscription = BackHandler.addEventListener("hardwareBackPress", () => {
-      hide();
-      return true;
-    });
-    return () => subscription.remove();
-  }, [tip]);
 
   if (!tip) return null;
   const measured = size?.tip === tip ? size : null;
@@ -310,17 +268,23 @@ export function TooltipHost() {
   );
 
   return (
-    <View style={[StyleSheet.absoluteFill, { pointerEvents: "box-none" }]}>
-      {/* An explanation stays until a tap anywhere else; a label lets every tap through */}
-      {popup && (
-        <Pressable
-          style={StyleSheet.absoluteFill}
-          onPress={() => hide()}
-          accessibilityRole="button"
-          accessibilityLabel="Close explanation"
-        />
-      )}
+    <Modal
+      visible
+      transparent
+      animationType="none" // the bubble fades itself, and not at all with Reduce Motion
+      // Edge to edge like the app, so the trigger's measured position is where the bubble is drawn
+      statusBarTranslucent
+      navigationBarTranslucent
+      onRequestClose={() => hide()} // Android's Back closes it, like Escape
+    >
+      {/* Open until a tap anywhere */}
+      <Pressable
+        style={StyleSheet.absoluteFill}
+        onPress={() => hide()}
+        accessibilityRole="button"
+        accessibilityLabel={popup ? "Close explanation" : "Close"}
+      />
       {bubble}
-    </View>
+    </Modal>
   );
 }

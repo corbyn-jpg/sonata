@@ -40,19 +40,19 @@ export function TooltipPreview() {
       <Text className="mb-4 font-mono-medium text-h4 text-primary">
         Tooltip · 8 states
       </Text>
-      <Row state="default" note="Long-press, hover or focus to show the label.">
+      <Row state="default" note="Long-press to show the label; it stays until a tap anywhere.">
         <IconButton label="Settings" className={base}>
           {gear}
         </IconButton>
       </Row>
-      <Row state="hover" note="Pointer only: the label shows after 600 ms.">
+      <Row state="hover" note="n/a on a phone: no hover. Shown with the surface fill for reference.">
         <IconButton label="Settings" className={`${base} bg-surface`}>
           {gear}
         </IconButton>
       </Row>
       <Row
         state="focus"
-        note="Keyboard focus: ring and label at once, no fade on the ring."
+        note="Keyboard focus: the ring shows at once, with no fade."
       >
         <View className={base} style={focusRing(true)}>
           {gear}
@@ -60,7 +60,7 @@ export function TooltipPreview() {
       </Row>
       <Row
         state="active"
-        note="Pressed: fades to 60%. A long-press shows the label for 1.5 s after release."
+        note="Pressed: fades to 60%."
       >
         <View className={`${base} opacity-60`}>{gear}</View>
       </Row>
