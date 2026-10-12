@@ -128,14 +128,18 @@ The Composer is a grid of seven note rows and sixteen beats. Tap squares to writ
 
 <p align="center"><img src="https://github.com/user-attachments/assets/b5f4de7d-3426-4e04-a8f4-f450e5fb45d6" alt="The Composer and Sheet music screens." width="100%"></p>
 
-<details>
+<details open>
 <summary><b>Everything else</b></summary>
+
+<img align="right" src="https://github.com/user-attachments/assets/b8cf390c-1496-4f35-8a48-f9faeae430e6" alt="Sonata's daily reminder showing as a notification on an Android phone." width="220">
 
 - Playlists of your weeks and pieces, played in order.
 - Share a week's song with a message, or save it to your phone.
-- A daily reminder at a time you choose.
+- **A daily reminder** at a time you choose: one quiet notification, with no badge on the icon.
 - **Feel notes:** every note has its own vibration, for anyone who can't hear the app. More pulses mean a higher note.
 - Export everything you've logged as a PDF, back it up to a passphrase-locked file, or delete it all.
+
+<br clear="right">
 
 </details>
 
