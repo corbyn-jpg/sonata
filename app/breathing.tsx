@@ -74,14 +74,26 @@ export default function Breathing() {
     }
   };
 
-  const label = session === "ready" ? "Breathe" : LABEL[breath.phase];
+  // The orb and the button do the same thing: begin, pause, carry on, or go again once finished
+  const toggle = () => {
+    if (session === "ready" || session === "done") begin();
+    else setSession(session === "running" ? "paused" : "running");
+  };
 
+  const label = session === "ready" ? "Breathe" : LABEL[breath.phase];
+  const action =
+    session === "ready" ? "Begin" : session === "running" ? "Pause" : session === "paused" ? "Carry on" : "Again";
 
   return (
     <Screen header={<BackHeader title="Breathing space" />} background={<Sky pace={1.6} />}>
       <View className="flex-1 items-center justify-between pb-20">
         <View className="flex-1 items-center justify-center ">
-          <View style={{ width: BREATHING_SIZE, height: BREATHING_SIZE }}>
+          <Pressable
+            onPress={toggle}
+            accessibilityRole="button"
+            accessibilityLabel={`${action} breathing`}
+            style={{ width: BREATHING_SIZE, height: BREATHING_SIZE }}
+          >
             <BreathingOrb elapsed={elapsed} still={reduceMotion} />
             <View className="absolute inset-0 items-center justify-center" pointerEvents="none">
               {/* The one place a word sits on an orb: it's an instruction, not a label */}
@@ -89,12 +101,12 @@ export default function Breathing() {
                 {label}
               </Text>
             </View>
-          </View>
+          </Pressable>
         </View>
 
         <View className="w-full gap-3">
           <Text className="text-center font-sans text-caption text-muted">
-            A chime marks each change, so you can breathe with your eyes closed.
+            Tap the orb to begin or pause. A chime marks each change, so you can breathe with your eyes closed.
           </Text>
           {session === "done" ? (
             <View className="flex-row gap-3">
@@ -115,15 +127,11 @@ export default function Breathing() {
             </View>
           ) : (
             <Pressable
-              onPress={() =>
-                session === "ready" ? begin() : setSession(session === "running" ? "paused" : "running")
-              }
+              onPress={toggle}
               accessibilityRole="button"
               className={`min-h-[52px] items-center justify-center rounded-pill ${session === "ready" ? "bg-violet-700" : "border border-violet-500"}`}
             >
-              <Text className="font-sans-bold text-body text-primary">
-                {session === "ready" ? "Begin" : session === "running" ? "Pause" : "Carry on"}
-              </Text>
+              <Text className="font-sans-bold text-body text-primary">{action}</Text>
             </Pressable>
           )}
         </View>

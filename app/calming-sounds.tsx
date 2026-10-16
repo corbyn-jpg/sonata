@@ -1,10 +1,31 @@
 import { Pressable, ScrollView, Text, View } from "react-native";
+import type { ErrorBoundaryProps } from "expo-router";
 import { Pause, Play } from "lucide-react-native";
 import { BackHeader } from "@/components/BackHeader";
 import { Screen } from "@/components/Screen";
 import { CALMING_SOUNDS } from "@/features/oasis/calmingSounds";
 import { useCalmingSound } from "@/features/oasis/useCalmingSound";
 import colours from "@/theme/colours";
+
+/** If the sounds can't be set up, say so with a way to try again, rather than leaving a blank screen. Trying again opens the screen afresh, with a new player. */
+export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
+  return (
+    <Screen header={<BackHeader title="Calming sounds" />}>
+      <View className="flex-1 justify-center gap-6 pb-20">
+        <Text className="text-center font-sans text-body text-secondary">
+          The sounds couldn’t be loaded just now.
+        </Text>
+        <Pressable
+          onPress={retry}
+          accessibilityRole="button"
+          className="min-h-[52px] items-center justify-center rounded-pill bg-violet-700"
+        >
+          <Text className="font-sans-bold text-body text-primary">Try again</Text>
+        </Pressable>
+      </View>
+    </Screen>
+  );
+}
 
 /** Calming sounds: one ambient loop at a time. The whole row is the button, so it's easy to hit. */
 export default function CalmingSounds() {

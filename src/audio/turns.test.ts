@@ -17,4 +17,17 @@ describe("takeTurn", () => {
     takeTurn(a, pauseA);
     expect(pauseA).not.toHaveBeenCalled();
   });
+
+  it("still hands over when the previous player has been freed", () => {
+    const a = {};
+    const b = {};
+    const c = {};
+    const pauseB = jest.fn();
+    takeTurn(a, () => {
+      throw new Error("released");
+    });
+    expect(() => takeTurn(b, pauseB)).not.toThrow();
+    takeTurn(c, jest.fn());
+    expect(pauseB).toHaveBeenCalledTimes(1);
+  });
 });

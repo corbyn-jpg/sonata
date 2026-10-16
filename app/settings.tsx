@@ -203,7 +203,7 @@ export default function Settings() {
         <SettingGroup title="Privacy and data">
           <SettingRow
             Icon={Download}
-            title="Export my data"
+            title="Export data"
             detail="A readable PDF of your check-ins, thought records, playlists and pieces. It isn't encrypted, so keep it private."
             onPress={() => void exportData()}
             right={

@@ -1,33 +1,45 @@
 import { useEffect, useState } from "react";
-import { useAudioPlayerStatus } from "expo-audio";
+import { useAudioPlayer, useAudioPlayerStatus, type AudioPlayer } from "expo-audio";
 import { useIsFocused } from "expo-router";
-import { calmPlayer, loadCalm } from "@/audio/calm";
 import { takeTurn } from "@/audio/turns";
 import type { CalmingSound } from "./calmingSounds";
 
+// Settings go on the player itself; they live out here because a hook's return value can't be changed inside the hook
+
+/** Calming sounds always loop, and looping carries over when the sound is replaced. */
+function setLooping(player: AudioPlayer) {
+  player.loop = true;
+}
+
+/** Load a sound at its own volume, so every sound plays at the same loudness. */
+function load(player: AudioPlayer, sound: CalmingSound) {
+  player.replace(sound.source);
+  player.volume = sound.volume;
+}
+
 /**
  Plays one calming sound at a time, on a loop. Starting one pauses anything else Sonata is playing, and it stops when the screen is left, so it never carries on unnoticed.
+
+ The player belongs to the screen: it's made when the screen opens and freed when it closes (which also stops the sound). A player kept for the app's life could be left unusable by Android, and the screen then failed to draw until the app was restarted.
  */
 export function useCalmingSound() {
-  const [player] = useState(calmPlayer);
+  const player = useAudioPlayer(null);
   const status = useAudioPlayerStatus(player);
   const isFocused = useIsFocused();
   const [current, setCurrent] = useState<string | null>(null);
 
+  useEffect(() => setLooping(player), [player]);
+
   useEffect(() => {
     if (!isFocused) player.pause();
   }, [isFocused, player]);
-
-  // Going back closes the screen without it ever losing focus first, and the player outlives the screen (it's
-  // shared, so loops can be set on it), so stop it when the screen closes too
-  useEffect(() => () => player.pause(), [player]);
 
   /** Play a sound, or pause / carry on if it's the one already loaded. */
   const toggle = (sound: CalmingSound) => {
     if (sound.id === current) {
       if (status.playing) return player.pause();
     } else {
-      loadCalm(sound.source, sound.volume);
+      load(player, sound);
       setCurrent(sound.id);
     }
     takeTurn(player, () => player.pause());
