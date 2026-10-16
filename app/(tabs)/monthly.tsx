@@ -62,8 +62,10 @@ export default function Monthly() {
       header={header}
       background={<Sky animated={isFocused} pace={1.6} />}
     >
+      {/* Edge to edge, with the page margin as padding, so glows near the sides aren't clipped at the margin */}
       <ScrollView
-        contentContainerClassName="gap-6 pb-10"
+        className="-mx-6"
+        contentContainerClassName="gap-6 px-6 pb-10"
         showsVerticalScrollIndicator={false}
       >
         {loading || !summary ? (

@@ -10,6 +10,9 @@ import { monthGrid } from "./month";
 const ROW = 52; // height of one week row
 const DOT = 20; // a logged day's orb
 const DOT_Y = 18; // centre of the dot within its row; the date sits underneath
+// The canvas reaches this far past the grid on every side, so an orb's halo (twice its size, blurred) fades out
+// instead of being cut off by the canvas edge
+const BLEED = DOT * 1.6;
 const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
 const DAY_NAMES = [
   "Sunday",
@@ -57,14 +60,21 @@ export function MonthCalendar({ month, days, today }: Props) {
       <View style={{ height: rows.length * ROW }}>
         {width > 0 && (
           <Canvas
-            style={{ position: "absolute", width, height: rows.length * ROW }}
+            style={{
+              position: "absolute",
+              left: -BLEED,
+              top: -BLEED,
+              width: width + 2 * BLEED,
+              height: rows.length * ROW + 2 * BLEED,
+              pointerEvents: "none",
+            }}
           >
             {rows.flatMap((row, r) =>
               row.map((date, c) => {
                 if (!date) return null;
                 const key = dayKey(date);
-                const cx = (c + 0.5) * cell;
-                const cy = r * ROW + DOT_Y;
+                const cx = BLEED + (c + 0.5) * cell;
+                const cy = BLEED + r * ROW + DOT_Y;
                 const checkin = days.get(key);
                 const ring = key === todayKey && (
                   <Circle
