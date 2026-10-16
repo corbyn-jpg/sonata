@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -12,6 +12,8 @@ import { router } from "expo-router";
 import {
   ArchiveRestore,
   Bell,
+  CalendarMinus,
+  CalendarPlus,
   CirclePlay,
   Clock,
   Download,
@@ -26,6 +28,12 @@ import { pickBackup } from "@/features/settings/backup";
 import { BackupSheet } from "@/features/settings/BackupSheet";
 import { exportMyData } from "@/features/settings/exportMyData";
 import { RestoreSheet } from "@/features/settings/RestoreSheet";
+import {
+  addSampleMonths,
+  hasSampleMonths,
+  removeSampleMonths,
+} from "@/features/settings/sampleData";
+import { sampleRangeLabel } from "@/features/settings/sampleMonths";
 import { SettingGroup, SettingRow } from "@/features/settings/SettingRow";
 import { TimeSheet } from "@/features/settings/TimeSheet";
 import { feelNote } from "@/haptics";
@@ -51,6 +59,12 @@ export default function Settings() {
   const [deleting, setDeleting] = useState(false);
   const [backingUp, setBackingUp] = useState(false);
   const [restoring, setRestoring] = useState<string | null>(null); // the chosen backup file's text
+  const [samples, setSamples] = useState<boolean | null>(null); // whether the sample months are in; null until known
+  const [changingSamples, setChangingSamples] = useState(false);
+
+  useEffect(() => {
+    hasSampleMonths().then(setSamples, () => setSamples(false));
+  }, []);
 
   const onFeelNotesChange = (on: boolean) => {
     setPreference("feelNotes", on);
@@ -115,6 +129,33 @@ export default function Settings() {
       }
     } finally {
       setExporting(false);
+    }
+  };
+
+  /** Add the sample months, or take them out again. Real check-ins are never touched. */
+  const toggleSamples = async () => {
+    if (changingSamples || samples === null) return;
+    setChangingSamples(true);
+    try {
+      if (samples) {
+        await removeSampleMonths();
+        setSamples(false);
+      } else {
+        const added = await addSampleMonths();
+        setSamples(true);
+        Alert.alert(
+          `Added ${added} sample check-ins`,
+          "Open Monthly and go back a month to see them.",
+        );
+      }
+    } catch (error) {
+      console.warn(
+        "Couldn't change the sample months:",
+        error instanceof Error ? error.message : error,
+      );
+      Alert.alert("Couldn't change the sample months", "Please try again.");
+    } finally {
+      setChangingSamples(false);
     }
   };
 
@@ -233,6 +274,24 @@ export default function Settings() {
           />
         </SettingGroup>
         {deleting && <DeleteSheet onClose={() => setDeleting(false)} />}
+
+        <SettingGroup title="Sample data">
+          <SettingRow
+            Icon={samples ? CalendarMinus : CalendarPlus}
+            title={samples ? "Remove sample months" : "Add sample months"}
+            detail={
+              samples
+                ? `Takes out the example check-ins from ${sampleRangeLabel(new Date())}. Your own check-ins stay.`
+                : `Fills ${sampleRangeLabel(new Date())} with example check-ins, so the calendar, chart and songs have something to show. Days you logged yourself are left alone.`
+            }
+            onPress={() => void toggleSamples()}
+            right={
+              changingSamples || samples === null ? (
+                <ActivityIndicator color={colours.violet[200]} />
+              ) : undefined
+            }
+          />
+        </SettingGroup>
 
         <SettingGroup title="Help">
           <SettingRow

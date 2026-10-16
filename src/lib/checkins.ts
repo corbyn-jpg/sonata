@@ -81,27 +81,36 @@ async function deletePending() {
   await AsyncStorage.setItem(DELETED_KEY, JSON.stringify(left));
 }
 
-/**
- Remove today's check-in, so the day can be chosen again. It goes from the phone straight away and from the backup as
- soon as there's a connection. Returns how many records were removed (normally one).
- */
-export async function forgetTodaysCheckin() {
-  const from = startOfDay(new Date());
-  const to = addDays(from, 1);
-  const today = (await localCheckins()).filter(
-    (r) => r.timestamp >= from.getTime() && r.timestamp < to.getTime(),
-  );
-  if (today.length === 0) return 0;
+/** Remove records from the phone straight away, and from the backup as soon as there's a connection. */
+async function forget(records: readonly StoredCheckin[]) {
+  if (records.length === 0) return 0;
   // Only uploaded records need deleting from the backup (one that never reached it has nothing to delete there)
-  const uploaded = today.filter((r) => r.synced).map((r) => r.id);
+  const uploaded = records.filter((r) => r.synced).map((r) => r.id);
   if (uploaded.length > 0)
     await AsyncStorage.setItem(
       DELETED_KEY,
       JSON.stringify([...new Set([...(await deletedIds()), ...uploaded])]),
     );
-  await removeCheckins(today.map((r) => r.id));
+  await removeCheckins(records.map((r) => r.id));
   void uploadPending(); // also sends the deletions
-  return today.length;
+  return records.length;
+}
+
+/** Remove today's check-in, so the day can be chosen again. Returns how many records were removed (normally one). */
+export async function forgetTodaysCheckin() {
+  const from = startOfDay(new Date());
+  const to = addDays(from, 1);
+  return forget(
+    (await localCheckins()).filter(
+      (r) => r.timestamp >= from.getTime() && r.timestamp < to.getTime(),
+    ),
+  );
+}
+
+/** Remove the check-ins made at these moments (the sample months). Returns how many were removed. */
+export async function forgetCheckinsAt(timestamps: readonly number[]) {
+  const at = new Set(timestamps);
+  return forget((await localCheckins()).filter((r) => at.has(r.timestamp)));
 }
 
 /** What the user chose for a check-in, and when. Everything else (pitch, emotion, valence) follows from note + mode. */
