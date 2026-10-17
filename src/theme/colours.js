@@ -17,23 +17,23 @@ module.exports = {
   orb: {
     C: {
       major: { core: "#A3FBC3", edge: "#60A5FA" },
-      minor: { core: "#013E88", edge: "#04C349" },
+      minor: { core: "#1B2F5E", edge: "#6F86A6" },
     },
     D: {
       major: { core: "#A7F3D0", edge: "#FDE047" },
-      minor: { core: "#BEA51C", edge: "#01894A" },
+      minor: { core: "#7D7330", edge: "#5E7F5A" },
     },
     E: {
       major: { core: "#F9DBAA", edge: "#FFBC05" },
-      minor: { core: "#916A00", edge: "#D98D12" },
+      minor: { core: "#6B5E3E", edge: "#9C948A" },
     },
     F: {
       major: { core: "#FD7FC1", edge: "#FDBA74" },
-      minor: { core: "#D36C00", edge: "#C6086B" },
+      minor: { core: "#5E3F82", edge: "#C06C8A" },
     },
     G: {
       major: { core: "#06D48C", edge: "#A3E635" },
-      minor: { core: "#65A30D", edge: "#009F92" },
+      minor: { core: "#3E5B5A", edge: "#A3B1B5" },
     },
     A: {
       major: { core: "#F97316", edge: "#EF4444" },
@@ -41,7 +41,7 @@ module.exports = {
     },
     B: {
       major: { core: "#D19855", edge: "#9828FA" },
-      minor: { core: "#7F1D5E", edge: "#DC2626" },
+      minor: { core: "#3A0F24", edge: "#B8202F" },
     },
   },
 };
