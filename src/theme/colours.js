@@ -28,7 +28,7 @@ module.exports = {
       minor: { core: "#6B5E3E", edge: "#9C948A" },
     },
     F: {
-      major: { core: "#FD7FC1", edge: "#FDBA74" },
+      major: { core: "#FDBA74", edge: "#FD7FC1" },
       minor: { core: "#5E3F82", edge: "#C06C8A" },
     },
     G: {
