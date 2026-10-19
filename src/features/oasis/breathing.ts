@@ -1,9 +1,10 @@
-// Breathing space: slow breathing counted at 60 BPM (one beat a second), in for 4 and out for 6. A longer out-breath than in-breath is what makes it calming, and six breaths a minute is the slow, steady pace this kind of exercise aims for. Pure, so it's tested, and a worklet, so the orb can follow it on the UI thread.
+// Slow breathing at one beat a second: in for 4, out for 6, so six breaths a minute with the longer out-breath that makes it calming. Pure for testing, and a worklet so the orb can follow it on the UI thread.
 
-export const INHALE = 4; // beats (seconds) breathing in
-export const EXHALE = 6; // beats breathing out
-export const CYCLES = 6; // breaths in a session: one minute
-export const SESSION = CYCLES * (INHALE + EXHALE); // seconds
+// In seconds: breathing in, breathing out, and the session of six breaths (one minute)
+export const INHALE = 4;
+export const EXHALE = 6;
+export const CYCLES = 6;
+export const SESSION = CYCLES * (INHALE + EXHALE);
 
 export type BreathPhase = "in" | "out" | "done";
 

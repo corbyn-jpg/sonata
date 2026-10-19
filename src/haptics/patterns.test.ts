@@ -25,8 +25,9 @@ describe("pulsesFor", () => {
   it("separates groups with a longer pause, so 5 reads as 3 + 2", () => {
     const g = pulsesFor("G", "major"); // degree 5
     const { pulse, gap } = FEEL.major;
-    expect(g[1].at - g[0].at).toBe(pulse + gap); // inside the first group
-    expect(g[3].at - g[2].at).toBe(pulse + GROUP_GAP); // between groups
+    // The gap inside a group, then between groups
+    expect(g[1].at - g[0].at).toBe(pulse + gap);
+    expect(g[3].at - g[2].at).toBe(pulse + GROUP_GAP);
   });
 
   it("gives every note in a mode a different pattern", () => {

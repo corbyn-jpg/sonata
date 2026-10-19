@@ -1,6 +1,6 @@
 // Calendar helpers in the user's local time. Pure, so they're easy to test.
 
-/** Local calendar day*/
+/** The local calendar day, e.g. "2026-10-01". */
 export function dayKey(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");

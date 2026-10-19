@@ -14,8 +14,9 @@ const PART_GAIN: Record<NoteEvent["part"], number> = {
   bass: 0.55,
 };
 
-const RELEASE = 0.35; // seconds a note takes to fade once it ends
-const TAIL = 2.5; // seconds after the last beat, so the final chord can ring out
+// Seconds: how long a note fades once it ends, and how long the final chord rings after the last beat
+const RELEASE = 0.35;
+const TAIL = 2.5;
 
 /** Reads our own 16-bit mono WAV files (see scripts/render-chords.mjs). */
 export function decodeWav(bytes: Uint8Array): Float32Array {
@@ -45,13 +46,14 @@ export function encodeWav(audio: Float32Array, rate: number): Uint8Array {
   view.setUint32(4, 36 + audio.length * 2, true);
   text(8, "WAVE");
   text(12, "fmt ");
-  view.setUint32(16, 16, true); // fmt chunk size
-  view.setUint16(20, 1, true); // PCM
-  view.setUint16(22, 1, true); // mono
+  // fmt chunk: 16 bytes, PCM, mono, then the byte rate, 2 bytes per frame and 16 bits per sample
+  view.setUint32(16, 16, true);
+  view.setUint16(20, 1, true);
+  view.setUint16(22, 1, true);
   view.setUint32(24, rate, true);
-  view.setUint32(28, rate * 2, true); // bytes per second
-  view.setUint16(32, 2, true); // bytes per frame
-  view.setUint16(34, 16, true); // bits per sample
+  view.setUint32(28, rate * 2, true);
+  view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true);
   text(36, "data");
   view.setUint32(40, audio.length * 2, true);
   for (let i = 0; i < audio.length; i++) {
@@ -107,8 +109,10 @@ export function mixSong(
     const heldEnd = Math.min(end, Math.ceil(held));
     const gain = event.velocity * PART_GAIN[event.part];
 
-    // Two plain loops (held, then fading out) rather than one with a branch: this runs on the phone
-    // millions of times per song. Each value is a straight line between the two nearest samples.
+    /*
+     Two plain loops (held, then fading out) rather than one with a branch, as this runs millions of times per song.
+     Each value is interpolated between the two nearest samples.
+     */
     let x = 0;
     for (let i = 0; i < heldEnd; i++, x += step) {
       const k = x | 0;

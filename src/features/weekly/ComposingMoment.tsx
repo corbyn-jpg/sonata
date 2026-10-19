@@ -24,8 +24,9 @@ import type { DayNote } from "@/engine";
 import colours from "@/theme/colours";
 
 const STAFF_WIDTH = 280;
-const GAP = 11; // space between staff lines
-const DRAW_MS = 2600; // the notes arrive over this long
+// Space between staff lines, and how long the notes take to arrive (ms)
+const GAP = 11;
+const DRAW_MS = 2600;
 // Staff steps above the bottom line, as on Home's staff: C sits on a ledger line below
 const STEPS = { C: -2, D: -1, E: 0, F: 1, G: 2, A: 3, B: 4 } as const;
 

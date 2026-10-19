@@ -12,7 +12,7 @@ export type { Chime } from "./chords.generated";
 
 const MODES: Mode[] = ["major", "minor"];
 
-// Up to two players per chord, used in turn, so replaying a chord never cuts off the copy that's still ringing (an abrupt stop would click). The second is only made the first time the chord is replayed, so an instrument starts with 14 players rather than 28.
+// Two players per chord, used in turn, so replaying a chord doesn't cut off the copy still ringing (which would click). The second is made on the first replay, so an instrument starts with 14 players, not 28.
 const VOICES = 2;
 const pool = new Map<string, { players: AudioPlayer[]; next: number }>();
 let modeSet = false;
@@ -20,7 +20,7 @@ let modeSet = false;
 export function ensureAudioMode() {
   if (modeSet) return;
   modeSet = true;
-  // Play alongside the user's own music. Media follows the media volume, not the ringer: with this false, Android ignores play() entirely while the phone is on vibrate or silent
+  // Mix with the user's own music and follow the media volume. Without playsInSilentMode, Android ignores play() on vibrate or silent.
   setAudioModeAsync({
     playsInSilentMode: true,
     interruptionMode: "mixWithOthers",
@@ -32,7 +32,8 @@ const keyOf = (instrument: Instrument, letter: Letter, mode: Mode) =>
   `${instrument}-${letter}-${mode}`;
 
 /**
- Frees a player now. remove() alone only forgets it: the native player lives on until garbage collection, and Android only allows an app so many at once, after a few instrument switches new chords failed to play at all. release() frees it straight away.
+ Frees a player now. remove() alone leaves the native player until garbage collection, and Android caps how many an
+ app can hold, so after a few instrument switches new chords stopped playing. release() frees it at once.
  */
 function free(player: AudioPlayer) {
   player.remove();
@@ -70,9 +71,7 @@ function play(
   player.play();
 }
 
-/**
- Load one instrument's chords so the first swipe plays instantly, and free the others — only the chosen instrument is kept in memory.
- */
+/** Load one instrument's chords so the first swipe plays at once, and free the others. */
 export function preloadChords(instrument: Instrument) {
   ensureAudioMode();
   for (const [key, entry] of pool) {

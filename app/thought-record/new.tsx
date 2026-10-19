@@ -10,9 +10,7 @@ import { saveThoughtRecord } from "@/lib/thoughtRecords";
 import colours from "@/theme/colours";
 
 /**
- One step of the record, as its own panel: the question, its hint and its answer belong together, and the
- space between panels keeps one step from running into the next. The answer box inside has no border of its
- own (a darker fill instead), so there's one outline per step, not a box inside a box.
+ One step of the record in its own panel. The answer box has a darker fill rather than a border, so each step has one outline.
  */
 function Section({ label, hint, children }: { label: string; hint: string; children: ReactNode }) {
   return (

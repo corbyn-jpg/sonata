@@ -1,5 +1,4 @@
-// The whole pipeline: a week of check-ins → a 7-bar song (one bar per day).
-// Deterministic: the same week and seed always give the same song. Runs on the phone: no internet.
+// A week of check-ins → a 7-bar song, one bar per day. Deterministic (the same week and seed give the same song) and offline.
 import { pitchOf, valenceOf } from "@/data/notes";
 import { bassNote, chooseChord, voiceChord } from "./harmony";
 import { addPassingNotes, MelodyLine, placeNote, rhythmFor } from "./melody";
@@ -42,7 +41,7 @@ export type Composition = {
   mode: WeekMode;
   /** Beats per minute: calmer weeks are slower. */
   tempo: number;
-  /** Whole number 1–10, for WEEKLY_MELODIES.average_valence. */
+  /** Whole number, 1–10. */
   averageValence: number;
   picardy: boolean;
   bars: Bar[];

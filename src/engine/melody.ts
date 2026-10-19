@@ -1,12 +1,13 @@
-// Step 3: voice leading. The day's notes are the melody's anchors; the passing notes between them are chosen by the GRU neural network trained on Bach's melodies. Music rules decide which notes are allowed (in the scale, in range, able to reach the next day's note), and the network decides which of those is most musical given everything it has heard so far.
+// Step 3, voice leading: the day's notes anchor the melody and the GRU picks the passing notes between them. Rules decide which notes are allowed (in the scale, in range, able to reach the next day's note); the network picks the most musical of those.
 import { encodeStep, intervalIndex, MAX_INTERVAL } from "./features";
 import { gruStep, predict } from "./gru";
 import { MELODY_NETWORK } from "./model";
 import { pickWeighted } from "./random";
 import { pitchClass, scaleDistance, stepFrom } from "./theory";
 
-export const MELODY_LOW = 67; // G4
-export const MELODY_HIGH = 86; // D6
+// The melody's range: G4 to D6
+export const MELODY_LOW = 67;
+export const MELODY_HIGH = 86;
 
 /** `pc` in the octave nearest `near`, within the melody's range, so the line doesn't leap about. */
 export function placeNote(pc: number, near: number): number {

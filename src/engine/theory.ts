@@ -6,7 +6,7 @@ export type DayNote = { note: Letter; mode: Mode };
 /** Monday first; null where there was no check-in. */
 export type Week = readonly (DayNote | null)[];
 
-/** The four modes a week can be written in (stored as WEEKLY_MELODIES.primary_mode). */
+/** The four modes a week can be written in. */
 export type WeekMode = "ionian" | "lydian" | "dorian" | "aeolian";
 
 export const MODE_NAMES: Record<WeekMode, string> = {
@@ -29,16 +29,15 @@ export const PITCH_CLASSES: Record<Pitch, number> = {
   B: 11,
 };
 
-/** Each mode's scale on C. */
+/** Each mode's scale on C: Ionian is major, Lydian raises its 4th, Dorian is minor with a raised 6th, Aeolian is natural minor. */
 export const SCALES: Record<WeekMode, readonly number[]> = {
-  ionian: [0, 2, 4, 5, 7, 9, 11], // major
-  lydian: [0, 2, 4, 6, 7, 9, 11], // major with a raised 4th: floating, ethereal
-  dorian: [0, 2, 3, 5, 7, 9, 10], // minor with a raised 6th: thoughtful, not hopeless
-  aeolian: [0, 2, 3, 5, 7, 8, 10], // natural minor, as on the Dark page
+  ionian: [0, 2, 4, 5, 7, 9, 11],
+  lydian: [0, 2, 4, 6, 7, 9, 11],
+  dorian: [0, 2, 3, 5, 7, 9, 10],
+  aeolian: [0, 2, 3, 5, 7, 8, 10],
 };
 
-// Where to borrow a chord from when a day's note isn't in the week's mode (modal mixture).
-// Every note the orbs can produce is in at least one of these.
+// Modes to borrow a chord from when a day's note isn't in the week's mode; every orb's note is in at least one
 export const BORROW_FROM: Record<WeekMode, readonly WeekMode[]> = {
   ionian: ["aeolian"],
   lydian: ["ionian", "aeolian"],

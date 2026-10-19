@@ -90,9 +90,10 @@ export default function Composer() {
   const [name, setName] = useState("");
   const [snapshot, setSnapshot] = useState<string | null>(null);
 
-  const [browsing, setBrowsing] = useState(false); // Your pieces is open
-  const [naming, setNaming] = useState(false); // the first save asks for a name
-  const [choosing, setChoosing] = useState(false); // the playlist sheet is open
+  // Open sheets and prompts: Your pieces, naming on first save, and the playlist picker
+  const [browsing, setBrowsing] = useState(false);
+  const [naming, setNaming] = useState(false);
+  const [choosing, setChoosing] = useState(false);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 

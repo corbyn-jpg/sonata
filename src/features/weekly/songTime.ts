@@ -22,8 +22,8 @@ const MONTHS = [
 /** How long one bar (one day) lasts, in seconds. */
 export const barSeconds = (tempo: number) => (BEATS_PER_BAR * 60) / tempo;
 
-// The player works in whole milliseconds, so after jumping to a bar's start it can report a time a fraction of a millisecond before it. Anything this close to a bar line counts as the new bar.
-const BAR_LINE_TOLERANCE = 0.05; // seconds
+// Seconds. The player works in whole milliseconds, so just after jumping to a bar it can report a time a hair before it; anything this close counts as the new bar.
+const BAR_LINE_TOLERANCE = 0.05;
 
 /** Which day's bar is playing at `seconds` (0 = Monday). */
 export const barAt = (seconds: number, tempo: number) =>
@@ -34,10 +34,7 @@ export const barAt = (seconds: number, tempo: number) =>
 
 export const barStart = (bar: number, tempo: number) => bar * barSeconds(tempo);
 
-/**
- * Where "back" goes, like any music player: to the start of the current day, or to the day before
- * if we're already within a second of the start.
- */
+/** Where "back" goes, as in any music player: the start of the current day, or the day before if within a second of its start. */
 export function previousBarStart(seconds: number, tempo: number) {
   const bar = barAt(seconds, tempo);
   const start = barStart(bar, tempo);

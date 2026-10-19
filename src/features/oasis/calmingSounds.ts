@@ -6,9 +6,7 @@ export type CalmingSound = {
   /** One plain line on what it sounds like. */
   about: string;
   source: number;
-  /**
-   Playback volume that brings this recording to the same loudness as the others (-33 LUFS, measured with ITU-R BS.1770)
-   */
+  /** Playback volume that matches this recording's loudness to the others (-33 LUFS, measured with ITU-R BS.1770). */
   volume: number;
 };
 

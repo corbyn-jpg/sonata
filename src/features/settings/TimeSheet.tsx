@@ -16,9 +16,7 @@ type Props = {
 };
 
 /**
- The rows above and below the chosen one fade into the sheet, so the eye lands on the middle. The fade lies over the
- wheels, so it sits in a plain View that lets touches through: Skia's Canvas ignores pointerEvents on the New
- Architecture, and on its own it swallowed every drag, so the wheels wouldn't turn.
+ Fades the rows above and below the chosen one. It sits in a plain View that lets touches through, because Skia's Canvas ignores pointerEvents on the New Architecture and swallowed every drag.
  */
 function Fades({ width }: { width: number }) {
   const solid = colours.surfaceRaised;

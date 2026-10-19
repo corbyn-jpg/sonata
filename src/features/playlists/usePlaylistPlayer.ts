@@ -70,9 +70,10 @@ export function usePlaylistPlayer(
   const toggle = (index: number) => {
     if (index !== current) return void playAt(index);
     if (status.playing) return player.pause();
+    // A finished song starts again, and anything else playing pauses
     if (status.duration > 0 && status.currentTime >= status.duration - 0.05)
-      player.seekTo(0); // finished: start again
-    takeTurn(player, () => player.pause()); // anything else playing pauses
+      player.seekTo(0);
+    takeTurn(player, () => player.pause());
     player.play();
   };
 

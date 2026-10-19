@@ -55,9 +55,10 @@ export function loadChorales(path: string): Record<Split, Chorale[]> {
 // --- Chords -------------------------------------------------------------------------------------
 
 const TRIADS = [
-  [0, 4, 7], // major
-  [0, 3, 7], // minor
-  [0, 3, 6], // diminished
+  // Major, minor and diminished
+  [0, 4, 7],
+  [0, 3, 7],
+  [0, 3, 6],
 ];
 // Chord root (semitones above C) → scale degree. Minor keys also use the raised 6th and 7th.
 const MAJOR_DEGREES: Record<number, number> = { 0: 0, 2: 1, 4: 2, 5: 3, 7: 4, 9: 5, 11: 6 };

@@ -10,13 +10,16 @@ import { Pause, Play, SkipBack, SkipForward } from "lucide-react-native";
 import { IconButton } from "@/components/Tooltip";
 import colours from "@/theme/colours";
 
-// A flat capsule with back and forward at its ends. While the song plays, the round play button rises half out of it in the week's colour; paused, it sinks back into the slot. Still and quiet, so the spinning disc above stays the thing to look at.
+/*
+ A flat capsule with back and forward at its ends. While playing, the round play button rises half out of it in the week's colour; paused, it sinks back into the slot. Below: the capsule's height, the raised button's diameter, the
+ lift that puts its centre on the capsule's top edge, and the paused scale that fits it inside.
+ */
 const WIDTH = 216;
-const BOX = 65; // the capsule's height
-const BUTTON = 60; // the play button's diameter when raised
-const LIFT = BUTTON / 2; // raised: the button's centre sits on the capsule's top edge
+const BOX = 65;
+const BUTTON = 60;
+const LIFT = BUTTON / 2;
 const HEIGHT = BOX + LIFT;
-const SLOTTED = 44 / BUTTON; // paused: small enough to sit inside the capsule
+const SLOTTED = 44 / BUTTON;
 const MOVE = { duration: 300, easing: Easing.out(Easing.quad) };
 
 /** How bright a colour looks, 0–1 (WCAG relative luminance). */

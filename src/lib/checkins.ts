@@ -267,8 +267,7 @@ export async function getCheckins(from: Date, to: Date): Promise<Checkin[]> {
           timestamp: new Date(record.timestamp),
         };
       } catch {
-        // Saved with a key this phone no longer has (e.g. after a reinstall). Skip it rather than
-        // losing the whole week; never log the payload itself.
+        // Sealed with a key this phone no longer has (e.g. after a reinstall): skipped rather than losing the week. Never log the payload.
         console.warn(
           `Skipped check-in ${record.id}: it can't be decrypted on this device`,
         );

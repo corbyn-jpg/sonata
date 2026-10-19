@@ -18,9 +18,8 @@ function load(player: AudioPlayer, sound: CalmingSound) {
 }
 
 /**
- Plays one calming sound at a time, on a loop. Starting one pauses anything else Sonata is playing, and it stops when the screen is left, so it never carries on unnoticed.
-
- The player belongs to the screen: it's made when the screen opens and freed when it closes (which also stops the sound). A player kept for the app's life could be left unusable by Android, and the screen then failed to draw until the app was restarted.
+ Plays one calming sound at a time, on a loop, pausing anything else Sonata is playing. The player belongs to the screen and is freed (stopping the sound) when it closes: a player kept for the app's life could be left unusable by
+ Android, and the screen then failed to draw until a restart.
  */
 export function useCalmingSound() {
   const player = useAudioPlayer(null);

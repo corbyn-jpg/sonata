@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { isInstrument, type Instrument } from "@/audio/instruments";
 
 type Preferences = {
-  /** Play each note's vibration pattern (for deaf and hard-of-hearing users).*/
+  /** Play each note's vibration pattern, for deaf and hard-of-hearing users. */
   feelNotes: boolean;
   /** What check-ins sound like. The last choice is remembered. */
   instrument: Instrument;

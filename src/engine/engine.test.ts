@@ -21,7 +21,7 @@ const d = (note: Letter, mode: Mode): DayNote => ({ note, mode });
 const B = (note: Letter) => d(note, "major");
 const D = (note: Letter) => d(note, "minor");
 
-// The spec's fixture: C4, E♭4, G4, B♭4, C5, A♭4, G4
+// A fixed test week: C4, E♭4, G4, B♭4, C5, A♭4, G4
 const FIXTURE: Week = [D("C"), D("E"), D("G"), D("B"), D("C"), D("A"), D("G")];
 const BRIGHT: Week = [B("C"), B("E"), B("G"), B("F"), B("D"), B("G"), B("C")];
 const MODES: WeekMode[] = ["ionian", "lydian", "dorian", "aeolian"];
@@ -76,8 +76,9 @@ describe("evaluateMode", () => {
   });
 
   it("settles an even split by average valence", () => {
-    expect(evaluateMode([B("E"), D("E")])).toBe("ionian"); // 9 and 5
-    expect(evaluateMode([B("G"), D("C")])).toBe("dorian"); // 6 and 2
+    // Average valences 9 and 5, then 6 and 2
+    expect(evaluateMode([B("E"), D("E")])).toBe("ionian");
+    expect(evaluateMode([B("G"), D("C")])).toBe("dorian");
   });
 });
 
@@ -144,8 +145,9 @@ describe("harmony", () => {
   });
 
   it("moves each chord to the nearest inversion", () => {
-    const c = voiceChord(diatonicChord("ionian", 0), null); // C E G
-    const f = voiceChord(diatonicChord("ionian", 3), c); // F A C, as C F A: only two notes move
+    // C E G, then F A C voiced as C F A: only two notes move
+    const c = voiceChord(diatonicChord("ionian", 0), null);
+    const f = voiceChord(diatonicChord("ionian", 3), c);
     expect(
       f.reduce((sum, n, i) => sum + Math.abs(n - c[i]), 0),
     ).toBeLessThanOrEqual(3);

@@ -12,8 +12,10 @@ import { localStore, type SealedRecord } from "@/lib/sealedStore";
 import { getUserId } from "@/lib/session";
 import { withTimeout } from "@/lib/timeout";
 
-// A Firestore collection of the user's own encrypted records (playlists, thought records) that works offline: every change is sealed and saved on the phone first, then uploaded in the background. Firestore only ever sees who owns a record and when it last changed.
-// Nothing is imported back from Firestore: the key never leaves this phone, so a server copy couldn't be read anywhere else anyway.
+/*
+ A Firestore collection of the user's own encrypted records that works offline: each change is sealed and saved on the phone first, then uploaded in the background. Firestore only sees who owns a record and when it last changed.
+ Nothing is imported back, since the key never leaves this phone.
+ */
 
 /** A record as the app sees it: its content, decrypted, plus its id and when it last changed. */
 export type Opened<Content> = Content & { id: string; updatedAt: number };

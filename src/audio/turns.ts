@@ -1,4 +1,4 @@
-// One song at a time: before a player starts, whichever other player had the last turn is paused. (The audio mode mixes with other apps, so without this two of Sonata's own players could overlap.)
+// One song at a time: a player that starts pauses whichever player had the last turn. The audio mode mixes with other apps, so Sonata's own players could otherwise overlap.
 
 let owner: object | null = null;
 let pauseOwner: (() => void) | null = null;

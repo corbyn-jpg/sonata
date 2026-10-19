@@ -24,7 +24,7 @@ import colours from "@/theme/colours";
 const STARS_PER_LAYER = 24;
 const LAYERS = 3;
 const NO_GLOW = [0, 0, 0, 0];
-// The sky's bottom fades into the plain background over this much, so the wash softens away above the tab bar (as an orb's halo does) instead of stopping in a straight line where the tab bar begins
+// The sky fades into the background over this many points above the tab bar, instead of ending in a straight line
 const FADE = 140;
 
 type Star = { x: number; y: number; r: number; opacity: number };
@@ -92,7 +92,7 @@ export const Sky = memo(function Sky({
     };
   }, [moving, pace, drift, twinkle]);
 
-  // Same colour at 30% → 10% → 0%, scaled by the glow's own alpha (a dimmer wash on the Dark page)
+  // Same colour at 30% → 10% → 0%, scaled by the glow's own alpha (dimmer in minor)
   const glowColours = useDerivedValue(() => {
     const [r, g, b, a = 1] = glow?.value ?? NO_GLOW;
     return [

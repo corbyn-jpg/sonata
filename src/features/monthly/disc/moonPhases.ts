@@ -13,9 +13,9 @@ import {
 } from "@/features/weekly/disc/scenes";
 import type { Painter } from "@/features/weekly/disc/painter";
 
-// The monthly song's record: the month's moon phases. Each week is a moon on one orbit, in that week's
-// colours and fuller for a brighter week; every day of the month is a bead around the rim; the centre
-// glows in the month's two most common colours. Same month, same picture.
+/*
+ The monthly song's record: each week is a moon on one orbit, in its colours and fuller for a brighter week; each day is a bead round the rim; the centre glows in the month's two most common colours. Same month, same picture.
+ */
 
 /**
  How full a week's moon is: a crescent (0.25) for the heaviest weeks up to full (1) for the brightest. A week without check-ins is a new moon (0).
@@ -62,8 +62,7 @@ function moon(
 
 /**
  Paints the month's record onto `painter`, filling a `size` × `size` square.
- `days`: every day of the month in order (null where there was no check-in), for the beads round the rim.
- `weeks`: the weeks that start in the month, one moon each. `seed` (e.g. the month's first day) varies the stars.
+ `days`: every day of the month in order (null where there was no check-in), for the beads round the rim. `weeks`: the weeks that start in the month, one moon each. `seed` (e.g. the month's first day) varies the stars.
  */
 export function drawMonthDisc(
   painter: Painter,

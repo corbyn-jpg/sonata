@@ -1,4 +1,3 @@
-// Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps } from "firebase/app";
 import {
   initializeAuth,
@@ -8,7 +7,7 @@ import {
 import { getFirestore } from "firebase/firestore";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Your web app's Firebase configuration
+// The web config isn't secret: access is controlled by the Firestore security rules
 const firebaseConfig = {
   apiKey: "AIzaSyAX2YNI2bnkqKr4Z5jA7TQ2p6yW_M4NVrM",
   authDomain: "sonata-a1248.firebaseapp.com",

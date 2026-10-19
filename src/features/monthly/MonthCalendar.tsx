@@ -7,11 +7,11 @@ import { dayKey } from "@/lib/dates";
 import colours from "@/theme/colours";
 import { monthGrid } from "./month";
 
-const ROW = 52; // height of one week row
-const DOT = 20; // a logged day's orb
-const DOT_Y = 18; // centre of the dot within its row; the date sits underneath
-// The canvas reaches this far past the grid on every side, so an orb's halo (twice its size, blurred) fades out
-// instead of being cut off by the canvas edge
+// Row height, a logged day's orb, and the orb's centre within its row (the date sits underneath)
+const ROW = 52;
+const DOT = 20;
+const DOT_Y = 18;
+// The canvas reaches past the grid on every side, so the orbs' halos fade out instead of being cut off
 const BLEED = DOT * 1.6;
 const WEEKDAYS = ["M", "T", "W", "T", "F", "S", "S"];
 const DAY_NAMES = [

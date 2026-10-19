@@ -47,10 +47,11 @@ describe("notation", () => {
   });
 
   it("places notes on the treble staff", () => {
-    expect(staffStep(spell(64))).toBe(0); // E4, bottom line
-    expect(staffStep(spell(71))).toBe(4); // B4, middle line
-    expect(staffStep(spell(77))).toBe(8); // F5, top line
-    expect(staffStep(spell(60))).toBe(-2); // C4, a ledger line below
+    // E4 is the bottom line, B4 the middle, F5 the top, and C4 a ledger line below
+    expect(staffStep(spell(64))).toBe(0);
+    expect(staffStep(spell(71))).toBe(4);
+    expect(staffStep(spell(77))).toBe(8);
+    expect(staffStep(spell(60))).toBe(-2);
   });
 
   it("names chords as on a lead sheet", () => {
@@ -270,9 +271,10 @@ describe("song choices", () => {
 
   it("lists weeks and months, newest first, with the seeds Weekly and Monthly use", () => {
     const { weeks, months } = songChoices([
-      at(2026, 8, 29, "C"), // Tue 29 Sep: the week of Mon 28 Sep, which starts in September
-      at(2026, 9, 6, "E"), // Tue 6 Oct
-      at(2026, 9, 14, "C", "minor"), // Wed 14 Oct
+      // Tue 29 Sep (in the week of Mon 28 Sep, which starts in September), Tue 6 Oct and Wed 14 Oct
+      at(2026, 8, 29, "C"),
+      at(2026, 9, 6, "E"),
+      at(2026, 9, 14, "C", "minor"),
     ]);
     expect(weeks.map((w) => w.title)).toEqual([
       "Week of 12 Oct 2026",

@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-// Encrypted records kept on the phone (playlists, thought records), sealed (AES-GCM) exactly as they're sent to Firestore. The same offline-first idea as check-ins (localCheckins.ts), with two differences: a record can be edited, so the newest version wins, and it can be deleted, so a deleted one is remembered until Firestore has deleted it too.
+// Encrypted records kept on the phone, sealed exactly as they're sent to Firestore. Offline-first like check-ins (localCheckins.ts), except a record can be edited (the newest version wins) or deleted (remembered until Firestore deletes it too).
 
 export type SealedRecord = {
   /** The Firestore document id, chosen on the phone. */

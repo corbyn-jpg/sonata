@@ -58,8 +58,9 @@ export default function Settings() {
   const [exporting, setExporting] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [backingUp, setBackingUp] = useState(false);
-  const [restoring, setRestoring] = useState<string | null>(null); // the chosen backup file's text
-  const [samples, setSamples] = useState<boolean | null>(null); // whether the sample months are in; null until known
+  // The chosen backup file's text, and whether the sample months are in (null until known)
+  const [restoring, setRestoring] = useState<string | null>(null);
+  const [samples, setSamples] = useState<boolean | null>(null);
   const [changingSamples, setChangingSamples] = useState(false);
 
   useEffect(() => {

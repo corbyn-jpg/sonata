@@ -1,4 +1,4 @@
-/** Internal only */
+/** Emotions stay internal: they're stored with each check-in but never shown in the interface. */
 
 export const LETTERS = ["C", "D", "E", "F", "G", "A", "B"] as const; // scale order
 export type Letter = (typeof LETTERS)[number];
@@ -67,12 +67,12 @@ export const emotionOf = (letter: Letter, mode: Mode) =>
 export const valenceOf = (letter: Letter, mode: Mode) =>
   NOTES[letter][mode].valence;
 
-/** Screen-reader name*/
+/** Screen-reader name. */
 export const spokenName = (letter: Letter, mode: Mode) => {
   const pitch = pitchOf(letter, mode);
   return pitch.endsWith("b") ? `${pitch[0]} flat` : pitch;
 };
 
-/** Visible label for the grid view*/
+/** Visible label, as on the Composer grid. */
 export const displayName = (letter: Letter, mode: Mode) =>
   pitchOf(letter, mode).replace("b", "♭");

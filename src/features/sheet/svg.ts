@@ -1,6 +1,6 @@
-// A score drawn as SVG, one staff line (system) per <svg>: shown in the app with react-native-svg,
-// and printed to PDF, where a page can break between lines but never through one. Hand-built shapes;
-// the clef and flat are Material Design Icons (Apache 2.0), as on Home's staff.
+/*
+ A score drawn as SVG, one staff line per <svg>: shown in the app with react-native-svg and printed to PDF, where a page breaks between lines but never through one. The clef and flat are Material Design Icons (Apache 2.0).
+ */
 import { chordName, engraveBar, staffStep, type Item } from "./notation";
 import type { Score, ScoreBar } from "./score";
 

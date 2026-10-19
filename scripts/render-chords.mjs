@@ -1,6 +1,7 @@
-// Renders every orb chord (7 notes × Bright/Dark) for each instrument, single notes for the weekly songs, and the glockenspiel and wind-chime cues, from recorded samples into assets/sounds/, and writes src/audio/chords.generated.ts so the app can load them.
-// Run with `npm run render:chords` after changing anything below, then commit the output.
-// The sample libraries aren't in the project (they're gigabytes). By default they're read from the folder above it; set SONATA_SAMPLES to use another folder. Salamander Grand Piano V3 by Alexander Holm, CC-BY 3.0 → 44.1khz16bit/ VSCO 2 Community Edition by Versilian Studios, CC0 → Solo Violin/, Harp/, Flute/, Glock/, various/
+/*
+ Renders the orb chords (7 notes, major and minor) for each instrument, single notes for the weekly songs, and the glockenspiel and wind-chime cues into assets/sounds/, then writes src/audio/chords.generated.ts. Run `npm run render:chords` after changing anything here and commit the output.
+*/
+
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,16 +13,19 @@ const at = (folder) => join(LIBRARY, folder);
 const OCTAVE = 5; // one above middle C: clear on phone speakers
 const SEMITONES_FROM_C = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
 const FLAT_IN_MINOR = new Set(["E", "A", "B"]); // C natural minor, as in src/data/notes.ts
-// The 3rd makes a chord bright (4) or dark (3), so every Dark orb sounds different
+// A major third (4 semitones) or a minor third (3)
 const TRIADS = { major: [0, 4, 7], minor: [0, 3, 7] };
 
 /** Smooth 0 → 1 ramp (no corners, so no clicks). */
 const ease = (x) => (x <= 0 ? 0 : x >= 1 ? 1 : x * x * (3 - 2 * x));
 
 
-// Instruments. File names give each sample's note; VSCO's cello, flute and glockenspiel files are numbered an octave low, which `octave: 1` corrects (checked by measuring their pitch).
-
-// `roll` staggers the chord's notes like a strum; `upper` is the 3rd and 5th's level under the root; `bass` adds the root an octave down; `release` is the fade at the end; `peak` evens out how loud each instrument feels. `notes` is the range of single notes rendered for the weekly songs: piano and harp also play the songs' chords and bass, so they go lower.
+/*
+ File names give each sample's note; VSCO numbers its cello, flute and glockenspiel an octave low, which `octave: 1`
+ corrects. `roll` strums the chord, `upper` is the 3rd and 5th's level under the root, `bass` adds the root an octave
+ down, `release` is the closing fade and `peak` evens out loudness. `notes` is the single-note range for the weekly
+ songs; piano and harp go lower because they also play the songs' chords and bass.
+ */
 
 const INSTRUMENTS = {
   piano: {
@@ -70,14 +74,14 @@ const INSTRUMENTS = {
 const NOTE_RATE = 32000;
 const NOTE_SPACING = 3;
 
-// Short cues used around the app. Glockenspiel notes are rendered from samples; `file` cues are recordings used as they are.
+// Cues for saving a check-in, a composed week, breathing in and out, composing (wind chimes) and the end of Breathing space. Glockenspiel notes are rendered from samples; `file` cues are recordings used as they are.
 const CHIMES = {
-  save: { notes: ["G6", "C7"], gap: 0.11, seconds: 2.2, peak: 0.2 }, // Save check-in
-  composed: { notes: ["C6", "E6", "G6", "C7"], gap: 0.14, seconds: 3, peak: 0.2 }, // week is ready
+  save: { notes: ["G6", "C7"], gap: 0.11, seconds: 2.2, peak: 0.2 },
+  composed: { notes: ["C6", "E6", "G6", "C7"], gap: 0.14, seconds: 3, peak: 0.2 },
   breatheIn: { notes: ["G6"], seconds: 2, peak: 0.14 },
   breatheOut: { notes: ["C6"], seconds: 2, peak: 0.14 },
   composing: { file: "various/windchimes_slowAsc1.wav", seconds: 8, peak: 0.16 },
-  finish: { file: "various/Fing_Cymb.wav", seconds: 5, peak: 0.18 }, // end of Breathing space
+  finish: { file: "various/Fing_Cymb.wav", seconds: 5, peak: 0.18 },
 };
 
 /** Mix `parts` ({ audio, at: seconds, level }) into `seconds` of audio with the given fades and peak. */
@@ -155,13 +159,14 @@ function toWav(samples, rate = SAMPLE_RATE) {
   header.writeUInt32LE(36 + data.length, 4);
   header.write("WAVE", 8);
   header.write("fmt ", 12);
-  header.writeUInt32LE(16, 16); // fmt chunk size
-  header.writeUInt16LE(1, 20); // PCM
-  header.writeUInt16LE(1, 22); // mono
+  // fmt chunk: 16 bytes, PCM, mono, then the byte rate, 2 bytes per frame and 16 bits per sample
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(1, 22);
   header.writeUInt32LE(rate, 24);
-  header.writeUInt32LE(rate * 2, 28); // bytes per second
-  header.writeUInt16LE(2, 32); // bytes per frame
-  header.writeUInt16LE(16, 34); // bits per sample
+  header.writeUInt32LE(rate * 2, 28);
+  header.writeUInt16LE(2, 32);
+  header.writeUInt16LE(16, 34);
   header.write("data", 36);
   header.writeUInt32LE(data.length, 40);
   return Buffer.concat([header, data]);

@@ -7,7 +7,7 @@ import { CALMING_SOUNDS } from "@/features/oasis/calmingSounds";
 import { useCalmingSound } from "@/features/oasis/useCalmingSound";
 import colours from "@/theme/colours";
 
-/** If the sounds can't be set up, say so with a way to try again, rather than leaving a blank screen. Trying again opens the screen afresh, with a new player. */
+/** Shown if the sounds can't load, instead of a blank screen. Trying again remounts the screen with a new player. */
 export function ErrorBoundary({ retry }: ErrorBoundaryProps) {
   return (
     <Screen header={<BackHeader title="Calming sounds" />}>

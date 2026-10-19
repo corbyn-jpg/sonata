@@ -15,7 +15,7 @@ export function useComposingMoment(weekKey: string | null, songReady: boolean) {
     null,
   );
 
-  // Start: a version of the week we haven't revealed yet
+  // Start: a version of the week not yet revealed
   useEffect(() => {
     if (!weekKey) return;
     let cancelled = false;

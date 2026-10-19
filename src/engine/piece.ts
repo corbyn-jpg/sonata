@@ -1,5 +1,4 @@
-// The Composer: the user writes a tune on a grid, one note per beat, and the engine can harmonise it with the
-// same chord odds it learned from Bach for the weekly songs. Deterministic: the same tune always gets the same chords.
+// The Composer: the user writes a tune, one note per beat, and the engine can harmonise it with the chord odds learned from Bach. The same tune always gets the same chords.
 import { pitchOf, type Letter, type Mode } from "@/data/notes";
 import { BEATS_PER_BAR, type NoteEvent } from "./compose";
 import { bassNote, chordModelFor, chordOptions, voiceChord } from "./harmony";

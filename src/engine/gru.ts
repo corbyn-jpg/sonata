@@ -1,4 +1,4 @@
-// A small recurrent neural network (a GRU, gated recurrent unit). It reads a melody one note at a time, keeps a memory of what it has heard (the hidden state), and predicts the next interval. This is inference only; training (backpropagation) is in scripts/train/. No imports: Node runs this exact file when training, so the app and the trainer can't disagree.
+// A small recurrent neural network (GRU) that reads a melody one note at a time, keeps a memory of it (the hidden state) and predicts the next interval. Inference only; training is in scripts/train/. It has no imports, so Node runs this same file when training and the two can't disagree.
 
 type Vector = ArrayLike<number>;
 

@@ -11,7 +11,7 @@ const GROUPS: Record<number, number[]> = {
   7: [3, 2, 2],
 };
 
-// Bright: light, quick pulses. Dark: heavier, slower ones. Times in ms.
+// Major: light, quick pulses. Minor: heavier, slower ones. Times in ms.
 export const FEEL: Record<Mode, { pulse: number; gap: number }> = {
   major: { pulse: 30, gap: 90 },
   minor: { pulse: 70, gap: 150 },

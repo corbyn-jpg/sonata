@@ -1,6 +1,4 @@
-// Turning the engine's notes into notation. Everything Sonata writes is in C, so a
-// score has no key signature: a note outside C major carries its own accidental, as on any lead
-// sheet in C. Pure, so it's tested; drawn by svg.ts and exported by musicxml.ts.
+// The engine's notes as notation. Sonata writes everything in C, so there's no key signature: notes outside C major carry their own accidentals, as on a lead sheet. Pure for testing; drawn by svg.ts and exported by musicxml.ts.
 import type { Chord } from "@/engine";
 
 export const STEPS = ["C", "D", "E", "F", "G", "A", "B"] as const;

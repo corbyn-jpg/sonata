@@ -58,7 +58,7 @@ export default function Weekly() {
   const isFocused = useIsFocused();
   const ready = status === "ready";
 
-  // Where we are in the song, in seconds. The player doesn't report new times while paused, so after a jump we show where we jumped to while the player is still reporting the old spot. (Worked out here rather than copied into state in an effect, which would re-render on every report.)
+  // The player doesn't report new times while paused, so after a seek this shows the target until it catches up
   const [jump, setJump] = useState<{ to: number; from: number } | null>(null);
   const position =
     jump &&

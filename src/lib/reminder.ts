@@ -1,7 +1,7 @@
 import { Platform } from "react-native";
 import { requireOptionalNativeModule } from "expo";
 
-// The daily reminder: a local notification, scheduled on this phone. Nothing is sent to a server and no push token is ever asked for. expo-notifications is loaded only when needed and only if this build of the app has it (importing it on an older build would crash at launch, as expo-print did, problem 51).
+// The daily reminder: a local notification scheduled on this phone, with no server and no push token. expo-notifications is loaded only if this build has it, as importing it on an older build crashes at launch (problem 51).
 
 const CHANNEL = "daily-reminder";
 

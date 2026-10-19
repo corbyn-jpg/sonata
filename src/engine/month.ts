@@ -52,7 +52,7 @@ export function linkChords(to: Composition): [Chord, Chord] {
 }
 
 /**
- One bar from the end of `from` into the start of `to`. Harmony: the next week's home chord (so itsmode is heard coming), then the dominant of the chord it opens on. Melody: the neural network walks from where the last week ended to a step away from where the next one begins.
+ One bar from the end of `from` into `to`: the next week's home chord, then the dominant of the chord it opens on, while the network walks the melody from the last week's final note to a step from the next week's first.
  */
 function link(
   from: Composition,

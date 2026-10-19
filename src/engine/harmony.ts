@@ -1,5 +1,4 @@
-// Step 2: harmonic framing. Each day's note gets a chord that contains it, chosen by a Markov chain
-// whose odds were learned from Bach's chorales (how often each chord follows each other chord).
+// Step 2, harmony: each day's note gets a chord containing it, chosen by a Markov chain learned from Bach's chorales.
 import { CHORD_MODELS } from "./model";
 import { pickWeighted } from "./random";
 import {
@@ -12,12 +11,12 @@ import {
   type WeekMode,
 } from "./theory";
 
-/** Major-key odds for bright weeks, minor-key odds for dark ones. */
+/** Major-key odds for the major modes, minor-key odds for the minor ones. */
 export const chordModelFor = (mode: WeekMode) =>
   CHORD_MODELS[mode === "ionian" || mode === "lydian" ? "major" : "minor"];
 
-// A chord sounds most like "the day's note" when that note is its root
-const ROLE_WEIGHTS = [1, 0.8, 0.6]; // root, 3rd, 5th
+// How much a chord sounds like the day's note when that note is its root, 3rd or 5th
+const ROLE_WEIGHTS = [1, 0.8, 0.6];
 
 type Option = { chord: Chord; role: number };
 

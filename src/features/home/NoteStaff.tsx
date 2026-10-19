@@ -37,7 +37,7 @@ const INDICES = LETTERS.map((_, i) => i);
 const STEPS = [-2, -1, 0, 1, 2, 3, 4];
 const MAJOR_CORES = LETTERS.map((l) => colours.orb[l].major.core);
 const MINOR_CORES = LETTERS.map((l) => colours.orb[l].minor.core);
-// 1 where the Dark page lowers the note (E♭, A♭, B♭)
+// 1 where minor lowers the note (E♭, A♭, B♭)
 const MINOR_FLATS = LETTERS.map((l) =>
   pitchOf(l, "minor").endsWith("b") ? 1 : 0,
 );
@@ -46,7 +46,7 @@ type Props = {
   cx: number;
   /** y of the top staff line */
   top: number;
-  /** 0 = Bright, 1 = Dark — animated, so colours and flats crossfade */
+  /** 0 = major, 1 = minor, animated so colours and flats crossfade. */
   page: SharedValue<number>;
   /** Carousel position, so the note glides between pitches as you swipe */
   position: SharedValue<number>;
@@ -62,8 +62,7 @@ export function NoteStaff({ cx, top, page, position }: Props) {
     interpolate(position.value, INDICES, STEPS, Extrapolation.CLAMP),
   );
   const noteY = useDerivedValue(() => bottom - (step.value * GAP) / 2);
-  // Lifted towards off-white so the darker Dark-page colours stay readable on the night sky
-  // Lifted towards off-white so the darker Dark-page colours stay readable on the night sky
+  // Lifted towards off-white so the darker minor colours stay readable on the night sky
   const colour = useDerivedValue(() =>
     mixColors(
       0.3,

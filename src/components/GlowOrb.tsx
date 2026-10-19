@@ -54,8 +54,7 @@ type OrbProps = {
 };
 
 /**
- * A glow orb drawn with Skia. Use inside a <Canvas>, so several orbs can share one GPU surface.
- * Halo: the orb at 2× with a real blur at 40% (spec). Body: two-colour radial gradient.
+ A glow orb drawn with Skia, for use inside a <Canvas> so several orbs share one GPU surface. The halo is the orb at twice its size, blurred, at 40% opacity; the body is a two-colour radial gradient.
  */
 export function Orb({
   cx,

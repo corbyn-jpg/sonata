@@ -64,9 +64,8 @@ function trimStart(audio, rate) {
   return audio.subarray(Math.max(0, start - Math.round(0.002 * rate)));
 }
 
-/**
- * Scaled so its first 1.5 s has the same average loudness (RMS) as every other sample. Recorded
- * libraries vary a lot note to note, and a chord should be balanced.
+/*
+ Scaled so its first 1.5 s matches every other sample's average loudness (RMS). Recorded libraries vary note to note, and a chord should be balanced.
  */
 function levelled(audio, rate) {
   const frames = Math.min(audio.length, Math.round(1.5 * rate));
@@ -90,9 +89,7 @@ function measureCents(audio, rate, midi) {
   return readings[Math.floor(readings.length / 2)];
 }
 
-/**
- * One reading at `start`. Looks for the note's period near where it's expected (YIN), so an overtone can't be mistaken for it. Null if the note isn't clearly periodic there.
- */
+/** One reading at `start`, searching near the expected period (YIN) so an overtone isn't mistaken for the note. Null if it isn't clearly periodic. */
 function centsAt(audio, rate, midi, start) {
   const expected = rate / frequencyOfMidi(midi); // period in frames
   const window = Math.max(1024, Math.round(expected * 8));
@@ -137,9 +134,7 @@ export function loadSamples(dir, pattern, { octave = 0, tune = true } = {}) {
   return samples;
 }
 
-/**
- `seconds` of `midi`, from the nearest recorded sample, resampled to 48 kHz. The nearest sample is at most a couple of semitones away, so the tone barely changes.
- */
+/** `seconds` of `midi` from the nearest recorded sample (a couple of semitones away at most), resampled to 48 kHz. */
 export function renderNote(samples, midi, seconds, rate = SAMPLE_RATE) {
   let nearest;
   for (const key of samples.keys())

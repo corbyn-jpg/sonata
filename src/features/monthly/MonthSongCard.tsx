@@ -28,9 +28,7 @@ type Props = {
   weeks: readonly MonthWeek[];
 };
 
-/**
- The month's song: every week with a song, joined into one piece (composeMonth). It's made the first time it's played (a few seconds, as it's several weeks long), then kept, so it plays straight away after that.
- */
+/** The month's song: every week with a song, joined into one piece. It's mixed on first play (a few seconds) and kept, so it plays at once after that. */
 export function MonthSongCard({ month, days, weeks }: Props) {
   const withSongs = useMemo(
     () => weeks.filter((w) => w.mode !== null),

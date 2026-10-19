@@ -1,4 +1,4 @@
-// South African support lines for the Oasis. Numbers and hours were checked against each organisation's own pages
+// South African support lines for the Oasis. Numbers and hours were checked against each organisation's own pages.
 
 export type Helpline = {
   id: string;

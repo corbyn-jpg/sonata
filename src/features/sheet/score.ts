@@ -1,5 +1,4 @@
-// A song as sheet music: the melody, bar by bar, with its chords named above. Built from exactly
-// what the engine composes for Weekly, Monthly and the Composer (same weeks, same seeds, same piece), so the score is the song.
+// A song as sheet music: the melody bar by bar with chord names above, built from exactly what the engine composes (same weeks, seeds and pieces), so the score is the song.
 import {
   BEATS_PER_BAR,
   composeMonth,
@@ -100,9 +99,8 @@ export function pieceScore(
 }
 
 /**
- A month's song as written: each week at its own tempo, with the link bar between weeks at the tempo
- between theirs. The monthly song is stored stretched to one tempo, so the link bars' melody is
- un-stretched back to beats here; the weeks are simply composed again (the same seed gives the same notes).
+ A month's song as written: each week at its own tempo, and each link bar at a tempo between its neighbours'. The
+ stored song is stretched to one tempo, so link bars are un-stretched here; weeks are composed again from their seeds.
  */
 export function monthScore(
   inputs: readonly MonthWeekInput[],

@@ -1,4 +1,4 @@
-// "Export my data": a readable, printable copy of everything the user has logged. Pure, so it's tested; exportMyData.ts gathers the data and prints it. Like the rest of Sonata it never shows emotion words: a check-in is its date, its note, Major or Minor, the instrument and the reflection.
+// "Export my data": a readable, printable copy of everything logged. Pure for testing; exportMyData.ts gathers and prints it. A check-in shows its date, note, major or minor, instrument and reflection, never emotion words.
 import { INSTRUMENT_LABELS, type Instrument } from "@/audio/instruments";
 import { displayName, type Letter, type Mode } from "@/data/notes";
 import { patternOf, type ThoughtRecord } from "@/features/oasis/thoughts";

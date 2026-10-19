@@ -1,11 +1,11 @@
-// Trains Sonata's composer on J.S. Bach's chorales and writes src/engine/model.generated.json.
-// Run with `npm run train:model`, then commit the JSON. Takes about a minute; results are identical every run (seeded).
+/*
+ Trains Sonata's composer on J.S. Bach's chorales and writes src/engine/model.generated.json. Run `npm run train:model` and commit the JSON; it takes about a minute and is seeded, so every run is identical.
 
-// 1. Chords: a Markov chain — counts how often each chord follows each other chord (major and minor keys separately).
-// 2. Melody: a GRU neural network trained with backpropagation to predict each next interval of Bach's soprano lines from the notes so far and the harmony underneath.
-// Both are tested on chorales they never saw during training, against simpler baselines.
+ Chords use a Markov chain of how often each chord follows another (major and minor keys separately). The melody is a GRU trained with backpropagation to predict each next interval of Bach's soprano lines from the notes so far and
+ the harmony. Both are tested against simpler baselines on chorales held out from training.
 
-// Data: JSB Chorales (Boulanger-Lewandowski et al., 2012), via github.com/czhuang/JSB-Chorales-dataset. The file isn't in the project; by default it's read from ../datasets/ beside it.
+ Data: JSB Chorales (Boulanger-Lewandowski et al., 2012), github.com/czhuang/JSB-Chorales-dataset. It isn't in the repo; by default it's read from ../datasets/.
+ */
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { INPUT_SIZE, INTERVAL_COUNT } from '../src/engine/features.ts';

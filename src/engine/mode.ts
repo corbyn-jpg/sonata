@@ -1,4 +1,4 @@
-// Step 1: mode evaluation. Reads the week's balance of Bright and Dark days and picks the mode the whole song is written in.
+// Step 1: reads the week's balance of major and minor days and picks the mode the song is written in.
 import { valenceOf } from "@/data/notes";
 import type { DayNote, WeekMode } from "./theory";
 
@@ -9,7 +9,7 @@ export const valencesOf = (days: readonly DayNote[]) =>
   days.map((d) => valenceOf(d.note, d.mode));
 
 /**
- Mostly Bright → a major mode: Lydian if the week was very bright (average valence 8+), else Ionian. Mostly Dark → a minor mode: Aeolian if the week was heavy (average below 3.5), else Dorian. An even split goes by average valence.
+ Mostly major → Lydian if very bright (average valence 8+), else Ionian. Mostly minor → Aeolian if heavy (average below 3.5), else Dorian. An even split goes by average valence.
  */
 export function evaluateMode(logged: readonly DayNote[]): WeekMode {
   const average = mean(valencesOf(logged));
@@ -21,7 +21,7 @@ export function evaluateMode(logged: readonly DayNote[]): WeekMode {
 }
 
 /**
- * Step 4: a minor week that resolves towards the positive ends on a major chord (a Picardy third), a small reward at the end of a hard week. "Resolves" means the last check-in was Bright, or the second half of the week averages at least 2 points higher than the first.
+ Step 4: a minor week that resolves upwards ends on a major chord (a Picardy third). It resolves if the last check-in was major, or the week's second half averages at least 2 points above the first.
  */
 export function endsInPicardy(
   logged: readonly DayNote[],

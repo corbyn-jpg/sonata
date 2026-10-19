@@ -20,8 +20,9 @@ type Props = {
 export function SongActions({ uri, fileName, playlistSong }: Props) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
-  const [writing, setWriting] = useState(false); // the "add a message" sheet is open
-  const [choosing, setChoosing] = useState(false); // the playlist sheet is open
+  // Whether the "add a message" sheet or the playlist sheet is open
+  const [writing, setWriting] = useState(false);
+  const [choosing, setChoosing] = useState(false);
 
   // A confirmation shows for a few seconds, then fades from the layout
   useEffect(() => {
@@ -76,7 +77,7 @@ export function SongActions({ uri, fileName, playlistSong }: Props) {
   const share = (caption: string) => {
     setWriting(false);
     run(async (song) => {
-      // Let our sheet slide away first: iPhone can't open its share sheet on top of another one
+      // Let Sonata's sheet slide away first: iPhone can't open its share sheet on top of another
       await new Promise((resolve) => setTimeout(resolve, 350));
       await shareSong(song, fileName, caption);
       return null; // the share sheet is its own confirmation

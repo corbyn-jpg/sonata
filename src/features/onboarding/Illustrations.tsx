@@ -19,7 +19,7 @@ import { NoteStaff } from "@/features/home/NoteStaff";
 import { makeDiscArt } from "@/features/weekly/discArt";
 import colours from "@/theme/colours";
 
-// The four intro pictures (wireframe 01 First launch). Each is the app's own visual, not a stock graphic: the orb, the carousel with its staff, a real record painted by the engine, and the teal orb that stands for privacy.
+// The four intro pictures from the First launch wireframe, drawn from the app's own visuals: the orb, the carousel and staff, a record painted by the engine, and the teal orb for privacy.
 
 export const ILLUSTRATION_HEIGHT = 280
 const H = ILLUSTRATION_HEIGHT;
@@ -82,8 +82,9 @@ export function OrbRow({ width }: Props) {
   const cx = width / 2;
   const cy = 130;
   const side = Math.min(width * 0.3, 110);
-  const position = useSharedValue(LETTERS.indexOf("E")); // the staff shows E, like the centre orb
-  const page = useSharedValue(0); // major
+  // The staff shows E, like the centre orb, in major
+  const position = useSharedValue(LETTERS.indexOf("E"));
+  const page = useSharedValue(0);
   const E = colours.orb.E.major;
   const D = colours.orb.D.major;
   const F = colours.orb.F.major;

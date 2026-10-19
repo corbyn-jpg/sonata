@@ -3,10 +3,7 @@ import type { Composition, DayNote } from "@/engine";
 import { drawDisc } from "./disc/scenes";
 import { skiaPainter } from "./disc/skiaPainter";
 
-/**
- The record's face for this week's song, painted once to an image so spinning it costs nothing.
-`seed` should identify the week (its Monday), so two weeks with the same notes still differ.
- */
+/** The record's face for this week's song, painted once so spinning it costs nothing. `seed` identifies the week (its Monday), so weeks with the same notes still differ. */
 export function makeDiscArt(
   days: readonly (DayNote | null)[],
   song: Composition,

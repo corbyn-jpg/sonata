@@ -45,11 +45,12 @@ import { NoteStaff } from "./NoteStaff";
 import colours from "@/theme/colours";
 
 const ORB_SIZE = 150;
-const STAFF_GAP = 35; // orb edge to top staff line
-const LABEL_GAP = STAFF_GAP + 32 + 10; // below the staff, clear of ledger lines and stems
+// Orb edge to the top staff line, and staff to the note name (clear of ledger lines and stems)
+const STAFF_GAP = 35;
+const LABEL_GAP = STAFF_GAP + 32 + 10;
 const NEIGHBOUR_SCALE = 0.6;
 const NEIGHBOUR_OPACITY = 0.35;
-const FADE = 15; // the halos fade out over this much of the canvas's top and bottom, rather than stopping at its edge
+const FADE = 15; // halos fade out over this much at the canvas's top and bottom
 const LAST = LETTERS.length - 1;
 const SPRING = { duration: 650, dampingRatio: 0.9 };
 const FLICK_VELOCITY = 500; // px/s — a quick flick moves one orb even if the drag was short
@@ -59,7 +60,7 @@ type Props = {
   mode: Mode;
   /** Fractional index of the centred orb. Shared with the atmosphere. */
   position: SharedValue<number>;
-  /** 0 = Bright, 1 = Dark — animated, so the orbs crossfade between palettes */
+  /** 0 = major, 1 = minor, animated so the orbs crossfade between palettes. */
   page: SharedValue<number>;
   focused: number;
   onFocusChange: (index: number) => void;
@@ -97,10 +98,10 @@ export function OrbCarousel({
     if (offset === 0) onSelect(LETTERS[focused]);
   };
 
-  // Rebuilt on each render (only when the focused orb changes), so it always calls the latest callbacks. Shared values use get()/set(): the React Compiler rules forbid writing .value here.
+  // Rebuilt on each render so it calls the latest callbacks. Shared values use get()/set(), as the React Compiler forbids writing .value here.
   const pan = Gesture.Pan()
     .activeOffsetX([-10, 10])
-    .failOffsetY([-15, 15]) // leave vertical swipes for the Bright/Dark pages
+    .failOffsetY([-15, 15]) // leave vertical swipes for switching between major and minor
     .onStart(() => {
       start.set(position.get());
     })
@@ -138,7 +139,7 @@ export function OrbCarousel({
 
   const letter = LETTERS[focused];
   const cx = width / 2;
-  // Centred, unless that would push the note name into the week strip below: then lift it just enough. The name's height grows with the phone's font size.
+  // Centred, unless that pushes the note name into the week strip; then lifted just enough (the name grows with the font size)
   const below = ORB_SIZE / 2 + LABEL_GAP + 16 * fontScale + 16;
   const cy = Math.max(ORB_SIZE / 2, Math.min(height / 2, height - below));
 
@@ -234,7 +235,7 @@ export function OrbCarousel({
   );
 }
 
-/** Faint orbit paths behind the orbs (spec: 5–10% opacity). */
+/** Faint orbit paths behind the orbs, at 5–10% opacity. */
 function Orbits({ cx, cy, width }: { cx: number; cy: number; width: number }) {
   const origin = vec(cx, cy);
   return (
@@ -345,7 +346,7 @@ const CarouselOrb = memo(function CarouselOrb({
     );
   }, [isSelected, pulse]);
 
-  // Blend between the Bright and Dark palettes as the page toggles
+  // Blend between the major and minor palettes as the toggle moves
   const { major, minor } = colours.orb[letter];
   const core = useDerivedValue(() =>
     mixColors(page.value, major.core, minor.core),

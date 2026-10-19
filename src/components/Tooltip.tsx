@@ -26,13 +26,13 @@ import * as Haptics from "expo-haptics";
 import { Info } from "lucide-react-native";
 import colours from "@/theme/colours";
 
-// A label tip names an icon-only button and shows on a long-press (the button's accessibilityLabel already gives screen
-// readers the same name). A popup tip is an "i" that explains an idea. Both stay open until a tap anywhere (or Back),
-// so there's time to read them, and only one shows at a time. They're drawn in a native Modal, like the bottom sheets,
-// so they always sit above every screen and can't lose the touch to the screens underneath.
+/*
+ A label tip names an icon-only button on long-press; a popup tip is an "i" that explains an idea. Both stay open until a tap anywhere (or Back), only one shows at a time, and both are drawn in a native Modal so they sit above every screen.
+ */
 
-const EDGE = 12; // from the screen's edges
-const GAP = 8; // between the trigger and the bubble's arrow
+// Points from the screen's edges, and between the trigger and the bubble's arrow
+const EDGE = 12;
+const GAP = 8;
 const ARROW = 10;
 
 type Anchor = { x: number; y: number; width: number; height: number };
@@ -232,9 +232,10 @@ export function TooltipHost() {
     </Text>
   );
 
-  // First an invisible copy, only to learn the bubble's size so it can be placed. The real bubble mounts once that's
-  // known, and only it fades in: putting the fade-in on a view whose own opacity starts at 0 left it invisible (the
-  // animation finished on the opacity the view had when it began), so tips vanished as soon as they appeared.
+  /*
+   An invisible copy measures the bubble first; the real one mounts once its size is known, and only it fades in. A
+   fade-in on a view whose own opacity started at 0 left tips invisible.
+   */
   const bubble: ReactNode = !measured ? (
     <View
       onLayout={onLayout}

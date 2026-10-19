@@ -24,11 +24,13 @@ import colours from "@/theme/colours";
 import { clock } from "./songTime";
 
 const DISC = 220;
-const RING = DISC / 2 + 14; // progress ring radius, just outside the disc
-const SIZE = 2 * (RING + 40); // room for the ring's glow and the knob
+// The progress ring's radius (just outside the disc), and the canvas size (room for its glow and knob)
+const RING = DISC / 2 + 14;
+const SIZE = 2 * (RING + 40);
 const C = SIZE / 2;
-const SPIN = (2 * Math.PI) / 40; // one turn every 40 s while playing
-const GRAB = 32; // how far from the ring a touch still counts as grabbing it
+// One turn every 40 s while playing; a touch this close to the ring grabs it
+const SPIN = (2 * Math.PI) / 40;
+const GRAB = 32;
 // The progress ring, drawn once: a full circle starting at 12 o'clock
 const RING_PATH = Skia.PathBuilder.Make()
   .addArc(Skia.XYWHRect(C - RING, C - RING, 2 * RING, 2 * RING), -90, 359.9)
@@ -84,7 +86,7 @@ export function SongDisc({
     total.set(duration);
   }, [duration, total]);
 
-  // The player reports coarsely; between reports the ring moves on by itself, so only correct it when it has drifted (or after a seek)
+  // The player reports coarsely and the ring moves on by itself in between, so it's only corrected when it drifts or after a seek
   useEffect(() => {
     if (scrubbing.get() || duration <= 0) return;
     const reported = Math.min(1, currentTime / duration);

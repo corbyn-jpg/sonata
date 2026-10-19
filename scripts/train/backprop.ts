@@ -157,8 +157,7 @@ export function clipGradients(g: Params, maxNorm: number) {
   for (const name of PARAMETERS) for (let i = 0; i < g[name].length; i++) g[name][i] *= maxNorm / norm;
 }
 
-/** The Adam optimiser: gradient descent with momentum and a per-weight step size. */
-// (Plain fields rather than `private` constructor parameters, which Node can't run directly.)
+/** The Adam optimiser: gradient descent with momentum and a per-weight step size. Plain fields rather than `private` constructor parameters, which Node can't run directly. */
 export class Adam {
   private m: Params;
   private v: Params;

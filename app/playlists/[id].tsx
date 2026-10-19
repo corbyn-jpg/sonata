@@ -53,7 +53,6 @@ export default function PlaylistScreen() {
       void renamePlaylist(id, name);
   };
 
-  // Removing a song can be undone, so it happens straight away with an Undo rather than a question first
   const insets = useSafeAreaInsets();
   const [removed, setRemoved] = useState<{
     index: number;

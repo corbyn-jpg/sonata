@@ -7,9 +7,7 @@ import { addDays, dayKey, startOfDay } from "@/lib/dates";
 // Dismissing is remembered only until the app closes, and never stored or sent anywhere.
 let dismissedThisSession = false;
 
-/**
- Whether to gently offer a grounding moment: 4 or more Dark check-ins in a row within the last 7 calendar days (missed days skipped).
- */
+/** Whether to gently offer a grounding moment: 4 or more minor check-ins in a row within the last 7 days (missed days skipped). */
 export function useLowMoodOffer() {
   const [heavy, setHeavy] = useState(false);
   const [dismissed, setDismissed] = useState(dismissedThisSession);

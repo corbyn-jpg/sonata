@@ -2,8 +2,7 @@ import type { Instrument } from "@/audio/instruments";
 import type { Piece } from "@/engine";
 import { sealedCollection, type Opened } from "@/lib/sealedCollection";
 
-// Composer pieces, offline-first and encrypted like everything else the user makes (sealedCollection.ts). Firestore
-// only sees who owns a piece and when it last changed.
+// Composer pieces, offline-first and encrypted like everything the user makes (sealedCollection.ts). Firestore only sees who owns a piece and when it last changed.
 
 export type PieceContent = {
   name: string;

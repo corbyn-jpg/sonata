@@ -10,8 +10,9 @@ import {
 } from "@/data/notes";
 import colours from "@/theme/colours";
 
-const ROWS = [...LETTERS].reverse(); // the highest note at the top, as on a staff
-const CELL = 44; // the minimum tap target
+// The highest note at the top, as on a staff; each cell is the 44 pt minimum tap target
+const ROWS = [...LETTERS].reverse();
+const CELL = 44;
 const GAP = 4;
 const BAR_GAP = 12; // a wider gap before each new bar, so the four bars read at a glance
 

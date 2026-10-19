@@ -4,7 +4,7 @@ import type { Week } from "./theory";
 export const LOW_MOOD_RUN = 4;
 
 /**
- True when 4 or more logged check-ins in a row were Dark, within the last 7 calendar days (pass them oldest first). A missed day is skipped: it neither breaks the run nor counts towards it.
+ True when 4 or more logged check-ins in a row were minor, within the last 7 days (oldest first). A missed day neither breaks the run nor counts towards it.
  */
 export function hasLowMoodRun(lastSevenDays: Week): boolean {
   let run = 0;

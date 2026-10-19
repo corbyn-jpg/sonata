@@ -1,6 +1,4 @@
-// Every song the user's check-ins make, to pick from on the Sheet music screen. Uses the same weeks
-// and seeds as Weekly and Monthly (summariseMonth, the Monday's date, the 1st of the month), so a
-// score is always the song as it sounds there.
+// Every song the check-ins make, for the Sheet music screen. Uses the same weeks and seeds as Weekly and Monthly, so a score always matches the song as it sounds there.
 import { mostUsedInstrument, type Instrument } from "@/audio/instruments";
 import type { MonthWeekInput, Piece, Week } from "@/engine";
 import {

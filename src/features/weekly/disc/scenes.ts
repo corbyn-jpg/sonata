@@ -8,11 +8,12 @@ import type { Painter, Point } from "./painter";
 
 export type Scene = "solarSystem" | "aurora" | "comets" | "eclipse";
 
+// Orderly orbits for Ionian, floating ribbons of light for Lydian, comets for Dorian, and an eclipse (a dark centre ringed with light) for Aeolian
 export const SCENE_FOR_MODE: Record<WeekMode, Scene> = {
-  ionian: "solarSystem", // steady and bright: orderly orbits
-  lydian: "aurora", // ethereal: floating ribbons of light
-  dorian: "comets", // thoughtful: journeys in motion
-  aeolian: "eclipse", // heavy: a dark centre with light all around it
+  ionian: "solarSystem",
+  lydian: "aurora",
+  dorian: "comets",
+  aeolian: "eclipse",
 };
 
 export type Orb = { core: string; edge: string };
@@ -217,8 +218,9 @@ const SCENES: Record<Scene, (ctx: Context) => void> = {
     stardust(ctx, 220);
     for (const day of logged(week)) {
       const radius = r * (0.4 + day.day * 0.08);
-      const head = -90 + (day.day * 360) / 7 + (random() - 0.5) * 30; // spread round the week like a clock
-      const length = 50 + valenceOf(day.note, day.mode) * 8; // degrees of tail
+      // Heads spread round the week like a clock; brighter days get longer tails (in degrees)
+      const head = -90 + (day.day * 360) / 7 + (random() - 0.5) * 30;
+      const length = 50 + valenceOf(day.note, day.mode) * 8;
       const { core } = orbOf(day);
       // The tail: overlapping arcs, wider and brighter towards the head
       for (let k = 0; k < 12; k++) {

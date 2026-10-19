@@ -8,10 +8,7 @@ import {
 } from "@shopify/react-native-skia";
 
 type Props = ViewProps & {
-  /**
-   The corner glow's two colours (inner, outer). Only for a card whose colours mean something (a song's own
-   palette); a glow on every card is decoration, so most cards go without and stand out by their lighter surface.
-   */
+  /** Corner glow colours (inner, outer), only for cards whose colours mean something, like a song's palette. */
   glow?: [string, string];
   /** Extra classes, e.g. a fixed height or flex-1 for half-width cards. */
   className?: string;

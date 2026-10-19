@@ -21,7 +21,7 @@ type Props = {
 };
 
 /**
- A sheet that rises from the bottom over a dimmed backdrop; tapping the backdrop closes it. Every sheet in the app uses this. Android draws apps edge to edge, under the navigation bar (gestures or the three buttons), and the bar's height differs between phones, so the bottom padding is the bar's real height plus SPACE rather than a fixed number: nothing ever sits under the bar.
+ A sheet that rises from the bottom over a dimmed backdrop; tapping the backdrop closes it. Android draws apps edge to edge under a navigation bar whose height varies by phone, so the bottom padding is that bar's height plus SPACE.
  */
 export function BottomSheet({
   visible,

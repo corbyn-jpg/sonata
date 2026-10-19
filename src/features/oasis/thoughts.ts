@@ -1,5 +1,4 @@
-// A thought record (a CBT reframe): what happened, the thought it brought, an optional thinking
-// pattern, and a kinder, more balanced thought. Pure, so it's tested; stored by lib/thoughtRecords.ts.
+// A thought record (a CBT reframe): what happened, the thought, an optional thinking pattern and a kinder, balanced thought. Pure for testing; stored by lib/thoughtRecords.ts.
 
 /** Common thinking patterns, each with one plain line on what it means. Picked from chips, never typed. */
 export const PATTERNS = [

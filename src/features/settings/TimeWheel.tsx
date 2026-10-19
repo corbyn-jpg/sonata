@@ -1,7 +1,3 @@
-/* Hallmark · component: time wheel · genre: atmospheric · theme: Sonata tokens (src/theme/colours.js)
- * states: default · active (dragging, tick per row) · focus (screen-reader focus, adjustable) · disabled, loading,
- * error, success: n/a, the wheel always holds a valid time and the sheet's Set time button saves it
- */
 import { useEffect, useMemo, useRef } from "react";
 import {
   Pressable,
@@ -18,8 +14,7 @@ import * as Haptics from "expo-haptics";
 /** Height of one row (also its tap target); the wheel shows five, with the chosen one in the middle. */
 export const WHEEL_ROW = 52;
 export const WHEEL_ROWS = 5;
-// The numbers repeat so the wheel turns past 59 back to 00, like a phone's alarm clock; after each spin it
-// quietly re-centres on the middle copy, so it never runs out in either direction
+// The numbers repeat so the wheel turns past 59 back to 00; after each spin it re-centres on the middle copy, so it never runs out
 const COPIES = 5;
 // A slow drag that's let go without a flick may never get a momentum event, so settle on the drag's end too
 const SETTLE_AFTER_DRAG_MS = 120;

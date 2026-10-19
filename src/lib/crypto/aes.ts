@@ -1,16 +1,17 @@
 import { gcm } from "@noble/ciphers/aes.js";
 import { bytesToHex, hexToBytes } from "@noble/ciphers/utils.js";
 
-export const KEY_BYTES = 32; // AES-256
-export const IV_BYTES = 12; // GCM standard nonce
+// An AES-256 key, and GCM's standard 12-byte nonce
+export const KEY_BYTES = 32;
+export const IV_BYTES = 12;
 
-/** Field names match the Firestore documents. */
+/** Field names match the Firestore documents. Both are hex; the payload is the ciphertext plus its 16-byte auth tag. */
 export type Sealed = {
-  encrypted_payload: string; // hex: ciphertext + 16-byte auth tag
-  initialization_vector_iv: string; // hex
+  encrypted_payload: string;
+  initialization_vector_iv: string;
 };
 
-// UTF-8 via encodeURIComponent so we don't depend on TextDecoder in Hermes
+// UTF-8 via encodeURIComponent, so it doesn't depend on TextDecoder in Hermes
 const toBytes = (text: string) =>
   Uint8Array.from(encodeURIComponent(text), (ch) => ch.charCodeAt(0));
 const fromBytes = (bytes: Uint8Array) =>

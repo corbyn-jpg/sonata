@@ -26,11 +26,11 @@ const CHOICES: { note: Letter; mode: Mode; valence: number }[] = LETTERS.flatMap
   (["major", "minor"] as const).map((mode) => ({ note, mode, valence: valenceOf(note, mode) })),
 );
 
-// Mostly piano, as most people leave the default, with a change of instrument now and then
-const INSTRUMENT_WEIGHTS = [5, 1.5, 2, 1.5]; // piano, violin, harp, flute
+// Weights for piano, violin, harp and flute: mostly piano, as most people keep the default
+const INSTRUMENT_WEIGHTS = [5, 1.5, 2, 1.5];
 
 /**
- A believable stretch of check-ins from `from` up to `to`: most evenings logged, the odd day missed, and the days drifting brighter and darker in runs, as real weeks do, rather than jumping at random. Days already in `taken` (day keys of real check-ins) are left alone.
+ A believable stretch of check-ins from `from` up to `to`: most evenings logged, the odd day missed, and runs of brighter and darker days. Days in `taken` (real check-ins) are left alone.
  */
 export function sampleEntries(from: Date, to: Date, taken: ReadonlySet<string>): CheckinEntry[] {
   const random = seededRandom(hashString(`samples-${dayKey(from)}`));

@@ -14,8 +14,9 @@ const d = (note: Letter, mode: Mode): DayNote => ({ note, mode });
 const B = (note: Letter) => d(note, "major");
 const D = (note: Letter) => d(note, "minor");
 
-const BRIGHT: Week = [B("C"), B("E"), B("G"), B("F"), B("D"), B("G"), B("C")]; // quick
-const HEAVY: Week = [D("C"), D("E"), D("G"), D("B"), D("C"), D("A"), D("G")]; // slow
+// A quick week and a slow one
+const BRIGHT: Week = [B("C"), B("E"), B("G"), B("F"), B("D"), B("G"), B("C")];
+const HEAVY: Week = [D("C"), D("E"), D("G"), D("B"), D("C"), D("A"), D("G")];
 const MIXED: Week = [B("A"), null, D("D"), B("G"), null, D("F"), B("E")];
 const EMPTY: Week = Array(7).fill(null);
 

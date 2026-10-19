@@ -1,5 +1,4 @@
-// A score as MusicXML 4.0, the format MuseScore, Sibelius, Dorico and Finale all open. Uses the same
-// bars, accidentals and beams as the drawn score (notation.ts), so both say exactly the same thing.
+// A score as MusicXML 4.0 (opens in MuseScore, Sibelius, Dorico and Finale), with the same bars, accidentals and beams as the drawn score.
 import type { Chord } from "@/engine";
 import { engraveBar, spellClass, type Item } from "./notation";
 import type { Score } from "./score";

@@ -13,11 +13,11 @@ import { INSTRUMENTS, INSTRUMENT_LABELS, type Instrument } from "@/audio";
 import { BottomSheet } from "@/components/BottomSheet";
 import colours from "@/theme/colours";
 
-// Lucide has no violin or harp, so these suggest the sound instead
+// Lucide has no violin or harp, so these suggest the sound: a long bowed note, and a light pluck
 const ICONS: Record<Instrument, LucideIcon> = {
   piano: Piano,
-  violin: AudioWaveform, // a long bowed note
-  harp: Feather, // light, plucked
+  violin: AudioWaveform,
+  harp: Feather,
   flute: Wind,
 };
 

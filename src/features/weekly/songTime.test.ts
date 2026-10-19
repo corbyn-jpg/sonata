@@ -20,9 +20,10 @@ describe("songTime", () => {
   });
 
   it("goes back to the start of the day, or to the day before if already at the start", () => {
-    expect(previousBarStart(10, TEMPO)).toBe(8); // mid-Wednesday → start of Wednesday
-    expect(previousBarStart(8.5, TEMPO)).toBe(4); // just into Wednesday → Tuesday
-    expect(previousBarStart(0.5, TEMPO)).toBe(0); // can't go before Monday
+    // Back goes to the start of the day, or to the day before when just past its start, but never before Monday
+    expect(previousBarStart(10, TEMPO)).toBe(8);
+    expect(previousBarStart(8.5, TEMPO)).toBe(4);
+    expect(previousBarStart(0.5, TEMPO)).toBe(0);
   });
 
   it("keeps going forward after a jump the player rounded down to the millisecond", () => {

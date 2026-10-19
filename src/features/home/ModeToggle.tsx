@@ -3,8 +3,7 @@ import { Music2, Music4 } from "lucide-react-native";
 import type { Mode } from "@/data/notes";
 import colours from "@/theme/colours";
 
-// Named for what they are musically. "Bright" and "Dark" with a sun and moon read as light/dark
-// mode in user testing, so the labels say Major and Minor and the icons are notes, not a theme.
+// Labelled by what they are musically: "Bright" and "Dark" with a sun and moon read as a theme switch in user testing.
 const OPTIONS = [
   {
     mode: "major",

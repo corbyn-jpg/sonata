@@ -51,8 +51,9 @@ function greeting() {
 
 export default function Home() {
   const [mode, setMode] = useState<Mode>("major");
-  const page = useSharedValue(0); // 0 = Bright, 1 = Dark
-  const isFocused = useIsFocused(); // pause the sky while another tab is showing
+  // The toggle's position (0 = major, 1 = minor); the sky pauses while another tab is showing
+  const page = useSharedValue(0);
+  const isFocused = useIsFocused();
   const position = useSharedValue(START_INDEX);
   const [focused, setFocused] = useState(START_INDEX);
   const [selected, setSelected] = useState<Letter | null>(null);
@@ -69,7 +70,7 @@ export default function Home() {
   // Load the chosen instrument's sounds now, so the first swipe plays without a delay
   useEffect(() => preloadChords(instrument), [instrument]);
 
-  // Wash colour follows the carousel, and crossfades to the Dark palette (and dims) with the toggle
+  // The wash follows the carousel and crossfades (and dims) to the minor palette with the toggle
   const glow = useDerivedValue(() => {
     const bright = interpolateColors(position.value, INDICES, MAJOR_CORES);
     const dark = interpolateColors(position.value, INDICES, MINOR_CORES);
@@ -78,7 +79,7 @@ export default function Home() {
       bright[0] + (dark[0] - bright[0]) * t,
       bright[1] + (dark[1] - bright[1]) * t,
       bright[2] + (dark[2] - bright[2]) * t,
-      1 - 0.35 * t, // dimmer wash on the Dark page
+      1 - 0.35 * t, // dimmer in minor
     ];
   });
 
@@ -131,7 +132,7 @@ export default function Home() {
     AccessibilityInfo.announceForAccessibility("Check-in saved"); // sighted users see the dot and the button change
     setSelected(null);
     setReflection("");
-    // addDoc only resolves once the server confirms, so don't wait on it (offline writes are queued)
+    // Not awaited: the check-in is saved on the phone and uploaded in the background
     saveCheckin(selected, mode, instrument, reflection).catch(() => {
       logToday(null);
       setStatus("error");
@@ -172,7 +173,7 @@ export default function Home() {
         <Sky
           glow={glow}
           animated={isFocused}
-          pace={mode === "minor" ? 1.6 : 1} // calmer stars on the Dark page
+          pace={mode === "minor" ? 1.6 : 1} // calmer stars in minor
         />
       }
       header={
@@ -230,7 +231,7 @@ export default function Home() {
               {todayLogged ? "Checked in for today" : "Save check-in"}
             </Text>
           </Pressable>
-          {/* One quiet line: a failure, or, once checked in, the way to choose again. It keeps the same height either way, so the orb doesn't move. */}
+          {/* A failure, or once checked in, the way to choose again. Same height either way, so the orb doesn't move. */}
           {todayLogged && status === "idle" ? (
             <Pressable
               onPress={changeToday}
