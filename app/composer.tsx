@@ -70,7 +70,7 @@ const snapshotOf = ({ name, instrument, piece }: PieceContent) =>
   ]);
 
 /**
- Custom Composer: a functional screen (flat, no washes, §6). The user writes a tune on the grid and hears it on their
+ Custom Composer: a functional screen (flat, no washes). The user writes a tune on the grid and hears it on their
  instrument, with the engine's harmony underneath if they want it, then saves it to their pieces or a playlist.
  */
 export default function Composer() {

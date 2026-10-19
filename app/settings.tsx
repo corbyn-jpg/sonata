@@ -49,7 +49,7 @@ const switchColours = {
   thumbColor: colours.textPrimary,
 };
 
-/** Settings & data privacy: flat, no washes (a functional screen, §6). */
+/** Settings & data privacy: flat, no washes (a functional screen). */
 export default function Settings() {
   const feelNotes = usePreference("feelNotes");
   const reminder = usePreference("reminder");

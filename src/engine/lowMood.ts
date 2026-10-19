@@ -1,4 +1,4 @@
-// Low-mood detection (CLAUDE.md §7). Only decides whether to *offer* the grounding sheet on the Weekly tab. It never diagnoses, and nothing about it is stored.
+// Low-mood detection. Only decides whether to *offer* the grounding sheet on the Weekly tab. It never diagnoses, and nothing about it is stored.
 import type { Week } from "./theory";
 
 export const LOW_MOOD_RUN = 4;

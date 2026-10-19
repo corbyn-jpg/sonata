@@ -1,4 +1,4 @@
-// The on-device symbolic AI (CLAUDE.md §7): pure TypeScript, no network, no React.
+// The on-device symbolic AI: pure TypeScript, no network, no React.
 export {
   composeWeek,
   paletteOf,

@@ -1,4 +1,4 @@
-// Turning the engine's notes into notation. Everything Sonata writes is in C (CLAUDE.md §7), so a
+// Turning the engine's notes into notation. Everything Sonata writes is in C, so a
 // score has no key signature: a note outside C major carries its own accidental, as on any lead
 // sheet in C. Pure, so it's tested; drawn by svg.ts and exported by musicxml.ts.
 import type { Chord } from "@/engine";

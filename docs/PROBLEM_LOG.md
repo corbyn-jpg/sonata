@@ -1,6 +1,6 @@
 # Sonata problem log
 
-Every problem hit while building Sonata: what we saw, why it happened and how it was fixed. Grouped by build stage (CLAUDE.md §8), oldest first. New problems are added as they come up.
+Every problem hit while building Sonata: what we saw, why it happened and how it was fixed. Grouped by build stage, oldest first. New problems are added as they come up.
 
 Each entry has:
 
@@ -269,7 +269,7 @@ Each entry has:
 ### 50. Parts of the app looked AI-generated (Hallmark design audit)
 - **Seen:** every bento card had the same two-tone corner glow; the Oasis cards were an icon in a tile above a heading; the Monthly bento was three matching stat tiles; the tab bar was the stock edge-to-edge bar, not the capsule from the mockups; removing a playlist song asked "Are you sure?"; Home showed "Check-in saved" when the button already said so; "COMPOSING" was a spaced-out uppercase label; the Save button used pure white.
 - **Cause:** each was a default pattern (the template card, the KPI row, the stock tab bar, the confirm dialog) rather than a choice made for Sonata. The glow colours were picked per card, so they meant nothing.
-- **Fix:** `BentoCard`'s glow is optional and kept only where the colours mean something; the Oasis became a bento where size follows content, with helplines as a plain link below it; the Monthly bento is one card with the chart and a line of figures; `CapsuleTabBar` draws the floating capsule; removing a song happens straight away with a 5 s Undo (`restoreSong`, `withSongAt`); success is silent (announced to screen readers); "Composing…" in sentence case; `text-primary` instead of white. CLAUDE.md §5, §6 and §12 updated, and its colour tokens now match `colours.js`.
+- **Fix:** `BentoCard`'s glow is optional and kept only where the colours mean something; the Oasis became a bento where size follows content, with helplines as a plain link below it; the Monthly bento is one card with the chart and a line of figures; `CapsuleTabBar` draws the floating capsule; removing a song happens straight away with a 5 s Undo (`restoreSong`, `withSongAt`); success is silent (announced to screen readers); "Composing…" in sentence case; `text-primary` instead of white.
 - **Lesson:** a decoration on every card means nothing on any of them. Before reaching for a familiar pattern, check the content asks for it.
 
 ### 51. "Cannot find native module 'ExpoPrint'" and "Route ./sheet-music.tsx is missing the required default export"

@@ -14,7 +14,7 @@ import { BackHeader } from "@/components/BackHeader";
 import { Screen } from "@/components/Screen";
 import { Sky } from "@/components/Sky";
 import { BREATHING_SIZE, BreathingOrb } from "@/features/oasis/BreathingOrb";
-import { breathAt, CYCLES, EXHALE, INHALE, stepOf, type BreathPhase } from "@/features/oasis/breathing";
+import { breathAt, CYCLES, stepOf, type BreathPhase } from "@/features/oasis/breathing";
 
 type Session = "ready" | "running" | "paused" | "done";
 

@@ -10,7 +10,7 @@ type Props = {
   /** A switch or other control on the right. Rows with `onPress` and no `right` get a chevron. */
   right?: ReactNode;
   onPress?: () => void;
-  /** Muted red, for Delete all data (never a solid red button, §6). */
+  /** Muted red, for Delete all data (never a solid red button). */
   danger?: boolean;
 };
 
