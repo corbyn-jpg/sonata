@@ -359,3 +359,9 @@ Each entry has:
 - **Cause:** several modules build Skia shapes as soon as they're imported, before Skia's web engine has loaded; the dynamic `import()` used to wait for it isn't supported by Metro's lazy development bundles; NativeWind's web runtime throws when dark mode is left on "media"; Firebase's browser build has no React Native persistence; and react-native-share has no web build at all.
 - **Fix:** `index.web.js` loads CanvasKit first and then `require`s the app; Tailwind's `darkMode` is "class" (Sonata uses no `dark:` classes); sign-in persistence and the encryption key's storage each have a `.web.ts` version (browser storage); sharing goes through `@/lib/share`, which is react-native-share on the phone and a placeholder on the web until its web version is built.
 - **Lesson:** for a web build, find every native-only import first and give it a platform file, rather than fixing crashes one at a time.
+
+### 65. Songs couldn't be made in the browser, and calming sounds stopped after one play
+- **Seen:** on the web, Weekly stayed on "Composing…" and then said the song couldn't be made; calming sounds played once instead of looping.
+- **Cause:** songs were read from and written to the phone's file system, which doesn't exist in a browser. In the browser's audio player, replacing the sound also resets looping, whereas on the phone it carries over. (Metro also took a restart to notice the new `.web.ts` file, as its file watcher is slow on Google Drive.)
+- **Fix:** `song.web.ts` fetches each instrument's samples over HTTP, mixes the song with the same `mixer.ts`, and plays it from an in-memory blob URL; `ACCOMPANIMENT` moved to `instruments.ts` so both versions share it. `useCalmingSound` turns looping on again after each sound is loaded, which changes nothing on the phone.
+- **Lesson:** keep the maths shared and put only the I/O behind a platform file; and when a new platform file seems ignored, restart Metro before debugging the code.

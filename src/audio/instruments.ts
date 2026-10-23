@@ -9,6 +9,14 @@ export const INSTRUMENT_LABELS: Record<Instrument, string> = {
   flute: "Flute",
 };
 
+/** Who plays the chords and bass under each melody instrument (violin and flute can't go that low). */
+export const ACCOMPANIMENT: Record<Instrument, Instrument> = {
+  piano: "piano",
+  violin: "piano",
+  harp: "harp",
+  flute: "harp",
+};
+
 export const isInstrument = (value: unknown): value is Instrument =>
   INSTRUMENTS.includes(value as Instrument);
 

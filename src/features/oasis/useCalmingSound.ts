@@ -6,7 +6,7 @@ import type { CalmingSound } from "./calmingSounds";
 
 // Settings go on the player itself; they live out here because a hook's return value can't be changed inside the hook
 
-/** Calming sounds always loop, and looping carries over when the sound is replaced. */
+/** Calming sounds always loop. On the phone looping carries over when the sound is replaced; in the browser it doesn't. */
 function setLooping(player: AudioPlayer) {
   player.loop = true;
 }
@@ -14,6 +14,7 @@ function setLooping(player: AudioPlayer) {
 /** Load a sound at its own volume, so every sound plays at the same loudness. */
 function load(player: AudioPlayer, sound: CalmingSound) {
   player.replace(sound.source);
+  setLooping(player); // in the browser, a replaced sound starts with looping off
   player.volume = sound.volume;
 }
 

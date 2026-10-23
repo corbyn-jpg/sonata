@@ -1,8 +1,8 @@
-// Renders a week's song to a WAV file on the phone (cached), ready to play or share.
+// Renders a week's song to a WAV file on the phone (cached), ready to play or share. The web uses song.web.ts.
 import { Asset } from "expo-asset";
 import { File, Paths } from "expo-file-system";
 import { NOTE_RATE, NOTES } from "./chords.generated";
-import type { Instrument } from "./instruments";
+import { ACCOMPANIMENT, type Instrument } from "./instruments";
 import {
   decodeWav,
   encodeWav,
@@ -10,14 +10,6 @@ import {
   type NoteSample,
   type Playable,
 } from "./mixer";
-
-/** Who plays the chords and bass under each melody instrument (violin and flute can't go that low). */
-export const ACCOMPANIMENT: Record<Instrument, Instrument> = {
-  piano: "piano",
-  violin: "piano",
-  harp: "harp",
-  flute: "harp",
-};
 
 // Each instrument's notes are decoded once, then kept for the session
 const loaded = new Map<Instrument, Promise<NoteSample[]>>();

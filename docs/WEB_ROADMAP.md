@@ -23,11 +23,11 @@ Run it with `node scripts/web.mjs` (or `node scripts/web.mjs build` to export it
 
 ## Phase 2: Sound
 
-- [ ] Orb chords and chimes play in the browser
-- [ ] Songs are mixed in the browser and played from memory instead of a file on the phone
-- [ ] Unlock sound on the first tap, since browsers block it until then
-- [ ] Each instrument's sounds load only when they're first needed, so the first visit stays quick
-- [ ] Weekly and monthly songs, the Composer, playlists, calming sounds and the breathing chimes all play
+- [x] Orb chords and chimes play in the browser
+- [x] Songs are mixed in the browser and played from memory instead of a file on the phone (`song.web.ts`)
+- [ ] Unlock sound on the first tap: works in Chrome, where the first swipe or tap counts; check iPhone Safari, which is stricter, in phase 6
+- [x] Each instrument's sounds load only when they're first needed, so the first visit stays quick
+- [x] Weekly and monthly songs, the Composer, calming sounds (looping) and the breathing chimes all play; playlists use the same song code and get a full run-through in phase 6
 
 ## Phase 3: Features that work differently
 
