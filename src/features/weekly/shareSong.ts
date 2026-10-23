@@ -1,5 +1,5 @@
 import { Directory, File, Paths } from "expo-file-system";
-import Share from "react-native-share";
+import Share from "@/lib/share";
 
 // The song is rendered to the cache under an internal name (song-<week>-<hash>-piano.wav). Before it leaves the app it gets a proper name, so it reads well in WhatsApp, email or the Files app.
 

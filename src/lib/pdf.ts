@@ -1,6 +1,6 @@
 import { requireOptionalNativeModule } from "expo";
 import { Directory, File, Paths } from "expo-file-system";
-import Share from "react-native-share";
+import Share from "@/lib/share";
 
 // PDFs (sheet music, Export my data) are made on the phone and leave through the share sheet. Nothing is uploaded by Sonata. expo-print is loaded only when needed and only if this build has it (problem 51).
 

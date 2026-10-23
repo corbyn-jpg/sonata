@@ -1,6 +1,6 @@
 import { getRandomBytes } from "expo-crypto";
 import { File } from "expo-file-system";
-import Share from "react-native-share";
+import Share from "@/lib/share";
 import { LETTERS } from "@/data/notes";
 import type { ThoughtRecord } from "@/features/oasis/thoughts";
 import { lockBackup, unlockBackup } from "@/lib/backupFile";

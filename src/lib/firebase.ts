@@ -1,11 +1,7 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
-import {
-  initializeAuth,
-  getReactNativePersistence,
-  getAuth,
-} from "firebase/auth";
+import { initializeAuth, getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { authPersistence } from "@/lib/authPersistence";
 
 // The web config isn't secret: access is controlled by the Firestore security rules
 const firebaseConfig = {
@@ -22,9 +18,7 @@ const isFirstInit = getApps().length === 0;
 const app = isFirstInit ? initializeApp(firebaseConfig) : getApp();
 
 export const auth = isFirstInit
-  ? initializeAuth(app, {
-      persistence: getReactNativePersistence(AsyncStorage),
-    })
+  ? initializeAuth(app, { persistence: authPersistence })
   : getAuth(app);
 
 export const db = getFirestore(app);

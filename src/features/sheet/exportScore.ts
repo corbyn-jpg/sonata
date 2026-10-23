@@ -1,4 +1,4 @@
-import Share from "react-native-share";
+import Share from "@/lib/share";
 import { shareAsPdf, shareFile } from "@/lib/pdf";
 import { scoreToMusicXml } from "./musicxml";
 import type { Score } from "./score";

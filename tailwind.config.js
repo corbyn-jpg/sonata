@@ -4,6 +4,9 @@ const c = require('./src/theme/colours');
 module.exports = {
   content: ['./app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
   presets: [require('nativewind/preset')],
+  // Sonata is always dark and uses no dark: classes. "class" stops NativeWind's web runtime from throwing
+  // when it tries to follow the browser's colour scheme ("media" can't be set manually).
+  darkMode: 'class',
   theme: {
     extend: {
       backgroundColor: { canvas: c.canvas, surface: c.surface, 'surface-raised': c.surfaceRaised },
