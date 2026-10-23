@@ -14,7 +14,7 @@ Get the app opening and navigating in a browser, even if some features don't wor
 - [x] Stop phone-only modules crashing on import:
   - Secure storage: the encryption key uses browser storage (`keyStore.web.ts`)
   - Sign-in: Firebase keeps it in browser storage (`authPersistence.web.ts`)
-  - Sharing: `@/lib/share`, a placeholder on the web until phase 3
+  - Sharing: web versions of the share, PDF and file code (phase 3)
   - Notifications, printing, the file system and haptics load without crashing; their web behaviour is phases 2 and 3
 - [x] Every tab and screen opens without an error
 - [x] A check-in saves, encrypted, and uploads to Firestore from the browser
@@ -31,13 +31,14 @@ Run it with `node scripts/web.mjs` (or `node scripts/web.mjs build` to export it
 
 ## Phase 3: Features that work differently
 
-- [ ] **Export as PDF** (sheet music and Export data) opens the browser's print dialog, ready to "Save as PDF"
-- [ ] **Share a song** uses the browser's share menu on phones, and downloads the file on laptops
-- [ ] **Save a song, back up, restore** become a download and a file picker
-- [ ] **Daily reminder** is hidden, because browsers can't schedule it
-- [ ] **Feel notes** is hidden, because iPhone browsers can't vibrate
-- [ ] A short note in Settings says these two are on the Android app
-- [ ] Arrow keys move the orb carousel on a laptop, alongside click-and-drag
+- [x] **Export as PDF** (sheet music and Export data) opens the browser's print dialog, ready to "Save as PDF"
+- [x] **Share a song** uses the browser's share menu on phones, and downloads the file on laptops (the download is checked; the phone share menu is checked in phase 6)
+- [x] **Back up, restore and MusicXML** become a download and a file picker. Save a song stays Android-only: in the browser, Share already downloads it or offers "Save to Files"
+- [x] **Daily reminder** is hidden, because browsers can't schedule it
+- [x] **Feel notes** is hidden, because iPhone browsers can't vibrate (in Settings and on the intro's last page)
+- [x] A short note in Settings says these two are on the Android app
+- [x] Arrow keys move the orb carousel on a laptop, alongside click-and-drag, and Enter chooses the orb
+- [x] Messages and confirmations show in the browser (react-native-web's `Alert.alert` does nothing; problem 66)
 
 ## Phase 4: The phone frame
 

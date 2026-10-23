@@ -1,11 +1,13 @@
 import { memo, useEffect, useState } from "react";
 import {
+  Platform,
   StyleSheet,
   Text,
   View,
   useWindowDimensions,
   type AccessibilityActionEvent,
 } from "react-native";
+import { useIsFocused } from "expo-router";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import {
   Canvas,
@@ -97,6 +99,27 @@ export function OrbCarousel({
   const onTap = (offset: number) => {
     if (offset === 0) onSelect(LETTERS[focused]);
   };
+
+  // In the browser, the arrow keys move between orbs and Enter chooses one, while Home is the screen in front
+  const isFocused = useIsFocused();
+  useEffect(() => {
+    if (Platform.OS !== "web" || !isFocused) return;
+    const onKey = (e: KeyboardEvent) => {
+      // Leave keys alone while a field, button or link has them
+      if (
+        e.target instanceof Element &&
+        e.target.closest("input, textarea, button, a, [role=button]")
+      )
+        return;
+      if (e.key === "ArrowRight") goTo(Math.min(LAST, focused + 1));
+      else if (e.key === "ArrowLeft") goTo(Math.max(0, focused - 1));
+      else if (e.key === "Enter") onSelect(LETTERS[focused]);
+      else return;
+      e.preventDefault();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  });
 
   // Rebuilt on each render so it calls the latest callbacks. Shared values use get()/set(), as the React Compiler forbids writing .value here.
   const pan = Gesture.Pan()

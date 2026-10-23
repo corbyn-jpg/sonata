@@ -1,6 +1,4 @@
 import { getRandomBytes } from "expo-crypto";
-import { File } from "expo-file-system";
-import Share from "@/lib/share";
 import { LETTERS } from "@/data/notes";
 import type { ThoughtRecord } from "@/features/oasis/thoughts";
 import { lockBackup, unlockBackup } from "@/lib/backupFile";
@@ -10,7 +8,7 @@ import {
   type CheckinEntry,
 } from "@/lib/checkins";
 import { addDays, dayKey } from "@/lib/dates";
-import { shareFile } from "@/lib/pdf";
+import { pickTextFile, shareTextFile } from "@/lib/files";
 import type { PlaylistSong } from "@/lib/playlistSongs";
 import { getPieces, restorePieces, type PieceContent } from "@/lib/pieces";
 import { getPlaylists, restorePlaylists } from "@/lib/playlists";
@@ -74,21 +72,16 @@ export async function makeBackup(
     })),
   };
 
-  const file = shareFile(`Sonata backup ${dayKey(now)}.json`);
-  file.write(await lockBackup(content, passphrase, getRandomBytes, onProgress));
-  await Share.open({
-    url: file.uri,
-    type: "application/json",
-    title: "Save your backup",
-    failOnCancel: false,
-  });
+  await shareTextFile(
+    `Sonata backup ${dayKey(now)}.json`,
+    await lockBackup(content, passphrase, getRandomBytes, onProgress),
+    "application/json",
+    "Save your backup",
+  );
 }
 
 /** Ask for a backup file with the system picker. Its text, or null if the user backs out. */
-export async function pickBackup(): Promise<string | null> {
-  const picked = await File.pickFileAsync(); // any type: cloud drives label .json files inconsistently
-  return picked.canceled ? null : picked.result.text();
-}
+export const pickBackup = pickTextFile;
 
 const isEntry = (entry: CheckinEntry) =>
   LETTERS.includes(entry.note) &&

@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Alert,
   Linking,
+  Platform,
   ScrollView,
   Switch,
   Text,
@@ -19,6 +20,7 @@ import {
   Download,
   FileLock,
   Lock,
+  Smartphone,
   Trash2,
   Vibrate,
 } from "lucide-react-native";
@@ -195,51 +197,64 @@ export default function Settings() {
           </Text>
         </View>
 
-        <SettingGroup title="Accessibility">
-          <SettingRow
-            Icon={Vibrate}
-            title="Feel notes"
-            detail="Each note has its own vibration, so you can feel it as well as hear it. More pulses mean a higher note; low notes feel heavier."
-            right={
-              <Switch
-                value={feelNotes}
-                onValueChange={onFeelNotesChange}
-                accessibilityLabel="Feel notes"
-                {...switchColours}
-              />
-            }
-          />
-        </SettingGroup>
-
-        <SettingGroup title="Reminders">
-          <SettingRow
-            Icon={Bell}
-            title="Daily reminder"
-            detail={`${timeLabel(reminderAt)} · a quiet nudge, no badge`}
-            right={
-              <Switch
-                value={reminder}
-                onValueChange={(on) => void onReminderChange(on)}
-                accessibilityLabel="Daily reminder"
-                {...switchColours}
-              />
-            }
-          />
-          {reminder && (
+        {/* Browsers can't vibrate each note (iPhone) or schedule a reminder, so the web says where to find them */}
+        {Platform.OS === "web" ? (
+          <SettingGroup title="On the Android app">
             <SettingRow
-              Icon={Clock}
-              title="Reminder time"
-              detail={`Every day at ${timeLabel(reminderAt)}`}
-              onPress={() => setPickingTime(true)}
+              Icon={Smartphone}
+              title="Feel notes and a daily reminder"
+              detail="Browsers can't vibrate each note or send a reminder, so these two are in the Android app."
             />
-          )}
-        </SettingGroup>
-        {pickingTime && (
-          <TimeSheet
-            minutes={reminderAt}
-            onDone={setReminderTime}
-            onClose={() => setPickingTime(false)}
-          />
+          </SettingGroup>
+        ) : (
+          <>
+            <SettingGroup title="Accessibility">
+              <SettingRow
+                Icon={Vibrate}
+                title="Feel notes"
+                detail="Each note has its own vibration, so you can feel it as well as hear it. More pulses mean a higher note; low notes feel heavier."
+                right={
+                  <Switch
+                    value={feelNotes}
+                    onValueChange={onFeelNotesChange}
+                    accessibilityLabel="Feel notes"
+                    {...switchColours}
+                  />
+                }
+              />
+            </SettingGroup>
+
+            <SettingGroup title="Reminders">
+              <SettingRow
+                Icon={Bell}
+                title="Daily reminder"
+                detail={`${timeLabel(reminderAt)} · a quiet nudge, no badge`}
+                right={
+                  <Switch
+                    value={reminder}
+                    onValueChange={(on) => void onReminderChange(on)}
+                    accessibilityLabel="Daily reminder"
+                    {...switchColours}
+                  />
+                }
+              />
+              {reminder && (
+                <SettingRow
+                  Icon={Clock}
+                  title="Reminder time"
+                  detail={`Every day at ${timeLabel(reminderAt)}`}
+                  onPress={() => setPickingTime(true)}
+                />
+              )}
+            </SettingGroup>
+            {pickingTime && (
+              <TimeSheet
+                minutes={reminderAt}
+                onDone={setReminderTime}
+                onClose={() => setPickingTime(false)}
+              />
+            )}
+          </>
         )}
 
         <SettingGroup title="Privacy and data">

@@ -365,3 +365,9 @@ Each entry has:
 - **Cause:** songs were read from and written to the phone's file system, which doesn't exist in a browser. In the browser's audio player, replacing the sound also resets looping, whereas on the phone it carries over. (Metro also took a restart to notice the new `.web.ts` file, as its file watcher is slow on Google Drive.)
 - **Fix:** `song.web.ts` fetches each instrument's samples over HTTP, mixes the song with the same `mixer.ts`, and plays it from an in-memory blob URL; `ACCOMPANIMENT` moved to `instruments.ts` so both versions share it. `useCalmingSound` turns looping on again after each sound is loaded, which changes nothing on the phone.
 - **Lesson:** keep the maths shared and put only the I/O behind a platform file; and when a new platform file seems ignored, restart Metro before debugging the code.
+
+### 66. Messages and confirmations were silently skipped in the browser
+- **Seen:** on the web, choosing a file that isn't a backup did nothing at all, and "Delete" on a playlist or piece would have gone ahead without asking.
+- **Cause:** react-native-web's `Alert.alert` is an empty function, so every message and Cancel/Delete confirmation in the app was skipped without an error.
+- **Fix:** `index.web.js` replaces `Alert.alert` with the browser's `alert` (a message) and `confirm` (Cancel plus one action), which covers every alert Sonata shows. Sharing, saving and PDFs got web versions at the same time: `files.web.ts` shares through the browser's share menu where it can take files and downloads otherwise, `pdf.web.ts` opens the print dialog, and `shareSong.web.ts` shares the in-memory song. The `@/lib/share` placeholder is gone, as nothing on the web imports react-native-share any more.
+- **Lesson:** a web shim that does nothing is worse than one that throws; check what each react-native-web export actually does, not only that it imports.

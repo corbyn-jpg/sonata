@@ -1,5 +1,5 @@
-import Share from "@/lib/share";
-import { shareAsPdf, shareFile } from "@/lib/pdf";
+import { shareTextFile } from "@/lib/files";
+import { shareAsPdf } from "@/lib/pdf";
 import { scoreToMusicXml } from "./musicxml";
 import type { Score } from "./score";
 import { scoreLines, type Look } from "./svg";
@@ -51,13 +51,10 @@ export async function shareMusicXml(
   instrument: string,
   fileName: string,
 ) {
-  const file = shareFile(`${fileName}.musicxml`);
-  file.create({ overwrite: true });
-  file.write(scoreToMusicXml(score, instrument));
-  await Share.open({
-    url: file.uri,
-    type: "application/vnd.recordare.musicxml+xml",
-    title: "Share your sheet music",
-    failOnCancel: false,
-  });
+  await shareTextFile(
+    `${fileName}.musicxml`,
+    scoreToMusicXml(score, instrument),
+    "application/vnd.recordare.musicxml+xml",
+    "Share your sheet music",
+  );
 }

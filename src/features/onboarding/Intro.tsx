@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   BackHandler,
+  Platform,
   Pressable,
   StyleSheet,
   Switch,
@@ -207,7 +208,10 @@ export function Intro({ mode, onFinish }: Props) {
               {body}
             </Text>
             {/* Replay is view-only, so the setting stays in Settings */}
-            {i === LAST && !replay && <FeelNotesCard />}
+            {/* Not in the browser: iPhone browsers can't vibrate */}
+            {i === LAST && !replay && Platform.OS !== "web" && (
+              <FeelNotesCard />
+            )}
           </View>
         ))}
       </Animated.ScrollView>
