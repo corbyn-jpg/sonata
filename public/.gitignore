@@ -1,2 +1,2 @@
-# Skia web engine, copied from node_modules by `npm run web` and `npm run build:web`
+# Skia web engine, copied from node_modules by scripts/web.mjs
 canvaskit.wasm

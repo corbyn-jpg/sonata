@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="%LANG_ISO_CODE%">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+    <!-- viewport-fit=cover lets the night sky run under the iPhone status bar; the app keeps clear of it with safe areas -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>%WEB_TITLE%</title>
+    <meta name="description" content="Your days, in music. One orb a day, one song a week." />
+    <!-- Installing it from the browser: Android reads the manifest, iPhone reads the apple- tags -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#060011" />
+    <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Sonata" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <!-- The react-native-web style reset: https://necolas.github.io/react-native-web/docs/setup/#root-element -->
+    <style id="expo-reset">
+      html,
+      body {
+        height: 100%;
+        background: #060011;
+      }
+      body {
+        overflow: hidden;
+      }
+      #root {
+        display: flex;
+        height: 100%;
+        flex: 1;
+      }
+    </style>
+  </head>
+
+  <body>
+    <noscript>Sonata needs JavaScript to run.</noscript>
+    <div id="root"></div>
+  </body>
+</html>

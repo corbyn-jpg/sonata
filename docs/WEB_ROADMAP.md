@@ -42,34 +42,37 @@ Run it with `node scripts/web.mjs` (or `node scripts/web.mjs build` to export it
 
 ## Phase 4: The phone frame
 
-- [ ] On a laptop or tablet, the app runs inside a phone-sized frame (an iframe), so its layout is exactly the phone's
-- [ ] The frame scales to fit shorter screens and keeps the phone's proportions
-- [ ] The page around it uses Sonata's night sky, with rounded screen edges and no drawn phone parts
-- [ ] Beside the frame:
-  - The Sonata name
-  - "Best on the Android app", linking to the APK
-  - A QR code to open it on a phone
-- [ ] On a phone, the frame is skipped and the app fills the screen
+- [x] On a laptop or tablet (700 px wide or more), the app runs inside a phone-sized frame (an iframe of the same address), so its layout is exactly the phone's (`src/web/phoneFrame.ts`)
+- [x] The frame scales to fit shorter screens and keeps the phone's proportions
+- [x] The page around it uses Sonata's night sky, with rounded screen edges and no drawn phone parts
+- [x] Beside the frame:
+  - The Sonata name and a line about the browser version
+  - "Get the Android app", linking to the Google Drive folder with the APK
+  - A QR code of the site's own address, to open it on a phone (hidden below 900 px wide)
+- [x] On a phone, the frame is skipped and the app fills the screen
+- [x] The arrow keys reach the app as soon as the frame loads
 
 ## Phase 5: Feels like an app
 
-- [ ] A web app manifest: name, icons, night-sky colours, full-screen display
-- [ ] An Apple touch icon and status-bar colours for iPhone
-- [ ] "Add to Home Screen" gives Sonata its own icon and opens it without the browser bar
-- [ ] The browser's theme colour matches the night sky
+- [x] A web app manifest: name, icons, night-sky colours, standalone display (`public/manifest.webmanifest`)
+- [x] An Apple touch icon and status-bar colours for iPhone (`public/index.html`, Expo's page template)
+- [ ] "Add to Home Screen" gives Sonata its own icon and opens it without the browser bar: check on a real phone in phase 6
+- [x] The browser's theme colour matches the night sky
+- No service worker: installing no longer needs one, and without it a new version shows up on the next visit
 
 ## Phase 6: Test
 
-- [ ] Laptop: Chrome, Edge, Firefox and Safari, at large and small window sizes
-- [ ] Phones: Android Chrome and iPhone Safari, in the browser and added to the home screen
-- [ ] Full run-through: check in, the week's song, the month, the Oasis, the Composer, sheet music, a backup and a restore, sample months
+- [x] Laptop, Chromium (the production build at 1280×720, 1366×768 and tablet size): frame, intro, check-in, arrow keys
+- [ ] Laptop: Firefox and Safari
+- [ ] Phones: Android Chrome and iPhone Safari, in the browser and added to the home screen; sound on the first tap in iPhone Safari; the share menu for a song
+- [ ] Full run-through on the published site: check in, the week's song, the month, the Oasis, the Composer, sheet music, a backup and a restore, sample months
 - [ ] Graphics run smoothly on an ordinary laptop
-- [ ] Type-check, lint and every test still pass, and the Android app still builds and updates
+- [x] Type-check, lint and every test still pass, and the Android fingerprint is unchanged (`2a28173…`), so the installed app still updates
 - [ ] Problems found go into `docs/PROBLEM_LOG.md`
 
 ## Phase 7: Publish
 
-- [ ] Host for free: Vercel (simplest) or GitHub Pages
+- [ ] Host for free on Vercel: `vercel.json` builds with `node scripts/web.mjs build` and serves `dist/`, sending every address to the app
 - [ ] Give it a clear address, such as `sonata-….vercel.app`
 - [ ] Add a "Try it in your browser" link to the README and the hand-in
 - [ ] Keep the walkthrough video linked as a backup

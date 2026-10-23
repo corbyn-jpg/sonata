@@ -3,6 +3,7 @@
 import "@expo/metro-runtime";
 import { Alert } from "react-native";
 import { LoadSkiaWeb } from "@shopify/react-native-skia/lib/module/web";
+import { showFrame, wantsFrame } from "@/web/phoneFrame";
 
 // react-native-web's Alert.alert does nothing, so messages and confirmations would be skipped. Every alert in Sonata
 // is either a message or Cancel plus one action, which the browser's own alert and confirm can show.
@@ -17,6 +18,9 @@ Alert.alert = (title, message, buttons = []) => {
   else cancel?.onPress?.();
 };
 
-LoadSkiaWeb({ locateFile: (file) => `/${file}` }).then(() => {
-  require("expo-router/entry");
-});
+// On a laptop or tablet the page shows the phone frame, and the app runs inside it (src/web/phoneFrame.ts)
+if (wantsFrame()) showFrame();
+else
+  LoadSkiaWeb({ locateFile: (file) => `/${file}` }).then(() => {
+    require("expo-router/entry");
+  });
