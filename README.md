@@ -61,12 +61,9 @@ Sonata runs on Android 7.0 or newer. It isn't on the Play Store, so you install 
 
 ### On an iPhone
 
-iPhones only install apps from the App Store, so there are two other ways to try Sonata:
+iPhones only install apps from the App Store, so there is a website prototype to try Sonata:
 
-| Option | What you get |
-| --- | --- |
-| **[Try it in the browser](https://appetize.io/app/b_ty5ozfyg7ml2jcpatqfwmehbpa)** (Appetize) | The real app, streamed to your browser. It works in Safari on an iPhone, or on any computer. Tap **Play**, and wait a moment for it to start. Sessions last a few minutes. |
-| **[Watch the walkthrough](https://drive.google.com/drive/folders/1OdtUAE4BKCDYtNwHIShrASlKAedjgx8b)** (video) | The whole app, start to finish, recorded on a phone. |
+https://sonata-beta-nine.vercel.app/
 
 > [!TIP]
 > The browser version can't vibrate or send reminders, and its sound depends on your browser. For the full experience, use an Android phone.
